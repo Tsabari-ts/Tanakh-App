@@ -1,0 +1,57 @@
+.welcome-body{
+    background-color: rgb(196, 172, 143);
+}
+
+.custom-dialog-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #333333e6; 
+    border-radius: 4px 4px 0 0; 
+  }
+  
+  .custom-dialog-title span {
+    flex-grow: 1;
+  }
+  
+  .custom-dialog-title button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .custom-dialog-title button:hover {
+    background-color: rgb(196, 172, 143);
+    border-radius: 50%; 
+  }
+
+  .go-setting-button{
+    margin-right: 25%;
+    width: 50%;
+    height: 40px;
+    background-color: #333333e6; 
+    color: #aaa; 
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 20px;
+  }
+
+  .go-setting-button:hover {
+    color: #fdfdfd; 
+  }
+
+  .header{
+    color: aliceblue; 
+    font-size: x-large;
+  }
+
+
+  @media only screen and (max-width: 1024px) {
+    .go-setting-button {
+        color: #fdfdfd; 
+    }
+}
+

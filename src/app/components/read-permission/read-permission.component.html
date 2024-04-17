@@ -1,0 +1,53 @@
+<div >
+    <div class="loader-background" *ngIf="userHasConfirmedReading; else notApproved">
+        <div class="welcome-body">
+            <div class="custom-dialog-title">
+              <span class="header"
+                    mat-dialog-title>אישור קריאת הפרק</span>
+              <button mat-icon-button (click)="closeDialog()">
+                <mat-icon class="header" aria-label="Close">close</mat-icon>
+              </button>
+            </div>
+            
+            <div mat-dialog-content>
+              <b>כל הכבוד זכית בעוד פרק</b>
+              <p>מתבצעת שמירה...</p>
+              <br>
+              <div class="progress-container">
+                <div class="progress-bar" [style.width.%]="progressValue"></div>
+              </div>
+            </div>        
+          </div> 
+    </div>
+    <ng-template #notApproved>
+        <div class="welcome-body">
+            <div class="custom-dialog-title">
+              <span class="header"
+                    mat-dialog-title>אישור קריאת הפרק</span>
+              <button mat-icon-button (click)="closeDialog()">
+                <mat-icon class="header" aria-label="Close">close</mat-icon>
+              </button>
+            </div>
+            
+            <div mat-dialog-content>
+              <b>{{ "לחיצה על אישור תגרום לשמירת הפרק כפרק האחרון שקראת." }}</b>
+              <br>
+              <b>{{ "האם לשמור את הפרק?" }}</b>
+              <br><br>
+
+              <div mat-dialog-actions>
+                <button class="save-button" (click)="saveAndClose()" [disabled]="isButtonDisabled">שמירת הפרק</button>
+              </div>
+  
+              <div class="progress-container" *ngIf="isSavedInProgress">
+                  <div class="progress-bar" [style.width.%]="progressValue"></div>
+                </div>
+                <div *ngIf="isSavedSuccessful">
+                  <span class="serverResponse">הפרק נשמר בהצלחה</span>
+                </div>
+            </div>
+            
+
+          </div> 
+</ng-template>
+</div>

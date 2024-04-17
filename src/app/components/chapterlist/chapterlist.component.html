@@ -1,0 +1,10 @@
+
+  <div class="centered-container">
+    <div class="button-row" *ngIf="chapters">
+      <div *ngFor="let versesNumber of chapters; 'index + 1' as chapterNumber ">
+          <button class="chapter-button" (click)="goToChapter(chapterNumber)">
+            פרק {{ getChapterName(chapterNumber) }} ({{ versesNumber }}) 
+          </button>
+      </div>
+  </div>
+  </div>

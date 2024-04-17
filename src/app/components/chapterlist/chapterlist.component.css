@@ -1,0 +1,97 @@
+.centered-container {
+    position: fixed;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    height: 100%; 
+    align-items: flex-start;
+    scroll-behavior: smooth;
+  overflow-y: auto;
+   margin-top: 100px;
+  max-height: calc(100vh - 200px); 
+  margin-bottom: 100px; 
+  box-sizing: border-box;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center; 
+}
+
+.chapter-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 35px;
+    background-color: #333333e6; 
+    color: #aaa; 
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 30px;
+    margin: 15px; 
+    max-width: 450px;
+    width: 500px;
+    padding-right: 180px;
+    margin-top: 10px; 
+}
+
+.button:hover {
+  color: #fdfdfd; 
+}
+
+.goBackButton{
+    display: inline-flex;
+    align-items: center;
+    background-color: #333333e6; 
+    color: #aaa; 
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 30px;
+    max-width: 155px;
+    width: 500px;
+    position: relative;
+    margin-top: -215px;
+    margin-bottom: 73px;
+    margin-right: 850px;
+}
+.goBackButton:hover {
+    color: #fdfdfd; 
+  }
+
+.return{
+    background-image: url('/assets/return.png'); 
+    width: 40px;
+    height: 40px;
+    margin-left: 20px;
+    background-size: cover;
+}
+.goBackButton img {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+  }
+
+  
+@media only screen and (max-width: 1450px) {
+  .button-row {
+    margin-top: 0;
+       align-items: center;
+  }
+
+.chapter-button {
+  padding: 20px; 
+  font-size: 25px;
+  width: 300px;
+  padding-right: 100px;
+}
+
+.goBackButton{
+  position: relative;
+  margin-top: -215px;
+  margin-bottom: 76px;
+  margin-right: 874px;
+}
+  }

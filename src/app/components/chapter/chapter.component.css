@@ -1,0 +1,158 @@
+
+.tittle{
+    text-align: right;
+    width: 75%;
+    text-decoration: underline;
+    text-align: justify;
+    font-size: 35px;
+}
+
+.sentences{
+    margin: auto;
+    margin-bottom: 150px;
+    width: 75%;
+    padding: 10px;
+    text-align: justify;
+    font-size: 35px;
+    padding-bottom: 100px;
+}
+
+.scrollBar{
+    position: fixed;
+    bottom: 20px;
+    right: 50%;
+    background: #333333e6;
+    padding: 5px;    
+}
+
+.scroll-to-top-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none; 
+  }
+
+
+  .centered-container {
+    scroll-behavior: smooth;
+  transition-timing-function: ease-in-out;
+  -webkit-overflow-scrolling: touch;
+  position: fixed;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  height: 100%; 
+  align-items: flex-start;
+  scroll-behavior: smooth;
+overflow-y: auto;
+ margin-top: 100px;
+max-height: calc(100vh - 200px); 
+margin-bottom: 100px; 
+box-sizing: border-box;
+  
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#floatingDiv {
+  position: fixed;
+  bottom: 13%;
+  right: 10%;
+  width: 80%;
+  background-color: #333333e6; 
+  padding: 10px;
+  box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.1); 
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.svg-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #333333e6; 
+  color: #aaa; 
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 30px;
+  margin: 8px; 
+  max-width: 450px;
+  width: 200px;
+}
+
+.svg-button:hover {
+  color: #fdfdfd; 
+}
+
+.svg-button div.icon {
+  width: 40px;
+  height: 40px; 
+  background-size: cover; 
+  margin-right: 20px; 
+}
+
+.end-button{
+  margin-right: 20%;
+  width: 60%;
+  height: 40px;
+  background-color: #333333e6; 
+  color: #aaa; 
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 20px;
+  margin-top: 50px;
+}
+
+.end-button:hover {
+  color: #fdfdfd; 
+}
+
+.down-icon {
+  background-image: url('/assets/arrowDown.png'); 
+}
+
+.stop-icon {
+  background-image: url('/assets/stopIcon.png'); 
+}
+
+.up-icon {
+  background-image: url('/assets/arrowUp.png'); 
+}
+
+.next-icon {
+  background-image: url('/assets/arrowNext.png'); 
+}
+
+
+
+@media only screen and (max-width: 1024px) {
+  .end-button {
+      color: #fdfdfd; 
+      width: 100%;
+      margin-right: 0;
+  }
+
+  #hide-text {
+    display: none; 
+  }
+
+  .svg-button {
+    width: 60px;
+  } 
+
+  .svg-button div.icon {
+    margin-right: 0px; 
+    width: 30px;
+    height: 30px;
+  }
+}
+

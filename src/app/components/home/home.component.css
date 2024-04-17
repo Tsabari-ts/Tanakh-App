@@ -1,0 +1,81 @@
+.centered-container {
+  position: fixed;
+  width: 100%;
+  margin-top: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.svg-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 35px;
+    background-color: #333333e6; 
+    color: #aaa; 
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 30px;
+    margin: 8px; 
+    max-width: 450px;
+    width: 500px;
+}
+
+.svg-button:hover {
+  color: #fdfdfd; 
+}
+
+    .svg-button svg {
+        margin-right: 8px;
+        color: black;
+    }
+
+.svg-button img {
+    margin-right: 8px;
+    color: black;
+}
+
+.svg-button div.icon {
+  width: 40px;
+  height: 40px; 
+  background-size: cover; 
+  margin-right: 20px; 
+  margin-left: 50px;
+}
+
+@media screen and (max-width: 1450px) {
+  .centered-container {
+    margin-top: 170px;
+  }
+  
+  .svg-button {
+    padding: 20px; 
+    font-size: 25px;
+    width: 300px;
+  }
+
+  .svg-button div.icon {
+    width: 20px; 
+    height: 20px;
+    margin-right: 5px;
+    margin-left: 20px; 
+  }
+}
+
+.torah-icon {
+  background-image: url('/assets/book.svg'); 
+}
+
+.BookWithBookmark-icon {
+  background-image: url('/assets/openBookWithBookmark.svg'); 
+}
+.stteing-icon {
+  background-image: url('/assets/setting.svg');
+}
