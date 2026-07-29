@@ -1,47 +1,44 @@
-﻿using System;
+using Microsoft.Extensions.Options;
+using System;
 using System.Net;
 using System.Net.Mail;
 using Tanakh.Model;
+using Tanakh.Options;
 
 namespace Tanakh
 {
     public class EmailSender
     {
-        private readonly CredentialsManager credentialsManager;
+        private readonly EmailOptions emailOptions;
 
-        public EmailSender(CredentialsManager credentialsManager)
+        public EmailSender(IOptions<EmailOptions> emailOptions)
         {
-            this.credentialsManager = credentialsManager;
+            this.emailOptions = emailOptions.Value;
         }
 
         public bool SendMessage(EmailMessage emailMessage)
         {
-            Credentials credentials = new Credentials();
-
-            credentials = credentialsManager.LoadCredentials();
-
             bool isSuccessful = false;
 
-            using (SmtpClient smtpClient = new SmtpClient(credentials.SmtpServer, Convert.ToInt32(credentials.SmtpPort)))
+            try
             {
-
-                smtpClient.EnableSsl = true;
-                smtpClient.Credentials = new NetworkCredential(credentials.EmailAddress, credentials.Password);
-                MailMessage message = new MailMessage(credentials.EmailAddress, credentials.RecipientAddress)
+                using (SmtpClient smtpClient = new SmtpClient(emailOptions.SmtpServer, emailOptions.SmtpPort))
                 {
-                    Subject = emailMessage.Subject,
-                    Body = emailMessage.Body
-                };
+                    smtpClient.EnableSsl = true;
+                    smtpClient.Credentials = new NetworkCredential(emailOptions.EmailAddress, emailOptions.Password);
+                    MailMessage message = new MailMessage(emailOptions.EmailAddress, emailOptions.RecipientAddress)
+                    {
+                        Subject = emailMessage.Subject,
+                        Body = emailMessage.Body
+                    };
 
-                try
-                {
                     smtpClient.Send(message);
                     isSuccessful = true;
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message.ToString());
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message.ToString());
             }
 
             return isSuccessful;

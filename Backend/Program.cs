@@ -4,11 +4,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
 using Tanakh;
 using Tanakh.Controllers;
+using Tanakh.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<CacheProvider>();
-builder.Services.AddSingleton<CredentialsManager>();
+builder.Services.AddOptions<EmailOptions>()
+    .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
 builder.Services.AddTransient<EmailSender>();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
