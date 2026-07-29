@@ -1,7 +1,0 @@
-book = "Genesis"
-heTitle = "בראשית"
-indexTitle = "Genesis"
-length = 50
-next = null / "Genesis 2"
-prev = null / "Genesis 1"
-he = {string[31]}
