@@ -1,0 +1,36 @@
+
+  <div class="centered-container" #contentContainer>
+    
+        <p class="tittle">
+            {{title}}
+        </p>
+<div *ngIf="data">
+    <p class="sentences">
+        {{ data }}
+
+        <br>
+        <button class="end-button" (click)="finishedReading()">סיימתי לקרוא</button>
+      </p>  
+</div>
+
+<div id="floatingDiv">
+  <button class="svg-button" type="button" (click)="scrollDown()">
+    <span id="hide-text">למטה</span>
+    <div class="icon" [ngClass]="downIcon"></div> 
+  </button>
+  <button class="svg-button" type="button" (click)="stopScrolling()">
+    <span id="hide-text">עצור</span>
+    <div class="icon" [ngClass]="stopIcon"></div>   
+  </button>
+  <button class="svg-button" type="button" (click)="scrollUp()">
+    <span id="hide-text">למעלה</span> 
+    <div class="icon" [ngClass]="upIcon"></div>
+  </button>
+  <button class="svg-button" type="button" (click)="GetNextChapter()">
+    <span id="hide-text">פרק הבא</span> 
+    <div class="icon" [ngClass]="nextIcon"></div>
+  </button>
+</div>
+</div>
+
+<app-scroll-to-top-button [contentContainer]="contentContainer"></app-scroll-to-top-button>

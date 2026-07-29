@@ -1,0 +1,14 @@
+<div class="centered-container">
+    <div class="button-row">
+      <button class="svg-button" *ngFor="let button of tanakhButtons" (click)="goTo(button)">
+        <div class="icon" [ngClass]="button.iconClass"></div>
+        {{ button.text }}
+      </button>
+    </div>
+    <div class="button-row">
+      <button class="svg-button" *ngFor="let button of buttons" (click)="goTo(button)">
+        <div class="icon" [ngClass]="button.iconClass"></div> 
+        {{ button.text }} 
+      </button>
+    </div>
+  </div>  

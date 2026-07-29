@@ -1,0 +1,197 @@
+.welcome-body{
+    background-color: rgb(196, 172, 143);
+}
+
+.custom-dialog-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #333333e6; 
+    border-radius: 4px 4px 0 0; 
+  }
+  
+  .custom-dialog-title span {
+    flex-grow: 1;
+  }
+  
+  .custom-dialog-title button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
+  }
+  
+  .custom-dialog-title button:hover {
+    background-color: rgb(196, 172, 143);
+    border-radius: 50%; 
+  }
+
+  .go-setting-button{
+    margin-right: 20%;
+    width: 60%;
+    height: 40px;
+    background-color: #333333e6; 
+    color: #aaa; 
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 20px;
+  }
+
+  .go-setting-button:disabled {
+    cursor: not-allowed;
+  }
+
+  .go-setting-button:hover {
+    color: #fdfdfd; 
+  }
+
+  .header{
+    color: aliceblue; 
+    font-size: x-large;
+  }
+
+
+.progress-container {
+    width: 420px;
+    border: 1px solid #ddd;
+    height: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    background-color: #333333e6;
+    transition: width 0.5s; 
+  }
+  
+ .serverResponse{
+    font-size: large;
+    color: red;
+  }
+
+
+  .input-container {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  label {
+    position: absolute;
+    top: 0;
+    margin-right: 40px;
+    transition: transform 0.3s ease-out, font-size 0.3s ease-out;
+  }
+
+  label.active {
+    display: none;
+  }
+  
+  input,
+  select {
+    padding: 5px;
+    font-size: 16px;
+    border: none;
+    border-bottom: 2px solid #333;
+    outline: none;
+    width: 85%;
+    margin-right: 15px;
+  }
+  
+  .underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background-color: #333;
+    transform-origin: bottom right;
+    transform: scaleX(0);
+    transition: transform 0.3s ease-out;
+  }
+  
+  input:focus + .underline {
+    transform: scaleX(1);
+  }
+  
+  input:focus + label, input:not(:placeholder-shown) + label {
+    transform: translateY(-20px) scale(0.8);
+    font-size: 12px;
+    color: #333;
+  }
+  
+  select {
+    width: 87.05%;
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
+  
+   select::after { 
+     content: '\25BC'; 
+     position: fixed;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #333;
+  } 
+
+  .options {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-top: none;
+    display: none;
+  }
+
+  .input-container.error input,
+.input-container.error select {
+  border-color: red;
+}
+
+.error-message {
+  color: red;
+  margin-top: 5px;
+  font-size: medium;
+  width: 300px;
+  margin-right: 15px;
+}
+
+
+@media only screen and (max-width: 1024px) {
+  .go-setting-button {
+      color: #fdfdfd; 
+  }
+
+  .header{
+    font-size: large;
+  }
+
+  .input-container {
+    margin-bottom: 5px;
+  }
+
+  .error-message {
+    margin-top: 0;
+  }
+
+  input,
+  select {
+    padding: 5px;
+    border-bottom: 2px solid #333;
+  }
+
+  select {
+    width: 89.05%;
+  }
+
+  .progress-container {
+    width: 100%;
+  }
+}

@@ -1,0 +1,97 @@
+<div >
+    <div class="loader-background" *ngIf="!userHasSubscribed; else unSubscribe">
+        <div class="welcome-body">
+            <div class="custom-dialog-title">
+              <span class="header"
+                    mat-dialog-title>הרשמה לתזכורת יומית</span>
+              <button mat-icon-button (click)="closeDialog()">
+                <mat-icon class="header" aria-label="Close">close</mat-icon>
+              </button>
+            </div>
+            
+            <div mat-dialog-content>
+              <b>לקבלת תזכורת יומית בהודעת SMS נא למלא את השדות.</b>
+              <br>
+              <b>לא ייעשה שימוש במידע מלבד שליחת תזכורת בהתאם לשעה שבחרת. (לציין כי מיום שישי בשעה 13:00 ועד יום ראשון לא יישלחו תזכורות).</b>
+              <br>
+              <b>בכל שלב תוכל לחזור ולבטל כאן את הרישום.</b>
+              <br><br>
+
+              <form #myForm="ngForm" (ngSubmit)="submitForm(myForm)">
+                <div class="input-container" [class.error]="myForm.submitted && (nameInput.invalid || (nameInput.touched && nameInput.value.length < 2))">
+                  <label for="nameInput" [ngClass]="{'active': nameValue !== ''}">שם משתמש</label>
+                  <input type="text" id="nameInput" [(ngModel)]="nameValue" name="nameInput" required minlength="2" maxlength="15"
+                   pattern="[א-תa-z ]*" #nameInput="ngModel">
+                  <div class="underline"></div>
+                  <div *ngIf="myForm.submitted && (nameInput.invalid || (nameInput.touched && nameInput.value.length < 2))"
+                    class="error-message">השם חייב להיות לפחות 2 אותיות.</div>
+                </div>
+              
+                <div class="input-container" [class.error]="myForm.submitted && (phoneInput.invalid || !isValidPhoneNumber())">
+                  <label for="phoneInput" [ngClass]="{'active': phoneValue !== ''}">פלאפון  0501234567</label>
+                  <input type="text" id="phoneInput" [(ngModel)]="phoneValue" name="phoneInput" required pattern="^\d{3}\d{7}$"
+                    #phoneInput="ngModel" [ngModelOptions]="{ updateOn: 'change' }">
+                  <div class="underline"></div>
+                  <div *ngIf="myForm.submitted && (phoneInput.invalid || !isValidPhoneNumber())"
+                   class="error-message">מס' פלאפון לא תקין (להזין ללא רווח או סימן).</div>
+                </div>
+              
+                <div class="input-container custom-select" [class.error]="myForm.submitted && !timeInput.valid">
+                  <label for="timeInput" [ngClass]="{'active': timeValue !== ''}">בחירת שעה</label>
+                  <select id="timeInput" [(ngModel)]="timeValue" name="timeInput" required #timeInput="ngModel">
+                    <option class="custom-option" *ngFor="let time of timeOptions" [value]="time">{{ time }}</option>
+                  </select>
+                  <div class="underline"></div>
+                  <div *ngIf="myForm.submitted && !timeInput.valid" class="error-message">חייב לבחור שעה.</div>
+                </div>
+                <br>
+                <button class="go-setting-button" type="submit" [disabled]="isButtonDisabled">הירשם</button>
+              </form><br>
+            
+  
+              <div class="progress-container" *ngIf="isRequestInProgress">
+                  <div class="progress-bar" [style.width.%]="progressValue"></div>
+                </div>
+                <div *ngIf="isRequestSuccessful">
+                  <span class="serverResponse">{{serverResponse}}</span>
+                </div>
+            </div> 
+          </div> 
+    </div>
+    <ng-template #unSubscribe>
+        <div class="welcome-body">
+            <div class="custom-dialog-title">
+              <span class="header"
+                    mat-dialog-title>ביטול תזכורת יומית</span>
+              <button mat-icon-button (click)="closeDialog()">
+                <mat-icon class="header" aria-label="Close">close</mat-icon>
+              </button>
+            </div>
+            
+            <div mat-dialog-content>
+
+              <form #unSubscribeForm="ngForm" (ngSubmit)="submitUnSubscribeForm(unSubscribeForm)">
+              
+                <div class="input-container" [class.error]="unSubscribeForm.submitted && (phoneInput.invalid || !isValidPhoneNumber())">
+                  <label for="phoneInput" [ngClass]="{'active': phoneValue !== ''}">פלאפון  0501234567</label>
+                  <input type="text" id="phoneInput" [(ngModel)]="phoneValue" name="phoneInput" required pattern="^\d{3}\d{7}$"
+                    #phoneInput="ngModel" [ngModelOptions]="{ updateOn: 'change' }">
+                  <div class="underline"></div>
+                  <div *ngIf="unSubscribeForm.submitted && (phoneInput.invalid || !isValidPhoneNumber())"
+                   class="error-message">מס' פלאפון לא תקין.</div>
+                </div>
+              
+                <br>
+                <button class="go-setting-button" type="submit" [disabled]="isButtonDisabled">הסר</button>
+              </form><br>
+              <div class="progress-container" *ngIf="isRequestInProgress">
+                  <div class="progress-bar" [style.width.%]="progressValue"></div>
+                </div>
+                <div *ngIf="isRequestSuccessful">
+                  <span class="serverResponse">{{serverResponse}}</span>
+                </div>
+            </div> 
+            </div>  
+</ng-template>
+</div>
+

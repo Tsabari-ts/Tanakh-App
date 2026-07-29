@@ -1,0 +1,116 @@
+body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    position: relative;
+    min-height: 100vh;
+  }
+  
+  .img-background {
+    background-image: url('/assets/tanakhBackground.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-grow: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+  
+  .title {
+    background: #333333e6;
+    padding: 5px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+  
+  .title h1 {
+    text-align: center;
+    color: #aaa;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 200;
+    animation: neon 5s infinite;
+  }
+  
+  @keyframes neon {
+    0%, 39%, 41%, 59%, 61%, 100% {
+      text-shadow:
+        #aaa 0 0 12px,
+        #3a3aff 0 0 24px,
+        #3a3aff 0 0 36px;
+    }
+  }
+  
+  .main-footer {
+    background: #333333e6;
+    padding: 5px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+  }
+  
+  .main-footer h4 {
+    text-align: center;
+    color: #aaa;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 200;
+  }
+
+  .return-button{
+    position: fixed;
+    border: none; 
+    color: #aaa; 
+    top: 4%;
+    left: 1%;
+    width: 10%;
+    background: transparent;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    cursor: pointer; 
+    font-size: 25px;
+  }
+
+  .return-button:hover {
+    color: #fdfdfd; 
+  }
+
+  .return-button div.icon {
+    width: 40px;
+    height: 40px; 
+    background-size: cover; 
+    margin-left: 20px;
+  }
+
+  .return-icon {
+    background-image: url('/assets/returnIcon.png'); 
+  }
+
+
+  @media only screen and (max-width: 1400px) {
+    .return-button {
+        color: #fdfdfd; 
+        width: 500px;
+        height: 60px;
+    }
+  
+    #hide-text {
+      display: none; 
+    }
+  
+    .return-button div.icon {
+      height: 30px;
+      margin-right: 90%;
+    }
+  }
+  
+  

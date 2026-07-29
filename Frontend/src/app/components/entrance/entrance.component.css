@@ -1,0 +1,208 @@
+
+    #mobileDiv {
+        display: none; 
+      }
+    
+    .img-background {
+        background-image: url('/assets/tora.png');
+
+
+        cursor: not-allowed;
+background-size: contain; 
+background-repeat: no-repeat; 
+background-position: center; 
+  position:absolute;
+  min-height: 150px;
+  width: 100%;
+  margin-top: 50px;
+      } 
+    
+      .word {
+        font-size: 60px;
+        font-weight: bold;
+        margin: 30px;
+        opacity: 0;
+        animation: fadeIn 1s ease-in-out forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    
+    
+      .row {
+        display: flex;
+        justify-content: space-between;
+      }
+    
+      .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 82vh; 
+      }
+
+      @media (min-width: 1024px) {
+        .word {
+          font-size: 40px;
+          font-weight: bold; 
+          margin: 13px;
+          opacity: 0;
+          animation: fadeIn  1s ease-out forwards;
+        }
+      }
+
+      @media (min-width: 1400px) {
+        .word {
+          font-size: 55px;
+          font-weight: bold; 
+          margin: 15px;
+          opacity: 0;
+          animation: fadeIn  1s ease-out forwards;
+        }
+      }
+    
+    @media (max-width: 1024px) {
+        #mobileDiv {
+          display: block; 
+        }
+    
+        #contentDiv {
+            display: none; 
+          }
+    
+          .img-background {
+            background-image: url('/assets/pngwing.png'); 
+            height: 82vh;
+          }
+    
+          .container {
+            min-height: 82vh; 
+          }
+      
+          .word {
+              font-size: 25px;
+              font-weight: bold; 
+              margin: 15px;
+              opacity: 0;
+              animation: fadeIn  1s ease-out forwards;
+            }
+
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+              }
+              to {
+                opacity: 1;
+              }
+            }
+    }
+    
+    .loading-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+  
+.frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  margin-top: -200px;
+  margin-left: -200px;
+  border-radius: 2px;
+	overflow: hidden;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+.circle {
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	top: 185px;
+	left: 185px;
+	border-radius: 50%;
+	border: 4px solid #fff;
+	animation: circle 2.5s ease-out infinite both;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.line{
+    position: absolute;
+    top:170px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2px;
+    stroke-linecap: round;
+    animation:line 2.5s linear infinite;
+} 
+.svg-1{transform: rotate(90deg);
+}
+.svg-2{transform: rotate(-90deg); }
+.svg-3{transform: rotate( 0deg);}
+.svg-4{transform: rotate(180deg);}
+@keyframes line{
+    from{
+        stroke-dasharray: 50 660;
+        stroke-dashoffset: 780;
+    }
+    to{
+        stroke-dasharray: 50 660;
+        stroke-dashoffset: 70;
+    }
+}
+
+@keyframes circle {
+	0%,50% {
+		opacity: 1;
+		transform: scale(0);
+	}
+	70%,100% {
+		opacity: 0;
+		transform: scale(.8);
+	}
+}
+
+.loader-background {
+  background-color: #333333e6;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-grow: 1;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+.shabat-text{
+  position: relative;
+  text-align: center;
+  font-size: xx-large;
+  margin-top: 150px;
+}
+
+.israel-flag{
+  background-image: url('/assets/IsraelFlag.jpg'); 
+cursor: not-allowed;
+background-size: contain; 
+background-repeat: no-repeat; 
+background-position: center; 
+  position:absolute;
+  min-height: 150px;
+  width: 100%;
+}
