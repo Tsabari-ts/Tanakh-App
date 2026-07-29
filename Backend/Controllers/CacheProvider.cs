@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using ServiceStack.Host;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,13 @@ namespace Tanakh.Controllers
     public class CacheProvider : IHttpHandler
     {
         private static readonly ObjectCache cache = MemoryCache.Default;
+        private readonly string dataDirectory;
+
+        public CacheProvider(IHostEnvironment environment, IConfiguration configuration)
+        {
+            dataDirectory = configuration["TanakhData:DataDirectory"]
+                ?? Path.Combine(environment.ContentRootPath, "Data");
+        }
 
         public TanakhContainer GetFullTanakhFromCache(string cacheKey)
         {
@@ -23,7 +32,7 @@ namespace Tanakh.Controllers
             }
             else
             {
-                string tanakhDataPath = "C:\\Users\\Tomer\\Desktop\\tomer\\myProjects\\Tanach in c#\\Tanakh\\Properties\\TanakhData.json";
+                string tanakhDataPath = Path.Combine(dataDirectory, "TanakhData.json");
 
                 using (StreamReader reader = new StreamReader(tanakhDataPath))
                 {
@@ -61,7 +70,7 @@ namespace Tanakh.Controllers
             }
             else
             {
-                string tanakhStructurePath = "C:\\Users\\Tomer\\Desktop\\tomer\\myProjects\\Tanach in c#\\Tanakh\\Properties\\TanakhStructure.json";
+                string tanakhStructurePath = Path.Combine(dataDirectory, "TanakhStructure.json");
 
                 using (StreamReader reader = new StreamReader(tanakhStructurePath))
                 {

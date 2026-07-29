@@ -12,4 +12,9 @@
     <PackageReference Include="System.Runtime.Caching" Version="10.0.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\TanakhData.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Data\TanakhStructure.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
