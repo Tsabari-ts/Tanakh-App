@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using ServiceStack.Host;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +10,7 @@ using Tanakh.Model;
 
 namespace Tanakh.Controllers
 {
-    public class CacheProvider : IHttpHandler
+    public class CacheProvider
     {
         private static readonly ObjectCache cache = MemoryCache.Default;
         private readonly string dataDirectory;
