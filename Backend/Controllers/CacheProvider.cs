@@ -1,100 +1,70 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Caching;
+using Tanakh.Caching;
 using Tanakh.Model;
 
 namespace Tanakh.Controllers
 {
     public class CacheProvider
     {
-        private static readonly ObjectCache cache = MemoryCache.Default;
+        private readonly ITanakhCache cache;
         private readonly string dataDirectory;
 
-        public CacheProvider(IHostEnvironment environment, IConfiguration configuration)
+        public CacheProvider(ITanakhCache cache, IHostEnvironment environment, IConfiguration configuration)
         {
+            this.cache = cache;
             dataDirectory = configuration["TanakhData:DataDirectory"]
                 ?? Path.Combine(environment.ContentRootPath, "Data");
         }
 
         public TanakhContainer GetFullTanakhFromCache(string cacheKey)
         {
-            TanakhContainer tanakhContainer = new TanakhContainer();
-
-            if (cache.Contains(cacheKey))
+            if (cache.TryGet(cacheKey, out TanakhContainer cached))
             {
-                tanakhContainer = cache[cacheKey] as TanakhContainer;
+                return cached;
             }
-            else
-            {
-                string tanakhDataPath = Path.Combine(dataDirectory, "TanakhData.json");
 
-                using (StreamReader reader = new StreamReader(tanakhDataPath))
+            string tanakhDataPath = Path.Combine(dataDirectory, "TanakhData.json");
+
+            using (StreamReader reader = new StreamReader(tanakhDataPath))
+            {
+                string jsonData = reader.ReadToEnd();
+                TanakhContainer tanakhContainer = JsonConvert.DeserializeObject<TanakhContainer>(jsonData);
+
+                if (tanakhContainer != null)
                 {
-                    string jsonData = reader.ReadToEnd();
-                    tanakhContainer = JsonConvert.DeserializeObject<TanakhContainer>(jsonData);
-
-                    if (tanakhContainer != null)
-                    {
-                        PutInCache(cacheKey, tanakhContainer);
-                    }
+                    cache.Set(cacheKey, tanakhContainer);
                 }
+
+                return tanakhContainer;
             }
-
-            return tanakhContainer;
-        }
-
-        private void PutInCache(string cacheKey, TanakhContainer tanakhContainer)
-        {
-            CacheItem cacheItem = new CacheItem(cacheKey, tanakhContainer);
-            CacheItemPolicy cacheItemPolicy = new CacheItemPolicy
-            {
-                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
-            };
-
-            cache.Add(cacheItem, cacheItemPolicy);
         }
 
         public List<BaseStructure> GetTanakhStructureFromCache(string cacheKey)
         {
-            List<BaseStructure> books = new List<BaseStructure>();
-
-            if (cache.Contains(cacheKey))
+            if (cache.TryGet(cacheKey, out List<BaseStructure> cached))
             {
-                books = cache[cacheKey] as List<BaseStructure>;
+                return cached;
             }
-            else
-            {
-                string tanakhStructurePath = Path.Combine(dataDirectory, "TanakhStructure.json");
 
-                using (StreamReader reader = new StreamReader(tanakhStructurePath))
+            string tanakhStructurePath = Path.Combine(dataDirectory, "TanakhStructure.json");
+
+            using (StreamReader reader = new StreamReader(tanakhStructurePath))
+            {
+                string jsonStructfure = reader.ReadToEnd();
+                List<BaseStructure> books = JsonConvert.DeserializeObject<TanakhStructure>(jsonStructfure).Structures;
+
+                if (books.Any())
                 {
-                    string jsonStructfure = reader.ReadToEnd();
-                    books = JsonConvert.DeserializeObject<TanakhStructure>(jsonStructfure).Structures;
-
-                    if (books.Any())
-                    {
-                        PutTanakhStructureInCache(cacheKey, books);
-                    }
+                    cache.Set(cacheKey, books);
                 }
+
+                return books;
             }
-
-            return books;
-        }
-
-        private void PutTanakhStructureInCache(string cacheKey, List<BaseStructure> books)
-        {
-            CacheItem cacheItem = new CacheItem(cacheKey, books);
-            CacheItemPolicy cacheItemPolicy = new CacheItemPolicy
-            {
-                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30) 
-            };
-
-            cache.Add(cacheItem, cacheItemPolicy);
         }
     }
 }

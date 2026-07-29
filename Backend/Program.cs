@@ -5,11 +5,17 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi;
 using System.Diagnostics;
 using Tanakh;
+using Tanakh.Caching;
 using Tanakh.Controllers;
 using Tanakh.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMemoryCache(options =>
+{
+    options.SizeLimit = 100;
+});
+builder.Services.AddSingleton<ITanakhCache, MemoryTanakhCache>();
 builder.Services.AddScoped<CacheProvider>();
 builder.Services.AddOptions<EmailOptions>()
     .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
