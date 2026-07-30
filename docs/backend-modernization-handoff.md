@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **15 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-13 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **16 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-17 with zero re-derivation.
 
 ---
 
@@ -59,6 +59,7 @@ Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 | `ad122e1` | B-16: Extract business logic from controllers into services |
 | `e12c625` | B-11: Make all I/O asynchronous |
 | `d67e71c` | B-12: Add CancellationToken to endpoints and outbound calls |
+| `ec40b93` | B-13: Standardize errors on ProblemDetails |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
@@ -269,7 +270,7 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
-3. **B-18, B-04, B-09, B-16, B-11, and B-12 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`, `e12c625`, `d67e71c`) — see §4 for the current 4-project layout. Every I/O call is async with a `CancellationToken` threaded through from `HttpContext.RequestAborted` down to the file reads and the hebcal.com HTTP call. `SubscribeController`'s email send deliberately does **not** observe cancellation (see B-12's entry in §9 for why — confirmed with the user, not assumed). Next task in wave order is **B-13** (standardize errors on ProblemDetails / RFC 9457), which has no decision point but does have a real risk flagged twice in this doc: `SubscribeController`'s response shape is a live Angular-frontend contract — read `Frontend/src/app/services/api-call.service.ts` before changing what it returns.
+3. **B-18, B-04, B-09, B-16, B-11, B-12, and B-13 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`, `e12c625`, `d67e71c`, `ec40b93`) — see §4 for the current 4-project layout. `SubscribeController`'s two endpoints now return `502 application/problem+json` on a genuine email-send failure instead of a soft `Ok(false)`; the success response stays a bare `Ok(true)` deliberately (see B-13's entry in §9 — this was checked against the live Angular frontend contract, not assumed). Only 2 tasks remain: **B-17** (health checks, next in wave order, no decision point but one real design question about SMTP-responsiveness flagged in §9) and **B-15** (API versioning under `/api/v1`, last — has the highest real-world-impact risk in the whole backlog since the frontend hardcodes unversioned routes today).
 4. Grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` still returns zero hits as of `d67e71c` — if a fresh session finds any, something has regressed.
 
 ---
@@ -346,38 +347,14 @@ Verified real cancellation, not just that it compiles: temporarily added a 5-sec
 
 ---
 
-### B-13 · Standardize errors on ProblemDetails (RFC 9457) · Wave 5 · P2 · S
+### B-13 · Standardize errors on ProblemDetails (RFC 9457) · Wave 5 · P2 · S · **DONE (`ec40b93`)**
 
-**Purpose:** one error shape for the whole API. `SubscribeController` currently returns a bare `bool`.
+Completed this session. The Frontend contract this section warned about twice turned out to matter in a specific, non-obvious way: `Frontend/src/app/components/subscribe/subscribe.component.ts` does `this.subscribeSuccessful = response` — it treats the **entire response body** as the boolean, not a field within an object. That made the "success" shape safe to leave alone (any non-null object is truthy in JS regardless of contents, so wrapping `true` wouldn't have broken anything) but made wrapping **`false`** in an object actively dangerous: a 200 with `{ subscribed: false }` would still read as truthy client-side, silently making every failed send look successful. So:
 
-**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Controllers/SubscribeController.cs` (the main target), `Backend/Tanakh.Api/Program.cs` (already has `AddProblemDetails()` from B-14 — just needs to be leveraged, not re-added).
+- Success → `Ok(true)`, **untouched**, still a bare bool.
+- Email-send failure → `Problem(statusCode: 502, title: "Failed to send notification email.", detail: "...")` via `Problem()`, reusing the `AddProblemDetails()` customization from `Program.cs` (confirmed live: the 502 response carries the same `traceId` extension as `GlobalExceptionHandler`'s output). 502 vs 500 vs "leave it a soft 200" was put to the user directly rather than guessed; 502 was chosen since it's semantically "tried to reach an upstream dependency (SMTP) and it failed."
 
-**Current state (verbatim, as of B-12 — logic unchanged since original, only async/naming updated by B-11/B-16):**
-```csharp
-[HttpPost("RegisterUser")]
-public async Task<IActionResult> RegisterNewUserAsync([FromBody] SubscribeEntity subscribeEntity)
-{
-    EmailMessage emailMessage = new EmailMessage { Subject = "...", Body = $"...{subscribeEntity.UserName}..." };
-    bool isSuccessful = await emailSender.SendMessageAsync(emailMessage);
-    return Ok(isSuccessful);
-}
-```
-Both `RegisterNewUserAsync` and `DeleteUserAsync` follow this exact bare-bool-in-a-200 pattern.
-
-**Implementation steps:**
-1. Success → `200`/`201` with a meaningful body (not just `true`) — e.g. `{ "message": "Subscription request received" }` or similar; decide the exact shape with the user if it's user-facing (the Angular frontend currently reads this response — check `Frontend/src/app/services/api-call.service.ts` and whatever component calls `RegisterUser`/`DeleteUser` to see what shape it expects today, **since changing the response shape is a breaking change for the frontend** — this is worth flagging explicitly, since Frontend is out of scope for this backlog but consumes this exact contract).
-2. `EmailSender.SendMessage` returning `false` today (SMTP failure) → what should the API return? The spec says duplicate subscription → 409, validation failure → 400 (already handled automatically by `required` + `[ApiController]` per B-03's verified behavior), but there's no real "duplicate" concept in this app currently (no persistence layer — every `RegisterUser` call just sends an email, there's no subscriber list to check against). **This mapping needs the user's input**: is an SMTP-send failure a `502 Bad Gateway` (upstream dependency failed), a `500`, or should it stay a "soft" `200` with a body indicating delivery status? Don't guess — ask.
-3. `builder.Services.AddProblemDetails()` already exists in `Program.cs` from B-14 with a `traceId`-stamping customization — reuse it, don't duplicate.
-
-**Verification/testing steps:**
-1. Every error response is `application/problem+json` with `type`/`title`/`status`/`detail`/`traceId`.
-2. No endpoint returns a bare primitive.
-3. Confirm the B-14 exception handler still emits the same shape (regression check).
-4. **Check the Frontend integration** — even though `Frontend/` is out of scope to *modify*, changing `SubscribeController`'s response shape without knowing what the Angular code expects risks silently breaking the live app. At minimum, read `Frontend/src/app/services/api-call.service.ts` and the component that calls it before changing the shape.
-
-**Expected commit message:** `B-13: Standardize errors on ProblemDetails`
-
-**Risks:** the biggest risk in this task is the Frontend contract — flagged above, twice, on purpose.
+This works because Angular's `HttpClient` routes any non-2xx response to the error callback regardless of body shape, and the frontend's error handler for these two calls doesn't read the body at all — it just logs it and falls back to `subscribeSuccessful`'s already-correct default (`false`). Net effect: the failure path is now RFC 9457-compliant with zero risk to the live frontend, verified live against the real (partially-configured, always-failing) dev SMTP secrets rather than just reasoned about. The pre-existing `[ApiController]` auto-400 on a missing required field was re-checked too — same ProblemDetails shape, unaffected.
 
 ---
 
