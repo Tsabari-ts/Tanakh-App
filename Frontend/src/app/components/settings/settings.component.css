@@ -34,12 +34,12 @@
 }
 
     .svg-button svg {
-        margin-right: 8px;
+        margin-inline-start: 8px;
         color: black;
     }
 
 .svg-button img {
-    margin-right: 8px;
+    margin-inline-start: 8px;
     color: black;
 }
 
@@ -47,8 +47,8 @@
   width: 40px;
   height: 40px; 
   background-size: cover; 
-  margin-right: 20px; 
-  margin-left: 50px;
+  margin-inline-start: 20px; 
+  margin-inline-end: 50px;
 }
 
 @media only screen and (max-width: 1450px) {
@@ -72,8 +72,8 @@
   .svg-button div.icon {
     width: 23px; 
     height: 20px;
-    margin-right: 5px;
-    margin-left: 20px; 
+    margin-inline-start: 5px;
+    margin-inline-end: 20px; 
   }
 }
 

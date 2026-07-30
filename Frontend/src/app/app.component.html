@@ -3,30 +3,30 @@
 @if (notifications.current(); as notification) {
   <div class="app-toast" [class.app-toast--error]="notification.type === 'error'" role="alert" aria-live="assertive">
     <span>{{ notification.text }}</span>
-    <button type="button" class="app-toast__dismiss" (click)="notifications.dismiss()" aria-label="סגירת הודעה">×</button>
+    <button type="button" class="app-toast__dismiss" (click)="notifications.dismiss()" i18n-aria-label="@@app.dismissNotification" aria-label="סגירת הודעה">×</button>
   </div>
 }
 
 @if (appUpdate.updateAvailable()) {
   <div class="update-banner" role="status">
-    <span>יש גרסה חדשה של האפליקציה</span>
-    <button type="button" (click)="appUpdate.applyUpdate()">רענן עכשיו</button>
+    <span i18n="@@app.updateAvailable">יש גרסה חדשה של האפליקציה</span>
+    <button type="button" (click)="appUpdate.applyUpdate()" i18n="@@app.refreshNow">רענן עכשיו</button>
   </div>
 }
 
 <div class="container">
   <div class="title">
-    <h1>פרק תנ"ך ביום</h1>
+    <h1 i18n="@@app.title">פרק תנ"ך ביום</h1>
     @if (showButton()) {
       <button class="return-button" (click)="goBack()">
-        <span id="hide-text">חזרה</span>
+        <span id="hide-text" i18n="@@app.back">חזרה</span>
         <div class="icon" [ngClass]="returnIcon"></div>
       </button>
     }
   </div>
 
   <div class="main-footer">
-    <h4>בשם ה' נעשה ונצליח</h4>
+    <h4 i18n="@@app.footer">בשם ה' נעשה ונצליח</h4>
   </div>
 
   <div class="img-background"></div>

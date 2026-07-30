@@ -28,7 +28,7 @@
   }
 
   .save-button{
-    margin-right: 20%;
+    margin-inline-start: 20%;
     width: 60%;
     height: 40px;
     background-color: #333333e6; 

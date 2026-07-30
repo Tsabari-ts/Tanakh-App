@@ -16,9 +16,8 @@ body {
     flex-grow: 1;
     position: absolute;
     top: 0;
-    right: 0;
     bottom: 0;
-    left: 0;
+    inset-inline: 0;
   }
   
   .title {
@@ -27,7 +26,7 @@ body {
     width: 100%;
     position: absolute;
     top: 0;
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1;
   }
   
@@ -54,7 +53,7 @@ body {
     width: 100%;
     position: absolute;
     bottom: 0;
-    left: 0;
+    inset-inline-start: 0;
     z-index: 1;
   }
   
@@ -70,7 +69,7 @@ body {
     border: none; 
     color: #aaa; 
     top: 4%;
-    left: 1%;
+    inset-inline-end: 1%;
     width: 10%;
     background: transparent;
     display: flex;
@@ -87,8 +86,8 @@ body {
   .return-button div.icon {
     width: 40px;
     height: 40px; 
-    background-size: cover; 
-    margin-left: 20px;
+    background-size: cover;
+    margin-inline-end: 20px;
   }
 
   .return-icon {
@@ -109,7 +108,7 @@ body {
 
     .return-button div.icon {
       height: 30px;
-      margin-right: 90%;
+      margin-inline-start: 90%;
     }
   }
 

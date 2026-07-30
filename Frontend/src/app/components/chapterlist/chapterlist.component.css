@@ -33,7 +33,7 @@
     margin: 15px; 
     max-width: 450px;
     width: 500px;
-    padding-right: 180px;
+    padding-inline-start: 180px;
     margin-top: 10px; 
 }
 
@@ -55,7 +55,7 @@
     position: relative;
     margin-top: -215px;
     margin-bottom: 73px;
-    margin-right: 850px;
+    margin-inline-start: 850px;
 }
 .goBackButton:hover {
     color: #fdfdfd; 
@@ -65,13 +65,13 @@
     background-image: url('/assets/return.png'); 
     width: 40px;
     height: 40px;
-    margin-left: 20px;
+    margin-inline-end: 20px;
     background-size: cover;
 }
 .goBackButton img {
     width: 24px;
     height: 24px;
-    margin-right: 10px;
+    margin-inline-start: 10px;
   }
 
   
@@ -85,13 +85,13 @@
   padding: 20px; 
   font-size: 25px;
   width: 300px;
-  padding-right: 100px;
+  padding-inline-start: 100px;
 }
 
 .goBackButton{
   position: relative;
   margin-top: -215px;
   margin-bottom: 76px;
-  margin-right: 874px;
+  margin-inline-start: 874px;
 }
   }

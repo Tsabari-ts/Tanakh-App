@@ -1,17 +1,17 @@
 
 <div class="centered-container">
   @if (loadError()) {
-    <p class="empty-state">אירעה שגיאה בטעינת רשימת הפרקים. נסה שוב מאוחר יותר.</p>
+    <p class="empty-state" i18n="@@chapterlist.loadError">אירעה שגיאה בטעינת רשימת הפרקים. נסה שוב מאוחר יותר.</p>
   } @else {
     <div class="button-row">
       @for (versesNumber of chapters(); track $index; let chapterNumber = $index) {
         <div>
-          <button class="chapter-button" (click)="goToChapter(chapterNumber + 1)">
+          <button class="chapter-button" (click)="goToChapter(chapterNumber + 1)" i18n="@@chapterlist.chapterLabel">
             פרק {{ getChapterName(chapterNumber + 1) }} ({{ versesNumber }})
           </button>
         </div>
       } @empty {
-        <p class="empty-state">לא נמצאו פרקים</p>
+        <p class="empty-state" i18n="@@chapterlist.empty">לא נמצאו פרקים</p>
       }
     </div>
   }

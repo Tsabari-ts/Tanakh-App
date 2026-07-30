@@ -477,4 +477,47 @@ This matches the spec's own explicit fallback ("it is reasonable to write the AD
 
 **Presenting the ADR to the user for explicit approval before considering this task done**, since the spec requires sign-off before implementation either way — see the message accompanying this log entry.
 
+**Update:** approved by the user 2026-07-31 — ADR 003 status changed from Proposed to Accepted. F-11 is done.
+
+---
+
+## F-17 · Set up i18n even though the app is Hebrew-only (2026-07-31)
+
+**Branch:** `feat/f-17-i18n`
+
+Last task in the spec, done after templates had stabilised (per the spec's own ordering note). Given "no half-finished implementations" is a ground rule that's applied all session, treated this as an all-or-nothing task rather than doing a partial pass — infrastructure, every hardcoded TS string, every static template string, and the CSS logical-properties sweep, all the way through.
+
+**`npx ng add @angular/localize`**: wired `@angular/localize/init` into both build and test polyfills, `@angular/localize` into both `tsconfig.app.json` and `tsconfig.spec.json` types.
+
+**Converted every hardcoded Hebrew string in `.ts` files to `$localize`** (the ground rule that's been in force since before F-06: "Hebrew strings hardcoded in TS files... In templates this is acceptable for now" — F-17 is where that debt gets paid). Touched: `app.routes.ts` (6 route titles), `home.component.ts` (5 button labels), `welcome-modal.component.ts` (see finding below), `subscribe.component.ts` (3 server-response messages), `settings.component.ts` (5 button/label strings), `scroll-to-top-button.component.ts` (2 inline-template strings), `error.interceptor.ts` (9 status messages), `global-error-handler.ts` (1 reload-prompt message).
+
+**Found real dead code while converting `welcome-modal.component.ts`**: it had a `data = { title: '...', content: '...' }` object that **the template never references** — the actual dialog template has its own separately-hardcoded (and different, longer) text. Confirmed via grep (`data\.` → zero matches in the template). Rather than wrap dead code in `$localize` (which would have extracted phantom, never-rendered message IDs), removed the `data` property entirely and marked the *actual* template text instead. This predates the whole modernization effort but was only surfaced because F-17 required touching every Hebrew string in this file.
+
+**Deliberately left `entrance.component.ts`'s `words` array untranslated** — `[" ''וזאת", "התורה", "אשר", "שם", " ","משה", "לפני", "בני", "ישראל''"]` is a quote from Deuteronomy 31:9, used as decorative animated intro text. Per the spec's own explicit rule ("Do not translate the biblical text through i18n... an entirely separate content feature"), scripture doesn't go through the UI translation pipeline even when it happens to be hardcoded in a component rather than fetched from the API.
+
+**Marked every static Hebrew text node across all 11 templates** with `i18n="@@id"` (or `i18n-aria-label` for the 5 dialog close buttons, all sharing one `@@dialog.close` id — plus a handful of other deliberately-shared ids: `@@app.refreshNow`, `@@chapter.backToHome`, `@@subscribe.subscribedButton`, reused where the exact same string/meaning appears in more than one place, so one translation covers all occurrences). Left every *dynamic* interpolation alone — book/chapter titles, verse text, gematria chapter labels, the notification/update-banner text (already `$localize`-sourced at the TS layer) — none of that is a static UI string. Used `<ng-container i18n="...">` rather than wrapping two checkbox labels in a new `<span>`, to avoid introducing DOM structure that wasn't there before just to have somewhere to hang the attribute.
+
+**`angular.json`**: added the project-level `i18n` block (`sourceLocale: "he"`, one target locale `"en"`). Deliberately did **not** set `"localize": true` on the base build target — that would change the *default* `ng build`/`ng build --configuration production` output structure (nesting everything under `dist/tanakh/browser/he/` and `/en/` instead of `dist/tanakh/browser/` directly), which would have broken the "Hebrew build still works and looks identical" requirement by changing something about the default build nobody asked to change. Locale-specific builds are opt-in via `ng build --localize` or a future dedicated `en` configuration, not the default.
+
+**`ng extract-i18n --output-path src/locale --format xlf2`**: 89 unique translation units (`src/locale/messages.xlf`, `srcLang="he"` once the `angular.json` config was in place — it was wrongly `en-US` on a first extraction run before that config existed, corrected by re-extracting after). Noted the `extract-i18n` builder itself prints a deprecation warning (`@angular-devkit/build-angular:extract-i18n` → `@angular/build:extract-i18n`) — a separate, broader builder-package migration unrelated to F-17's actual task; not chased, same reasoning as declining `use-application-builder` back in F-01.
+
+**Dummy English translation** (`src/locale/messages.en.xlf`): generated by copying every `<source>` into a matching `<target>` (a small Node script, not hand-translation — an actual English translation is a content task explicitly out of scope, "dummy" means proving the pipeline works, not translating). Verified this genuinely works end-to-end:
+- `ng build --configuration production --localize` → succeeds, emits `dist/tanakh/browser/he/` and `dist/tanakh/browser/en/`.
+- `dist/tanakh/browser/en/index.html` → `<html dir="ltr" lang="en" ...>` — a **real** LTR build (Angular's i18n tooling sets `dir` from the locale automatically; English is a known-LTR locale).
+- `dist/tanakh/browser/he/index.html` → `<html dir="rtl" lang="he" ...>` — unchanged.
+- Confirmed the *default* `ng build --configuration production` (no `--localize` flag) still produces the original `dist/tanakh/browser/` structure directly, with no locale subfolders — the Hebrew build's default behavior is genuinely unaffected.
+
+**CSS logical-properties sweep**: found 48 physical `left`/`right` occurrences (margin, padding, `text-align`, and absolute/fixed positioning) across 10 component CSS files plus one inline `styles:` array. Since this app is *currently* always `dir="rtl"`, applied the constant, direction-correct mapping (physical right → `inline-start`, physical left → `inline-end`, for margin/padding/inset properties — because in RTL, inline content starts at the right) — this preserves **pixel-identical current rendering** while making the layout correctly mirror if the app is ever actually served in an LTR locale. Where both `left: 0` and `right: 0` were set together to span full width (`.img-background`, `.loader-background`), collapsed to the `inset-inline: 0` shorthand. Where a single side was set together with `width: 100%` (visually inert regardless of which logical direction is chosen, since the box fills the container either way), picked `inline-start` for consistency. Left `transform-origin: bottom right` (in `subscribe.component.css`) alone — logical values for `transform-origin` are a different, more niche CSS feature the spec's own guidance doesn't cover.
+- Final sweep (`grep -rn "margin-left\|margin-right\|padding-left\|padding-right\|text-align:\s*(left|right)\|(^|[^-\w])(left|right)\s*:"`) across all `.css` and `.ts` files: **zero matches.**
+- `getChapterName()`'s gematria chapter labels (א׳, ב׳, ג׳...) are content generated from a number, not translatable UI strings — matches the spec's own explicit note on this exact case; confirmed nothing needed there, no change made.
+- No `DatePipe`/`DecimalPipe` usage anywhere in this app (grep confirmed) — the spec's guidance on locale-aware number/date formatting doesn't apply since nothing formats dates or numbers via Angular pipes here.
+
+**Verification:**
+- `ng build --configuration production`: succeeds, 344.88 kB raw / 63.76 kB transfer (small expected growth from the `@angular/localize/init` polyfill + `$localize` call overhead — still comfortably under the 350kB/500kB budgets from F-10), same pre-existing `gematriya` warning only.
+- `ng test --watch=false --browsers=ChromeHeadless`: 10 FAILED / 18 SUCCESS, unchanged throughout every checkpoint in this task.
+- Full DoD sweep: extraction produces every UI string (89 units) ✅. No hardcoded Hebrew in `.ts` (verified, one deliberate scripture exception) ✅. `dir`/`lang` set from active locale (verified via both real locale builds) ✅. No physical left/right CSS except the one documented `transform-origin` exception ✅. Hebrew build unchanged (verified structurally) ✅. Dummy English translation produces a valid LTR build (verified) ✅.
+- **Not performed, consistent with every task since F-03:** actually loading the `en` build in a real browser and eyeballing the mirrored layout. The `dir="ltr"` flip and the logical-property math are both individually verified (build output inspection, and the direction-mapping being mathematically self-consistent), but nobody has looked at it rendered. Flagged rather than claimed.
+
+This completes all 17 tasks in `docs/TANACH-APP-FRONTEND-SPEC.md`.
+
 ---

@@ -28,16 +28,16 @@ export class HomeComponent implements OnInit {
     }
 }
   
-  tanakhButtons:any[]=[    
-    {text: 'תורה', value: 'torah', iconClass: 'torah-icon'},
-    {text: 'נביאים', value: 'prophets', iconClass: 'torah-icon'},
-    {text: 'כתובים', value: 'writings', iconClass: 'torah-icon'},
-  ]  
+  tanakhButtons:any[]=[
+    {text: $localize`:@@home.torah:תורה`, value: 'torah', iconClass: 'torah-icon'},
+    {text: $localize`:@@home.prophets:נביאים`, value: 'prophets', iconClass: 'torah-icon'},
+    {text: $localize`:@@home.writings:כתובים`, value: 'writings', iconClass: 'torah-icon'},
+  ]
 
-  buttons:any[]=[    
-    {text: this.hasStorage ? 'המשך מהפרק האחרון' : 'התחל קריאה', value: 'show-sentence', iconClass: 'BookWithBookmark-icon'},
-    {text: 'הגדרות', value: 'settings', iconClass: 'stteing-icon'}
-  ]  
+  buttons:any[]=[
+    {text: this.hasStorage ? $localize`:@@home.continueReading:המשך מהפרק האחרון` : $localize`:@@home.startReading:התחל קריאה`, value: 'show-sentence', iconClass: 'BookWithBookmark-icon'},
+    {text: $localize`:@@home.settings:הגדרות`, value: 'settings', iconClass: 'stteing-icon'}
+  ]
  
   goTo(path:any){
 let section = path.value;

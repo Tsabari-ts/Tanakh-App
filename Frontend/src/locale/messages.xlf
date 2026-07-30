@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="he">
+  <file id="ngi18n" original="ng.template">
+    <unit id="app.dismissNotification">
+      <notes>
+        <note category="location">src/app/app.component.html:6,10</note>
+      </notes>
+      <segment>
+        <source>סגירת הודעה</source>
+      </segment>
+    </unit>
+    <unit id="app.updateAvailable">
+      <notes>
+        <note category="location">src/app/app.component.html:12,13</note>
+      </notes>
+      <segment>
+        <source>יש גרסה חדשה של האפליקציה</source>
+      </segment>
+    </unit>
+    <unit id="app.refreshNow">
+      <notes>
+        <note category="location">src/app/app.component.html:13,17</note>
+        <note category="location">src/app/shared/error-screen/error-screen.component.html:16,18</note>
+      </notes>
+      <segment>
+        <source>רענן עכשיו</source>
+      </segment>
+    </unit>
+    <unit id="app.title">
+      <notes>
+        <note category="location">src/app/app.component.html:19,20</note>
+      </notes>
+      <segment>
+        <source>פרק תנ&quot;ך ביום</source>
+      </segment>
+    </unit>
+    <unit id="app.back">
+      <notes>
+        <note category="location">src/app/app.component.html:22,23</note>
+      </notes>
+      <segment>
+        <source>חזרה</source>
+      </segment>
+    </unit>
+    <unit id="app.footer">
+      <notes>
+        <note category="location">src/app/app.component.html:29,32</note>
+      </notes>
+      <segment>
+        <source>בשם ה&apos; נעשה ונצליח</source>
+      </segment>
+    </unit>
+    <unit id="route.entrance.title">
+      <notes>
+        <note category="location">src/app/app.routes.ts:8</note>
+      </notes>
+      <segment>
+        <source>תנ&quot;ך</source>
+      </segment>
+    </unit>
+    <unit id="route.home.title">
+      <notes>
+        <note category="location">src/app/app.routes.ts:13</note>
+      </notes>
+      <segment>
+        <source>תנ&quot;ך</source>
+      </segment>
+    </unit>
+    <unit id="route.settings.title">
+      <notes>
+        <note category="location">src/app/app.routes.ts:18</note>
+      </notes>
+      <segment>
+        <source>הגדרות</source>
+      </segment>
+    </unit>
+    <unit id="route.booklist.title">
+      <notes>
+        <note category="location">src/app/app.routes.ts:23</note>
+      </notes>
+      <segment>
+        <source>ספרי התנ&quot;ך</source>
+      </segment>
+    </unit>
+    <unit id="route.chapterlist.title">
+      <notes>
+        <note category="location">src/app/app.routes.ts:28</note>
+      </notes>
+      <segment>
+        <source>פרקים</source>
+      </segment>
+    </unit>
+    <unit id="route.chapter.title">
+      <notes>
+        <note category="location">src/app/app.routes.ts:33</note>
+      </notes>
+      <segment>
+        <source>תנ&quot;ך</source>
+      </segment>
+    </unit>
+    <unit id="booklist.loadError">
+      <notes>
+        <note category="location">src/app/components/booklist/booklist.component.html:3,5</note>
+      </notes>
+      <segment>
+        <source>אירעה שגיאה בטעינת רשימת הספרים. נסה שוב מאוחר יותר.</source>
+      </segment>
+    </unit>
+    <unit id="booklist.empty">
+      <notes>
+        <note category="location">src/app/components/booklist/booklist.component.html:11,14</note>
+      </notes>
+      <segment>
+        <source>לא נמצאו ספרים</source>
+      </segment>
+    </unit>
+    <unit id="chapter.loadError">
+      <notes>
+        <note category="location">src/app/components/chapter/chapter.component.html:6,7</note>
+      </notes>
+      <segment>
+        <source>אירעה שגיאה בטעינת הפרק. ייתכן שהפרק אינו קיים.</source>
+      </segment>
+    </unit>
+    <unit id="chapter.backToHome">
+      <notes>
+        <note category="location">src/app/components/chapter/chapter.component.html:7,9</note>
+        <note category="location">src/app/shared/error-screen/error-screen.component.html:8,10</note>
+      </notes>
+      <segment>
+        <source>חזרה לדף הבית</source>
+      </segment>
+    </unit>
+    <unit id="chapter.finishedReading">
+      <notes>
+        <note category="location">src/app/components/chapter/chapter.component.html:18,20</note>
+      </notes>
+      <segment>
+        <source>סיימתי לקרוא</source>
+      </segment>
+    </unit>
+    <unit id="chapter.scrollDown">
+      <notes>
+        <note category="location">src/app/components/chapter/chapter.component.html:25,26</note>
+      </notes>
+      <segment>
+        <source>למטה</source>
+      </segment>
+    </unit>
+    <unit id="chapter.stop">
+      <notes>
+        <note category="location">src/app/components/chapter/chapter.component.html:29,30</note>
+      </notes>
+      <segment>
+        <source>עצור</source>
+      </segment>
+    </unit>
+    <unit id="chapter.scrollUp">
+      <notes>
+        <note category="location">src/app/components/chapter/chapter.component.html:33,34</note>
+      </notes>
+      <segment>
+        <source>למעלה</source>
+      </segment>
+    </unit>
+    <unit id="chapter.nextChapter">
+      <notes>
+        <note category="location">src/app/components/chapter/chapter.component.html:37,38</note>
+      </notes>
+      <segment>
+        <source>פרק הבא</source>
+      </segment>
+    </unit>
+    <unit id="chapterlist.loadError">
+      <notes>
+        <note category="location">src/app/components/chapterlist/chapterlist.component.html:4,6</note>
+      </notes>
+      <segment>
+        <source>אירעה שגיאה בטעינת רשימת הפרקים. נסה שוב מאוחר יותר.</source>
+      </segment>
+    </unit>
+    <unit id="chapterlist.chapterLabel">
+      <notes>
+        <note category="location">src/app/components/chapterlist/chapterlist.component.html:10,11</note>
+      </notes>
+      <segment>
+        <source> פרק <ph id="0" equiv="INTERPOLATION" disp="{{ getChapterName(chapterNumber + 1) }}"/> (<ph id="1" equiv="INTERPOLATION_1" disp="{{ versesNumber }}"/>) </source>
+      </segment>
+    </unit>
+    <unit id="chapterlist.empty">
+      <notes>
+        <note category="location">src/app/components/chapterlist/chapterlist.component.html:14,18</note>
+      </notes>
+      <segment>
+        <source>לא נמצאו פרקים</source>
+      </segment>
+    </unit>
+    <unit id="entrance.shabbatNotice">
+      <notes>
+        <note category="location">src/app/components/entrance/entrance.component.html:23,24</note>
+      </notes>
+      <segment>
+        <source>אתר זה שומר שבתות וחגים</source>
+      </segment>
+    </unit>
+    <unit id="entrance.shabbatReturn">
+      <notes>
+        <note category="location">src/app/components/entrance/entrance.component.html:24,27</note>
+      </notes>
+      <segment>
+        <source>נחזור לפעילות מיד אחרי ההבדלה</source>
+      </segment>
+    </unit>
+    <unit id="home.torah">
+      <notes>
+        <note category="location">src/app/components/home/home.component.ts:32</note>
+      </notes>
+      <segment>
+        <source>תורה</source>
+      </segment>
+    </unit>
+    <unit id="home.prophets">
+      <notes>
+        <note category="location">src/app/components/home/home.component.ts:33</note>
+      </notes>
+      <segment>
+        <source>נביאים</source>
+      </segment>
+    </unit>
+    <unit id="home.writings">
+      <notes>
+        <note category="location">src/app/components/home/home.component.ts:34</note>
+      </notes>
+      <segment>
+        <source>כתובים</source>
+      </segment>
+    </unit>
+    <unit id="home.continueReading">
+      <notes>
+        <note category="location">src/app/components/home/home.component.ts:38</note>
+      </notes>
+      <segment>
+        <source>המשך מהפרק האחרון</source>
+      </segment>
+    </unit>
+    <unit id="home.startReading">
+      <notes>
+        <note category="location">src/app/components/home/home.component.ts:38</note>
+      </notes>
+      <segment>
+        <source>התחל קריאה</source>
+      </segment>
+    </unit>
+    <unit id="home.settings">
+      <notes>
+        <note category="location">src/app/components/home/home.component.ts:39</note>
+      </notes>
+      <segment>
+        <source>הגדרות</source>
+      </segment>
+    </unit>
+    <unit id="readPermission.title">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:7,8</note>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:26,27</note>
+      </notes>
+      <segment>
+        <source>אישור קריאת הפרק</source>
+      </segment>
+    </unit>
+    <unit id="dialog.close">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:9,10</note>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:28,29</note>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:9,10</note>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:84,85</note>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:6,7</note>
+      </notes>
+      <segment>
+        <source>סגירה</source>
+      </segment>
+    </unit>
+    <unit id="readPermission.congrats">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:13,14</note>
+      </notes>
+      <segment>
+        <source>כל הכבוד זכית בעוד פרק</source>
+      </segment>
+    </unit>
+    <unit id="readPermission.saving">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:14,16</note>
+      </notes>
+      <segment>
+        <source>מתבצעת שמירה...</source>
+      </segment>
+    </unit>
+    <unit id="readPermission.confirmPrompt1">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:32,34</note>
+      </notes>
+      <segment>
+        <source>לחיצה על אישור תגרום לשמירת הפרק כפרק האחרון שקראת.</source>
+      </segment>
+    </unit>
+    <unit id="readPermission.confirmPrompt2">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:34,36</note>
+      </notes>
+      <segment>
+        <source>האם לשמור את הפרק?</source>
+      </segment>
+    </unit>
+    <unit id="readPermission.save">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:37,39</note>
+      </notes>
+      <segment>
+        <source>שמירת הפרק</source>
+      </segment>
+    </unit>
+    <unit id="readPermission.saved">
+      <notes>
+        <note category="location">src/app/components/read-permission/read-permission.component.html:46,48</note>
+      </notes>
+      <segment>
+        <source>הפרק נשמר בהצלחה</source>
+      </segment>
+    </unit>
+    <unit id="scrollToTop.jump">
+      <notes>
+        <note category="location">src/app/components/scroll-to-top-button/scroll-to-top-button.component.ts:9,10</note>
+      </notes>
+      <segment>
+        <source>קפוץ</source>
+      </segment>
+    </unit>
+    <unit id="scrollToTop.up">
+      <notes>
+        <note category="location">src/app/components/scroll-to-top-button/scroll-to-top-button.component.ts:10,13</note>
+      </notes>
+      <segment>
+        <source>למעלה</source>
+      </segment>
+    </unit>
+    <unit id="settings.iosInstallHint">
+      <notes>
+        <note category="location">src/app/components/settings/settings.component.html:19,22</note>
+      </notes>
+      <segment>
+        <source> להתקנת האפליקציה: לחצו על כפתור השיתוף בדפדפן ובחרו &quot;הוספה למסך הבית&quot;. </source>
+      </segment>
+    </unit>
+    <unit id="subscribe.subscribedButton">
+      <notes>
+        <note category="location">src/app/components/settings/settings.component.ts:29</note>
+        <note category="location">src/app/components/subscribe/subscribe.component.ts:99</note>
+      </notes>
+      <segment>
+        <source>נרשמת לתזכורת</source>
+      </segment>
+    </unit>
+    <unit id="settings.subscribeButton">
+      <notes>
+        <note category="location">src/app/components/settings/settings.component.ts:29</note>
+      </notes>
+      <segment>
+        <source>הירשם לתזכורת יומית</source>
+      </segment>
+    </unit>
+    <unit id="settings.contactUs">
+      <notes>
+        <note category="location">src/app/components/settings/settings.component.ts:31</note>
+      </notes>
+      <segment>
+        <source>צור קשר</source>
+      </segment>
+    </unit>
+    <unit id="settings.appInstalled">
+      <notes>
+        <note category="location">src/app/components/settings/settings.component.ts:35</note>
+      </notes>
+      <segment>
+        <source>האפליקציה מותקנת</source>
+      </segment>
+    </unit>
+    <unit id="settings.addToHomeScreen">
+      <notes>
+        <note category="location">src/app/components/settings/settings.component.ts:36</note>
+      </notes>
+      <segment>
+        <source>הוספה למסך הבית</source>
+      </segment>
+    </unit>
+    <unit id="settings.downloadApp">
+      <notes>
+        <note category="location">src/app/components/settings/settings.component.ts:37</note>
+      </notes>
+      <segment>
+        <source>הורדת אפליקציה</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.title">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:7,8</note>
+      </notes>
+      <segment>
+        <source>הרשמה לתזכורת יומית</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.intro1">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:13,15</note>
+      </notes>
+      <segment>
+        <source>לקבלת תזכורת יומית במייל נא למלא את השדות.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.intro2">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:15,17</note>
+      </notes>
+      <segment>
+        <source>לאחר ההרשמה יישלח אליך מייל אישור - יש ללחוץ על הקישור בו כדי להתחיל לקבל תזכורות.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.intro3">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:17,19</note>
+      </notes>
+      <segment>
+        <source>ניתן לבטל את הרישום בכל עת דרך הקישור שבתחתית כל הודעת תזכורת.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.emailLabel">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:21,22</note>
+      </notes>
+      <segment>
+        <source>אימייל</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.emailInvalid">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:27,29</note>
+      </notes>
+      <segment>
+        <source>כתובת אימייל לא תקינה.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.nameLabel">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:31,32</note>
+      </notes>
+      <segment>
+        <source>שם (לא חובה)</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.timeLabel">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:36,37</note>
+      </notes>
+      <segment>
+        <source>בחירת שעה</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.timeRequired">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:44,46</note>
+      </notes>
+      <segment>
+        <source>חייב לבחור שעה.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.skipShabbat">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:50,51</note>
+      </notes>
+      <segment>
+        <source>לא לשלוח תזכורות בשבתות ובחגים</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.consent">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:56,57</note>
+      </notes>
+      <segment>
+        <source>אני מסכים/ה לקבל הודעות תזכורת במייל</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.consentRequired">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:59,61</note>
+      </notes>
+      <segment>
+        <source>יש לאשר קבלת הודעות כדי להירשם.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.submit">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:63,64</note>
+      </notes>
+      <segment>
+        <source>הירשם</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.alreadySubscribedTitle">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:82,83</note>
+      </notes>
+      <segment>
+        <source>תזכורת יומית</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.alreadySubscribed1">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:88,90</note>
+      </notes>
+      <segment>
+        <source>את/ה כבר רשום/ה לתזכורת היומית.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.alreadySubscribed2">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.html:90,92</note>
+      </notes>
+      <segment>
+        <source>ניתן לבטל את הרישום בכל עת דרך הקישור שבתחתית כל הודעת תזכורת שקיבלת במייל.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.confirmationSent">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.ts:97</note>
+      </notes>
+      <segment>
+        <source>שלחנו לך מייל אישור - יש ללחוץ על הקישור בו כדי להשלים את ההרשמה.</source>
+      </segment>
+    </unit>
+    <unit id="subscribe.failed">
+      <notes>
+        <note category="location">src/app/components/subscribe/subscribe.component.ts:101</note>
+      </notes>
+      <segment>
+        <source>הרישום נכשל, אנא נסה שוב מאוחר יותר</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.title">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:4,5</note>
+      </notes>
+      <segment>
+        <source>ברוכים הבאים</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.body1">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:11,12</note>
+      </notes>
+      <segment>
+        <source>המערכת פועלת להפצת תורה וחסד ברחבי הארץ ללא מטרות רווח.</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.body2">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:12,13</note>
+      </notes>
+      <segment>
+        <source>כל מי שיקבל על עצמו את קריאת התנ&quot;ך - הלב והספר של עם הספר, עם הנצח יהיה שותף בקירוב לבבות עם ישראל.</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.body3">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:13,14</note>
+      </notes>
+      <segment>
+        <source>תוכלו לקרוא פרק אחד בכל יום ובכך להשלים את קריאת התנ&quot;ך</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.body4">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:14,15</note>
+      </notes>
+      <segment>
+        <source>על ידי לחיצה על הכפתור למטה תוכלו לעבור לעמוד ההגדרות ולבחור האם לקבל תזכורת יומית ישירות למכשיר הפלאפון שלכם.</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.body5">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:15,16</note>
+      </notes>
+      <segment>
+        <source>כמו כן תוכלו להוריד את האפליקציה אליכם לפלאפון - שימו לב כי האפליקציה כמעט ואינה תופסת מקום אחסון.</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.body6">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:16,19</note>
+      </notes>
+      <segment>
+        <source>בשאיפה לאחדות רוחנית וגשמית בקרב עם ישראל במהרה בימנו.</source>
+      </segment>
+    </unit>
+    <unit id="welcomeModal.goToSettings">
+      <notes>
+        <note category="location">src/app/components/welcome-modal/welcome-modal.component.html:20,22</note>
+      </notes>
+      <segment>
+        <source>עבור להגדרות</source>
+      </segment>
+    </unit>
+    <unit id="errorHandler.reloadPrompt">
+      <notes>
+        <note category="location">src/app/core/global-error-handler.ts:15</note>
+      </notes>
+      <segment>
+        <source>גרסה חדשה זמינה. רענן את הדף כדי להמשיך.</source>
+      </segment>
+    </unit>
+    <unit id="error.offline">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:7</note>
+      </notes>
+      <segment>
+        <source>אין חיבור לאינטרנט. בדוק את החיבור ונסה שוב.</source>
+      </segment>
+    </unit>
+    <unit id="error.badRequest">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:8</note>
+      </notes>
+      <segment>
+        <source>הבקשה אינה תקינה.</source>
+      </segment>
+    </unit>
+    <unit id="error.unauthorized">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:9</note>
+      </notes>
+      <segment>
+        <source>יש להתחבר מחדש.</source>
+      </segment>
+    </unit>
+    <unit id="error.forbidden">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:10</note>
+      </notes>
+      <segment>
+        <source>אין לך הרשאה לצפות בתוכן הזה.</source>
+      </segment>
+    </unit>
+    <unit id="error.notFound">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:11</note>
+      </notes>
+      <segment>
+        <source>התוכן המבוקש לא נמצא.</source>
+      </segment>
+    </unit>
+    <unit id="error.tooManyRequests">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:12</note>
+      </notes>
+      <segment>
+        <source>יותר מדי בקשות. נסה שוב בעוד רגע.</source>
+      </segment>
+    </unit>
+    <unit id="error.serverError">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:13</note>
+      </notes>
+      <segment>
+        <source>תקלה בשרת. אנחנו כבר על זה.</source>
+      </segment>
+    </unit>
+    <unit id="error.serviceUnavailable">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:14</note>
+      </notes>
+      <segment>
+        <source>השירות אינו זמין כרגע. נסה שוב בעוד מספר דקות.</source>
+      </segment>
+    </unit>
+    <unit id="error.unexpected">
+      <notes>
+        <note category="location">src/app/core/interceptors/error.interceptor.ts:23</note>
+      </notes>
+      <segment>
+        <source>אירעה שגיאה בלתי צפויה. נסה שוב.</source>
+      </segment>
+    </unit>
+    <unit id="errorScreen.fatalTitle">
+      <notes>
+        <note category="location">src/app/shared/error-screen/error-screen.component.html:4,5</note>
+      </notes>
+      <segment>
+        <source>משהו השתבש</source>
+      </segment>
+    </unit>
+    <unit id="errorScreen.fatalMessage">
+      <notes>
+        <note category="location">src/app/shared/error-screen/error-screen.component.html:5,6</note>
+      </notes>
+      <segment>
+        <source>אירעה שגיאה בלתי צפויה באפליקציה. ניתן לנסות שוב או לחזור לדף הבית.</source>
+      </segment>
+    </unit>
+    <unit id="errorScreen.tryAgain">
+      <notes>
+        <note category="location">src/app/shared/error-screen/error-screen.component.html:7,8</note>
+      </notes>
+      <segment>
+        <source>נסה שוב</source>
+      </segment>
+    </unit>
+    <unit id="errorScreen.reloadTitle">
+      <notes>
+        <note category="location">src/app/shared/error-screen/error-screen.component.html:13,14</note>
+      </notes>
+      <segment>
+        <source>עדכון זמין</source>
+      </segment>
+    </unit>
+  </file>
+</xliff>

@@ -94,11 +94,11 @@ export class SubscribeComponent {
   setSubscribeServerResponse() {
     setTimeout(() => {
       if (this.subscribeSuccessful) {
-        this.serverResponse.set('שלחנו לך מייל אישור - יש ללחוץ על הקישור בו כדי להשלים את ההרשמה.');
+        this.serverResponse.set($localize`:@@subscribe.confirmationSent:שלחנו לך מייל אישור - יש ללחוץ על הקישור בו כדי להשלים את ההרשמה.`);
         this.subscriptionStatusChange.emit({
-          newButtonName: 'נרשמת לתזכורת' });
+          newButtonName: $localize`:@@subscribe.subscribedButton:נרשמת לתזכורת` });
       } else {
-        this.serverResponse.set('הרישום נכשל, אנא נסה שוב מאוחר יותר');
+        this.serverResponse.set($localize`:@@subscribe.failed:הרישום נכשל, אנא נסה שוב מאוחר יותר`);
       }
       this.isRequestInProgress.set(false);
       this.isRequestSuccessful.set(true);
