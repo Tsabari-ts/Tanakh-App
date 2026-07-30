@@ -1,4 +1,4 @@
-import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, inject, provideAppInitializer, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withXhr, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -11,6 +11,7 @@ import { environment } from '../environments/environment';
 import { retryInterceptor } from './core/interceptors/retry.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
+import { AppUpdateService } from './core/app-update.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,6 +25,7 @@ export const appConfig: ApplicationConfig = {
       enabled: environment.enableServiceWorker,
       registrationStrategy: 'registerWhenStable:30000'
     }),
+    provideAppInitializer(() => inject(AppUpdateService).init()),
     WelcomeModalComponent,
     SubscribeComponent,
     ReadPermissionComponent

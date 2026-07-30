@@ -5,6 +5,7 @@ import { RouterOutlet } from '@angular/router';
 import { NotificationService } from './services/notification.service';
 import { ErrorStateService } from './services/error-state.service';
 import { ErrorScreenComponent } from './shared/error-screen/error-screen.component';
+import { AppUpdateService } from './core/app-update.service';
 
 @Component({
     selector: 'app-root',
@@ -19,6 +20,7 @@ export class AppComponent {
   returnIcon:string = 'return-icon';
   readonly notifications = inject(NotificationService);
   readonly errorState = inject(ErrorStateService);
+  readonly appUpdate = inject(AppUpdateService);
 
   constructor(private location: Location) { }
 
