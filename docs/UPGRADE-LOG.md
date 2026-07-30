@@ -110,4 +110,19 @@ Preparation: `git status` clean, `npm ci` clean install, baseline `ng build --co
 - `ng test --watch=false --browsers=ChromeHeadless`: 12 FAILED / 5 SUCCESS, unchanged.
 - Committed as a single `chore(F-01): upgrade Angular to v19`.
 
+### 19 → 20 (2026-07-31) — Node upgrade required mid-sequence
+
+**⚠️ VERIFY correction, real blocker (not anticipated by the spec):** the spec's Node-22-requirement warning was attached only to the final 21→22 step. In practice, `npx ng update @angular/core@20` refused to run: *"The Angular CLI requires a minimum Node.js version of v20.19 or v22.12"* — this machine had v20.11.0. The blocker landed two steps earlier than the spec expected.
+
+Resolved by installing `nvm-windows` via `winget install --id CoreyButler.NVMforWindows` (per explicit user choice — asked first since this changes machine-wide state, not just the repo) and `nvm install 22` → Node v22.23.2. `nvm use 22.23.2` updates the machine PATH permanently (new terminal sessions pick it up automatically); the existing Bash tool session's cached environment needed `export PATH="/c/nvm4w/nodejs:$PATH"` prepended per command for the rest of this session. The old Node 20.11.0 install at `C:\Program Files\nodejs` was left untouched, so nothing else on this machine is affected. `node_modules` was reinstalled clean (`rm -rf node_modules && npm install`) under Node 22 before continuing.
+
+- `npx ng update @angular/core@20 @angular/cli@20`: core/cli/etc → 20.3.27/20.3.32, `typescript` → 5.9.3.
+  - Automated (required) migrations: workspace generation defaults preserved in `angular.json`; `tsconfig.json` `moduleResolution` → `bundler`; SSR-related import migrations ran with no changes (app doesn't use SSR yet).
+  - **Declined both optional migrations offered:** `use-application-builder` (already on it) and, importantly, `control-flow-migration` (converts templates to `@if`/`@for` block syntax) — this is explicitly F-05's job later in the sequence, run only after F-02 (standalone) per the dependency graph. Running it now would jump ahead of the plan. Also declined `router-current-navigation` (no usage of the deprecated `Router.getCurrentNavigation()` in this codebase).
+- `npx ng update @angular/material@20`: material/cdk → 20.2.14. No source changes (only touched stale files under `dist/`, which is gitignored build output from earlier smoke-testing — not committed).
+- `ng build --configuration production`: succeeds, 683.88 kB raw / 150.63 kB transfer, same warning set (budgets, gematriya CJS).
+- `ng test --watch=false --browsers=ChromeHeadless`: 12 FAILED / 5 SUCCESS, same count as baseline (error format changed cosmetically to Angular's newer `NG0201` style, same underlying pre-existing DI-setup gap in the specs).
+- `npm audit --omit=dev`: **0 vulnerabilities** (down from 11 high at baseline) — the Angular 17 sanitization/XSS advisories are resolved as of this version.
+- Committed as a single `chore(F-01): upgrade Angular to v20`.
+
 ---
