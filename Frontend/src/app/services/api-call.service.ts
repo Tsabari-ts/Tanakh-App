@@ -18,7 +18,11 @@ export class ApiCallService {
 
   getBookList(section:string): Observable<any> {
     return this.http.get<any>(`https://localhost:44308/Tanakh/books/${section}`);
-  }  
+  }
+
+  getBookByTitle(book:string): Observable<any> {
+    return this.http.get<any>(`https://localhost:44308/Tanakh/books/main/${book}`);
+  }
 
   RegisterNewUser(userData: any) {
     return this.http.post<any>(`https://localhost:44308/Subscribe/RegisterUser`, userData);

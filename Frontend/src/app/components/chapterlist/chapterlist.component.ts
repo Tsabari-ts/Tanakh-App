@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BookService } from '../../services/book.service';
+import { ApiCallService } from '../../services/api-call.service';
 import gematriya from 'gematriya';
 import { AppComponent } from '../../app.component';
 
@@ -16,17 +17,28 @@ export class ChapterlistComponent implements OnInit {
 
   constructor(private activatedRoute: ActivatedRoute,
               private router: Router,
-              private bookService: BookService,              
+              private bookService: BookService,
+              private apiService: ApiCallService,
               private appComponent: AppComponent) {
                 this.appComponent.showButton = true;
                }
 
   ngOnInit(): void {
-    this.chapters = this.bookService.getBookChapter();
-
-      this.activatedRoute.params.subscribe(p => {
+    this.activatedRoute.params.subscribe(p => {
       this.section = p['section'];
       this.book = p['book'];
+
+      if (this.book) {
+        this.apiService.getBookByTitle(this.book).subscribe(data => {
+          const bookData = Array.isArray(data) ? data[0] : data;
+          if (bookData) {
+            this.bookService.setBookData(bookData);
+            this.chapters = this.bookService.getBookChapter();
+          }
+        }, (error) => {
+          console.log(error);
+        });
+      }
     })
   }
 
