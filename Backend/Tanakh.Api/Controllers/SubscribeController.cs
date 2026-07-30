@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Tanakh.Api.Model;
@@ -33,7 +34,22 @@ namespace Tanakh.Api.Controllers
             };
 
             bool isSuccessful = await emailSender.SendMessageAsync(emailMessage);
-            return Ok(isSuccessful);
+
+            // Success stays a bare `true`, deliberately not wrapped in an object:
+            // the Angular frontend does `this.subscribeSuccessful = response` and
+            // relies on the body itself being the boolean. Failure is mapped to a
+            // real error status instead of a "soft" 200 with `false` in the body -
+            // an object body there would be truthy in JS even when it represents
+            // failure, which would have silently broken the frontend's own check.
+            if (!isSuccessful)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status502BadGateway,
+                    title: "Failed to send notification email.",
+                    detail: "The email notification for this subscription request could not be delivered.");
+            }
+
+            return Ok(true);
         }
 
         /// <summary>Notifies the site owner by email that an existing user wants to unsubscribe.</summary>
@@ -47,7 +63,16 @@ namespace Tanakh.Api.Controllers
             };
 
             bool isSuccessful = await emailSender.SendMessageAsync(emailMessage);
-            return Ok(isSuccessful);
+
+            if (!isSuccessful)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status502BadGateway,
+                    title: "Failed to send notification email.",
+                    detail: "The email notification for this unsubscribe request could not be delivered.");
+            }
+
+            return Ok(true);
         }
     }
 }
