@@ -98,19 +98,48 @@ body {
 
   @media only screen and (max-width: 1400px) {
     .return-button {
-        color: #fdfdfd; 
+        color: #fdfdfd;
         width: 500px;
         height: 60px;
     }
-  
+
     #hide-text {
-      display: none; 
+      display: none;
     }
-  
+
     .return-button div.icon {
       height: 30px;
       margin-right: 90%;
     }
   }
-  
-  
+
+  .app-toast {
+    position: fixed;
+    top: 16px;
+    inset-inline: 16px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #333333e6;
+    color: #fdfdfd;
+    font-family: 'Roboto', sans-serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .app-toast--error {
+    background: #7a1f1fe6;
+  }
+
+  .app-toast__dismiss {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+  }

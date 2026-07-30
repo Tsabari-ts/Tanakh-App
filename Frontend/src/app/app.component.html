@@ -1,5 +1,12 @@
 <div dir="auto"></div>
 
+@if (notifications.current(); as notification) {
+  <div class="app-toast" [class.app-toast--error]="notification.type === 'error'" role="alert" aria-live="assertive">
+    <span>{{ notification.text }}</span>
+    <button type="button" class="app-toast__dismiss" (click)="notifications.dismiss()" aria-label="סגירת הודעה">×</button>
+  </div>
+}
+
 <div class="container">
   <div class="title">
     <h1>פרק תנ"ך ביום</h1>

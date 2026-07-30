@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withPreloading, PreloadAllModules } from '@angular/router';
-import { provideHttpClient, withXhr, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withXhr, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideServiceWorker } from '@angular/service-worker';
 import { WelcomeModalComponent } from './components/welcome-modal/welcome-modal.component';
@@ -8,13 +8,15 @@ import { SubscribeComponent } from './components/subscribe/subscribe.component';
 import { ReadPermissionComponent } from './components/read-permission/read-permission.component';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { retryInterceptor } from './core/interceptors/retry.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
     provideAnimations(),
-    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptors([retryInterceptor, errorInterceptor])),
     provideServiceWorker('ngsw-worker.js', {
       enabled: environment.enableServiceWorker,
       registrationStrategy: 'registerWhenStable:30000'
