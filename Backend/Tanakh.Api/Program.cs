@@ -17,6 +17,7 @@ using Tanakh.Infrastructure.Caching;
 using Tanakh.Infrastructure.Data;
 using Tanakh.Infrastructure.HealthChecks;
 using Tanakh.Infrastructure.Options;
+using Tanakh.Infrastructure.Reminders;
 using Tanakh.Infrastructure.Retention;
 using Tanakh.Infrastructure.Seeding;
 using Tanakh.Infrastructure.Services;
@@ -69,6 +70,8 @@ builder.Services.AddOptions<RetentionOptions>()
 builder.Services.AddOptions<RemindersOptions>()
     .Bind(builder.Configuration.GetSection(RemindersOptions.SectionName));
 builder.Services.AddHostedService<RetentionHostedService>();
+builder.Services.AddHostedService<ReminderPlannerService>();
+builder.Services.AddHostedService<ReminderDispatcherService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddHealthChecks()
     .AddCheck<TanakhDataHealthCheck>("tanakh-data", tags: new[] { "ready" });
