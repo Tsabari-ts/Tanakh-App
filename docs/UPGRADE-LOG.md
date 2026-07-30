@@ -460,3 +460,21 @@ Per the spec's explicit instruction to measure before locking anything in, and g
 - Values and rationale recorded above, per the DoD's explicit requirement that this be documented in `UPGRADE-LOG.md` rather than just committed silently.
 
 ---
+
+## F-11 · Evaluate SSR/SSG (2026-07-31) — ADR written, awaiting owner approval before implementation
+
+**Branch:** `docs/f-11-ssr-adr`
+
+Per the spec's explicit instruction, this task starts with a decision, not code — wrote `docs/adr/003-frontend-ssr-decision.md` (see that file for the full reasoning) rather than implementing anything.
+
+**⚠️ VERIFY correction:** the spec's own suggested filename is `docs/adr/001-ssr-decision.md`, but `docs/adr/` already contains `001-scheduler.md` and `002-worker-hosting.md` (backend ADRs, from before this frontend work started). Used `003-frontend-ssr-decision.md` instead, continuing the existing project-wide ADR sequence rather than colliding with it.
+
+**Recommendation in the ADR:** full SSG (build-time prerendering), not dynamic SSR — matches the spec's own recommendation and reasoning (static content, no logged-in users on reading pages, no reason to run Node at request time, static output keeps hosting maximally open). **But recommend deferring the actual implementation** until a production domain exists or is imminent — the entire payoff (search engines actually indexing real pages, real Open Graph previews) can't be realized or verified without one, and implementing the ~929-page prerender pipeline, the full `window`/`document`/`localStorage` browser-guard sweep, sitemap generation, and per-chapter meta tags against a codebase still mid-modernization felt like building against a moving target for a benefit that can't be checked yet.
+
+This matches the spec's own explicit fallback ("it is reasonable to write the ADR now and defer implementation... decide explicitly rather than drifting") and open decision #5 ("SSG: implement now, or write the ADR and defer? — large effort, payoff only after launch").
+
+**No implementation was started.** No `@angular/ssr` package added, no prerender route generation, no `environment.siteUrl` field, no browser-API guard sweep. Per the spec's own DoD: "If no — decision and rationale documented, task closed" applies here (the ADR's decision is "not yet," which is a form of "no" for now, with the criteria for revisiting spelled out).
+
+**Presenting the ADR to the user for explicit approval before considering this task done**, since the spec requires sign-off before implementation either way — see the message accompanying this log entry.
+
+---
