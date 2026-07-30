@@ -23,6 +23,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<ReminderDelivery> ReminderDeliveries => Set<ReminderDelivery>();
 
+        public DbSet<EmailEvent> EmailEvents => Set<EmailEvent>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

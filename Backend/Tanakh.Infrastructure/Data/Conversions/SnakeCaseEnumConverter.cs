@@ -17,6 +17,10 @@ namespace Tanakh.Infrastructure.Data.Conversions
             value => ToSnakeCase(value.ToString()),
             value => ParseSnakeCase(value));
 
+        public static ValueConverter<TEnum?, string?> NullableInstance { get; } = new(
+            value => value.HasValue ? ToSnakeCase(value.Value.ToString()) : null,
+            value => value == null ? null : ParseSnakeCase(value));
+
         private static string ToSnakeCase(string value)
         {
             StringBuilder builder = new();
