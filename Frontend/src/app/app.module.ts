@@ -1,4 +1,4 @@
-import { NgModule, isDevMode } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,6 +19,7 @@ import { SubscribeComponent } from './components/subscribe/subscribe.component';
 import { FormsModule } from '@angular/forms';
 import { ScrollToTopButtonComponent } from './components/scroll-to-top-button/scroll-to-top-button.component';
 import { ReadPermissionComponent } from './components/read-permission/read-permission.component';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,7 @@ import { ReadPermissionComponent } from './components/read-permission/read-permi
       {path:"*",redirectTo:"home"}
     ]),
     ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: !isDevMode(),
+      enabled: environment.enableServiceWorker,
       registrationStrategy: 'registerWhenStable:30000'
     })
   ],
