@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Tanakh.Domain.Caching;
 using Tanakh.Infrastructure.Model;
 using Tanakh.Infrastructure.Options;
@@ -23,7 +24,7 @@ namespace Tanakh.Infrastructure
                 ?? Path.Combine(environment.ContentRootPath, "Data");
         }
 
-        public TanakhContainer GetFullTanakhFromCache(string cacheKey)
+        public async Task<TanakhContainer> GetFullTanakhFromCacheAsync(string cacheKey)
         {
             if (cache.TryGet(cacheKey, out TanakhContainer? cached))
             {
@@ -31,36 +32,32 @@ namespace Tanakh.Infrastructure
             }
 
             string tanakhDataPath = Path.Combine(dataDirectory, "TanakhData.json");
+            string jsonData = await File.ReadAllTextAsync(tanakhDataPath);
+            TanakhContainer? tanakhContainer = JsonSerializer.Deserialize<TanakhContainer>(jsonData);
 
-            using (StreamReader reader = new StreamReader(tanakhDataPath))
+            if (tanakhContainer?.structures is null)
             {
-                string jsonData = reader.ReadToEnd();
-                TanakhContainer? tanakhContainer = JsonSerializer.Deserialize<TanakhContainer>(jsonData);
+                throw new InvalidOperationException(
+                    $"Failed to parse Tanakh data file at '{tanakhDataPath}': missing or empty 'structures'.");
+            }
 
-                if (tanakhContainer?.structures is null)
+            foreach (Structure structure in tanakhContainer.structures)
+            {
+                if (structure.book is null || structure.sectionRef is null || structure.heTitle is null
+                    || structure.heSectionRef is null || structure.he is null)
                 {
                     throw new InvalidOperationException(
-                        $"Failed to parse Tanakh data file at '{tanakhDataPath}': missing or empty 'structures'.");
+                        $"Tanakh data file at '{tanakhDataPath}' has a section missing a required field " +
+                        "(book/sectionRef/heTitle/heSectionRef/he).");
                 }
-
-                foreach (Structure structure in tanakhContainer.structures)
-                {
-                    if (structure.book is null || structure.sectionRef is null || structure.heTitle is null
-                        || structure.heSectionRef is null || structure.he is null)
-                    {
-                        throw new InvalidOperationException(
-                            $"Tanakh data file at '{tanakhDataPath}' has a section missing a required field " +
-                            "(book/sectionRef/heTitle/heSectionRef/he).");
-                    }
-                }
-
-                cache.Set(cacheKey, tanakhContainer);
-
-                return tanakhContainer;
             }
+
+            cache.Set(cacheKey, tanakhContainer);
+
+            return tanakhContainer;
         }
 
-        public List<BaseStructure> GetTanakhStructureFromCache(string cacheKey)
+        public async Task<List<BaseStructure>> GetTanakhStructureFromCacheAsync(string cacheKey)
         {
             if (cache.TryGet(cacheKey, out List<BaseStructure>? cached))
             {
@@ -68,35 +65,31 @@ namespace Tanakh.Infrastructure
             }
 
             string tanakhStructurePath = Path.Combine(dataDirectory, "TanakhStructure.json");
+            string jsonStructfure = await File.ReadAllTextAsync(tanakhStructurePath);
+            List<BaseStructure>? books = JsonSerializer.Deserialize<TanakhStructure>(jsonStructfure)?.structures;
 
-            using (StreamReader reader = new StreamReader(tanakhStructurePath))
+            if (books is null)
             {
-                string jsonStructfure = reader.ReadToEnd();
-                List<BaseStructure>? books = JsonSerializer.Deserialize<TanakhStructure>(jsonStructfure)?.structures;
+                throw new InvalidOperationException(
+                    $"Failed to parse Tanakh structure file at '{tanakhStructurePath}': missing or empty 'structures'.");
+            }
 
-                if (books is null)
+            foreach (BaseStructure item in books)
+            {
+                if (item.section is null || item.title is null || item.book is null)
                 {
                     throw new InvalidOperationException(
-                        $"Failed to parse Tanakh structure file at '{tanakhStructurePath}': missing or empty 'structures'.");
+                        $"Tanakh structure file at '{tanakhStructurePath}' has an entry missing a required field " +
+                        "(section/title/book).");
                 }
-
-                foreach (BaseStructure item in books)
-                {
-                    if (item.section is null || item.title is null || item.book is null)
-                    {
-                        throw new InvalidOperationException(
-                            $"Tanakh structure file at '{tanakhStructurePath}' has an entry missing a required field " +
-                            "(section/title/book).");
-                    }
-                }
-
-                if (books.Any())
-                {
-                    cache.Set(cacheKey, books);
-                }
-
-                return books;
             }
+
+            if (books.Any())
+            {
+                cache.Set(cacheKey, books);
+            }
+
+            return books;
         }
     }
 }

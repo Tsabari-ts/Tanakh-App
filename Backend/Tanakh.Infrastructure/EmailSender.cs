@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Net;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using Tanakh.Domain;
 using Tanakh.Infrastructure.Options;
 
@@ -16,7 +17,7 @@ namespace Tanakh.Infrastructure
             this.emailOptions = emailOptions.Value;
         }
 
-        public bool SendMessage(EmailMessage emailMessage)
+        public async Task<bool> SendMessageAsync(EmailMessage emailMessage)
         {
             bool isSuccessful = false;
 
@@ -32,7 +33,7 @@ namespace Tanakh.Infrastructure
                         Body = emailMessage.Body
                     };
 
-                    smtpClient.Send(message);
+                    await smtpClient.SendMailAsync(message);
                     isSuccessful = true;
                 }
             }

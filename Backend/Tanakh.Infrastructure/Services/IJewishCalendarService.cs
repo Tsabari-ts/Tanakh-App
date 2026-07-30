@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
+
 namespace Tanakh.Infrastructure.Services
 {
     public interface IJewishCalendarService
     {
-        bool IsBetweenCandleLightingAndHavdalah();
+        Task<bool> IsBetweenCandleLightingAndHavdalahAsync();
     }
 }

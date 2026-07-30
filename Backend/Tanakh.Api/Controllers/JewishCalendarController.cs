@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using Tanakh.Infrastructure.Services;
 
 namespace Tanakh.Api.Controllers
@@ -17,9 +18,9 @@ namespace Tanakh.Api.Controllers
         /// <summary>Returns whether today falls between candle lighting and Havdalah, per hebcal.com.</summary>
         [HttpGet]
         [Route("getJewishCalendar")]
-        public IActionResult GetJewishCalendar()
+        public async Task<IActionResult> GetJewishCalendarAsync()
         {
-            return Ok(jewishCalendarService.IsBetweenCandleLightingAndHavdalah());
+            return Ok(await jewishCalendarService.IsBetweenCandleLightingAndHavdalahAsync());
         }
     }
 }

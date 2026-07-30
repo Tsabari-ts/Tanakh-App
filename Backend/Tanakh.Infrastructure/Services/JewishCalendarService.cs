@@ -9,14 +9,14 @@ namespace Tanakh.Infrastructure.Services
 {
     public class JewishCalendarService : IJewishCalendarService
     {
-        public bool IsBetweenCandleLightingAndHavdalah()
+        public async Task<bool> IsBetweenCandleLightingAndHavdalahAsync()
         {
             bool isBetweenCandleLightingAndHavdalah = false;
-            JewishCalendarContainer jewishCalendar = FillJewishCalendar().GetAwaiter().GetResult();
+            JewishCalendarContainer jewishCalendar = await FillJewishCalendarAsync();
 
             DateTime currentDay = DateTime.Now.Date;
 
-            // items validated non-null in FillJewishCalendar
+            // items validated non-null in FillJewishCalendarAsync
             Item? todayObject = jewishCalendar.items!.FirstOrDefault(obj =>
             {
                 DateTime objDate = obj.date.Date;
@@ -55,7 +55,7 @@ namespace Tanakh.Infrastructure.Services
             return isBetweenCandleLightingAndHavdalah;
         }
 
-        private static async Task<JewishCalendarContainer> FillJewishCalendar()
+        private static async Task<JewishCalendarContainer> FillJewishCalendarAsync()
         {
             HttpClient httpClient = new HttpClient();
             HttpResponseMessage jsonResult = await httpClient.GetAsync("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&geo=geoname&geonameid=293397&M=on&s=on");

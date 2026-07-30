@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using Tanakh.Api.Model;
 using Tanakh.Api.Services;
 using Tanakh.Infrastructure.Services;
@@ -21,26 +22,26 @@ namespace Tanakh.Api.Controllers
         /// <summary>Lists the books belonging to a Tanakh section (e.g. "torah", "neviim", "ketuvim").</summary>
         /// <param name="section">The section name, case-insensitive.</param>
         [HttpGet("books/{section}")]
-        public IActionResult GetBookList(string section)
+        public async Task<IActionResult> GetBookListAsync(string section)
         {
-            return Ok(structureService.GetBySection(section));
+            return Ok(await structureService.GetBySectionAsync(section));
         }
 
         /// <summary>Looks up structure entries for a single book by title.</summary>
         /// <param name="book">The book title (e.g. "Genesis").</param>
         [HttpGet("books/main/{book}")]
-        public IActionResult getBookChapter(string book)
+        public async Task<IActionResult> getBookChapterAsync(string book)
         {
-            return Ok(structureService.GetByTitle(book));
+            return Ok(await structureService.GetByTitleAsync(book));
         }
 
         /// <summary>Returns the Hebrew text and navigation data for a single chapter.</summary>
         /// <param name="book">The book title (e.g. "Genesis").</param>
         /// <param name="chapter">The chapter number, as a string.</param>
         [HttpGet("books/{book}/{chapter}")]
-        public IActionResult GetChapter(string book, string chapter)
+        public async Task<IActionResult> GetChapterAsync(string book, string chapter)
         {
-            TanakhContext? context = textService.GetChapter(book, chapter);
+            TanakhContext? context = await textService.GetChapterAsync(book, chapter);
 
             if (context is null)
             {

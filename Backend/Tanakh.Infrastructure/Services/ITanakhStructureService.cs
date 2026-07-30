@@ -1,14 +1,15 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Tanakh.Infrastructure.Model;
 
 namespace Tanakh.Infrastructure.Services
 {
     public interface ITanakhStructureService
     {
-        List<BaseStructure> GetAll();
+        Task<List<BaseStructure>> GetAllAsync();
 
-        List<BaseStructure> GetBySection(string section);
+        Task<List<BaseStructure>> GetBySectionAsync(string section);
 
-        List<BaseStructure> GetByTitle(string title);
+        Task<List<BaseStructure>> GetByTitleAsync(string title);
     }
 }

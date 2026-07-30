@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
+
 namespace Tanakh.Domain
 {
     public interface IEmailSender
     {
-        bool SendMessage(EmailMessage emailMessage);
+        Task<bool> SendMessageAsync(EmailMessage emailMessage);
     }
 }

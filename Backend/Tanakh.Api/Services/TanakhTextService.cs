@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Tanakh.Api.Model;
 using Tanakh.Infrastructure;
 using Tanakh.Infrastructure.Model;
@@ -18,9 +19,9 @@ namespace Tanakh.Api.Services
             this.structureService = structureService;
         }
 
-        public TanakhContext? GetChapter(string book, string chapter)
+        public async Task<TanakhContext?> GetChapterAsync(string book, string chapter)
         {
-            Dictionary<string, Book> dataDictionary = BuildChapterDictionary();
+            Dictionary<string, Book> dataDictionary = await BuildChapterDictionaryAsync();
             string chosenSection = book + " " + chapter;
 
             if (!dataDictionary.TryGetValue(chosenSection, out Book? bookData))
@@ -35,16 +36,16 @@ namespace Tanakh.Api.Services
             };
         }
 
-        private Dictionary<string, Book> BuildChapterDictionary()
+        private async Task<Dictionary<string, Book>> BuildChapterDictionaryAsync()
         {
             string cacheKey = "fullTanakh";
-            TanakhContainer tanakhContainer = cacheProvider.GetFullTanakhFromCache(cacheKey);
+            TanakhContainer tanakhContainer = await cacheProvider.GetFullTanakhFromCacheAsync(cacheKey);
             Dictionary<string, Book> dataDictionary = new Dictionary<string, Book>();
 
-            List<BaseStructure> structureBooks = structureService.GetAll();
+            List<BaseStructure> structureBooks = await structureService.GetAllAsync();
             int currentBookIndex = 1;
 
-            // structures validated non-null in CacheProvider.GetFullTanakhFromCache
+            // structures validated non-null in CacheProvider.GetFullTanakhFromCacheAsync
             foreach (Structure item in tanakhContainer.structures!)
             {
                 string? nextSection = item.next;
@@ -60,7 +61,7 @@ namespace Tanakh.Api.Services
                     }
                 }
 
-                // book/sectionRef/heTitle/heSectionRef/he validated non-null in CacheProvider.GetFullTanakhFromCache
+                // book/sectionRef/heTitle/heSectionRef/he validated non-null in CacheProvider.GetFullTanakhFromCacheAsync
                 string chosenSection = item.sectionRef!;
                 string episodeData = string.Join(" ", item.he!);
                 string verses = Regex.Replace(episodeData, @"<[^>]+>", "");
