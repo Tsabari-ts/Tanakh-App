@@ -7,8 +7,7 @@ import { AppComponent } from '../../app.component';
     selector: 'app-booklist',
     templateUrl: './booklist.component.html',
     styleUrl: './booklist.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager
 })
 
 export class BooklistComponent implements OnInit {

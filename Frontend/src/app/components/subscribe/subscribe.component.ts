@@ -1,13 +1,17 @@
 import { Component, EventEmitter, Inject, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-subscribe',
     templateUrl: './subscribe.component.html',
     styleUrl: './subscribe.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, NgClass]
 })
 
 export class SubscribeComponent {

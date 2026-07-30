@@ -8,8 +8,8 @@ describe('ReadPermissionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ReadPermissionComponent]
-    })
+    imports: [ReadPermissionComponent]
+})
     .compileComponents();
     
     fixture = TestBed.createComponent(ReadPermissionComponent);

@@ -2,13 +2,14 @@ import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy } fro
 import { PwaInstallService } from '../../services/pwa-install.service';
 import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
+import { NgClass } from '@angular/common';
 
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [NgClass]
 })
 
 export class SettingsComponent implements OnInit {

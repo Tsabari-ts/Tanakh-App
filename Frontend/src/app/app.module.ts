@@ -21,20 +21,7 @@ import { ScrollToTopButtonComponent } from './components/scroll-to-top-button/sc
 import { ReadPermissionComponent } from './components/read-permission/read-permission.component';
 import { environment } from '../environments/environment';
 
-@NgModule({ declarations: [
-        AppComponent,
-        EntranceComponent,
-        HomeComponent,
-        SettingsComponent,
-        BooklistComponent,
-        ChapterlistComponent,
-        ChapterComponent,
-        WelcomeModalComponent,
-        SubscribeComponent,
-        ScrollToTopButtonComponent,
-        ReadPermissionComponent
-    ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+@NgModule({ declarations: [AppComponent], bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
         MatDialogModule,
@@ -53,5 +40,14 @@ import { environment } from '../environments/environment';
         ServiceWorkerModule.register('ngsw-worker.js', {
             enabled: environment.enableServiceWorker,
             registrationStrategy: 'registerWhenStable:30000'
-        })], providers: [WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent, provideHttpClient(withXhr(), withInterceptorsFromDi())] })
+        }), EntranceComponent,
+        HomeComponent,
+        SettingsComponent,
+        BooklistComponent,
+        ChapterlistComponent,
+        ChapterComponent,
+        WelcomeModalComponent,
+        SubscribeComponent,
+        ScrollToTopButtonComponent,
+        ReadPermissionComponent], providers: [WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent, provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 export class AppModule { }

@@ -1,12 +1,14 @@
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
 
 @Component({
     selector: 'app-read-permission',
     templateUrl: './read-permission.component.html',
     styleUrl: './read-permission.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatDialogActions]
 })
 
 export class ReadPermissionComponent implements OnInit{
