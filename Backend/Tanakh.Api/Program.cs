@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using Tanakh.Api;
@@ -12,11 +14,30 @@ using Tanakh.Domain;
 using Tanakh.Domain.Caching;
 using Tanakh.Infrastructure;
 using Tanakh.Infrastructure.Caching;
+using Tanakh.Infrastructure.Data;
 using Tanakh.Infrastructure.HealthChecks;
 using Tanakh.Infrastructure.Options;
 using Tanakh.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContextPool<AppDbContext>(options =>
+{
+    string connectionString = builder.Configuration.GetConnectionString("AppDb")
+        ?? throw new InvalidOperationException("Missing required connection string 'ConnectionStrings:AppDb'.");
+
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure();
+        npgsqlOptions.CommandTimeout(30);
+    });
+    options.UseSnakeCaseNamingConvention();
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    }
+});
 
 builder.Services.AddMemoryCache(options =>
 {
