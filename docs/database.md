@@ -47,13 +47,13 @@ ConnectionStrings__MigrationsDb=Host=ep-xxxx.us-east-2.aws.neon.tech;Port=5432;D
 
 Note the two hostnames: the pooled one has `-pooler` in it (copy from Neon's
 dashboard "Pooled connection" tab), the direct one doesn't. `Username`
-differs too — `app_user` (least-privilege) for the app, `migrations_user`
-(schema owner) for migrations, both set up in a later task. **`Ssl
-Mode=Require;Trust Server Certificate=false` is mandatory for every
-non-local environment** — Neon requires TLS, and this setting both enforces
-it and validates the server certificate (as opposed to `Trust Server
-Certificate=true`, which would accept any certificate and defeat the
-point).
+differs too — `app_user` (least-privilege, see `db/roles/app_user.sql`) for
+the app, `migrations_user` (schema owner, see `db/roles/migrations_user.sql`)
+for migrations. **`Ssl Mode=Require;Trust Server Certificate=false` is
+mandatory for every non-local environment** — Neon requires TLS, and this
+setting both enforces it and validates the server certificate (as opposed to
+`Trust Server Certificate=true`, which would accept any certificate and
+defeat the point).
 
 ## Local dev setup
 
@@ -61,6 +61,17 @@ point).
 cd Backend
 cp .env.example .env   # fill in real values, .env is gitignored
 docker compose up -d
+
+# One-time per fresh instance, as the POSTGRES_USER bootstrap superuser -
+# creates migrations_user (schema owner) and app_user (least-privilege),
+# see db/roles/*.sql and the "Roles" section below.
+docker exec -i tanakh-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+  -v migrations_password="'<pick a password, matches ConnectionStrings__MigrationsDb>'" \
+  -f db/roles/migrations_user.sql
+docker exec -i tanakh-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+  -v app_password="'<pick a password, matches ConnectionStrings__AppDb>'" \
+  -f db/roles/app_user.sql
+
 dotnet ef database update --project Tanakh.Infrastructure --startup-project Tanakh.Api
 ```
 
@@ -127,3 +138,30 @@ to look at it, not a smarter grep. If a real, parameterized use of
 `FromSqlRaw`/`ExecuteSqlRaw` is ever added, update the CI step to allow-list
 that specific line with a comment explaining why `FromSql`/`ExecuteSql`
 wasn't enough.
+
+## Roles
+
+`db/roles/migrations_user.sql` and `db/roles/app_user.sql` create the two
+least-privilege roles used above — run `migrations_user.sql` **first** (it
+takes ownership of the schema and revokes `CREATE ON SCHEMA public FROM
+PUBLIC`), then `app_user.sql` (grants CRUD on existing and, via `ALTER
+DEFAULT PRIVILEGES`, all future tables/sequences `migrations_user` creates).
+Run them once per environment, including the local docker-compose instance —
+run before the first `dotnet ef database update` so every table ends up
+owned by `migrations_user` from the start. See those files' comments for
+exactly what each role can and can't do.
+
+`db/roles/verify.sh` proves the boundary actually holds: it connects as
+`app_user` and asserts `DROP TABLE` fails.
+
+```bash
+PGHOST=localhost PGPORT=5433 PGDATABASE=tanakh APP_USER_PASSWORD='...' \
+  ./db/roles/verify.sh
+```
+
+On Neon, the project's default role already owns the database — either
+treat that default role as `migrations_user` for connection-string purposes,
+or run `migrations_user.sql`'s `ALTER SCHEMA public OWNER TO migrations_user`
+step to transfer ownership to a role you create explicitly. Either way,
+`app_user` must be a role you create yourself — Neon does not provide a
+least-privilege role out of the box.
