@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy } from '@angular/core';
 import { PwaInstallService } from '../../services/pwa-install.service';
 import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
@@ -7,6 +7,7 @@ import { AppComponent } from '../../app.component';
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     standalone: false
 })
 

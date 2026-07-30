@@ -5,7 +5,7 @@ import { AppComponent } from './app.component';
 import { RouterModule } from '@angular/router';
 import { EntranceComponent } from './components/entrance/entrance.component';
 import { HomeComponent } from './components/home/home.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { SettingsComponent } from './components/settings/settings.component';
 import { BooklistComponent } from './components/booklist/booklist.component';
@@ -53,5 +53,5 @@ import { environment } from '../environments/environment';
         ServiceWorkerModule.register('ngsw-worker.js', {
             enabled: environment.enableServiceWorker,
             registrationStrategy: 'registerWhenStable:30000'
-        })], providers: [WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent, provideHttpClient(withInterceptorsFromDi())] })
+        })], providers: [WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent, provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 export class AppModule { }

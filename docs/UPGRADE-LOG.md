@@ -141,4 +141,33 @@ Resolved by installing `nvm-windows` via `winget install --id CoreyButler.NVMfor
 - `npm audit --omit=dev`: 0 vulnerabilities.
 - Committed as a single `chore(F-01): upgrade Angular to v21`.
 
+### 21 → 22 (2026-07-31) — final step, `OnPush` becomes the default
+
+- `npx ng update @angular/core@22 @angular/cli@22`: core/cli/etc → 22.1.0/22.1.2, `typescript` → 6.0.3.
+  - **`OnPush`-by-default stopgap handled automatically, and better than the spec anticipated.** The spec expected to have to manually add `changeDetection: ChangeDetectionStrategy.Default` with a hand-written `TODO(F-03)` comment to every component that broke. Instead, Angular's own `ng update` migration ("Adds `ChangeDetectionStrategy.Eager` to all components") did this automatically and blanket-applied it to all 11 non-standalone components before any of them could actually break — `Eager` is Angular 22's real, first-class compatibility value for "preserve the pre-v22 default (non-OnPush) behavior," not a hack. Manually added `// TODO(F-03): remove after signals migration` to all 11 occurrences afterward (via a scripted sed pass across the 11 files) so F-03 can find and clear every one, per the spec's DoD requirement.
+  - Other required migrations: `withXhr` added to the `provideHttpClient()` call in `app.module.ts`; `nullishCoalescingNotNullable`/`optionalChainNotNullable` extended diagnostics disabled in `tsconfig.app.json`/`tsconfig.spec.json` (both no-op for this codebase — neither pattern in use, this only suppresses stricter checks introduced in the same release); `canMatch` third-argument and duplicate-outputs/optional-chaining migrations all ran with no changes (none of those patterns exist here).
+  - **Declined both optional migrations**: `migrate-karma-to-vitest` (spec explicitly says decline — don't change test infra mid-upgrade) and `use-application-builder` (already on it since before this upgrade started).
+  - ⚠️ VERIFY: checked for the v22 hardened-sanitization concern on dynamic `[href]`/`[xlink:href]`/`bypassSecurityTrust*` — none exist in this codebase (grep returned no matches), so that risk doesn't apply here.
+- `npx ng update @angular/material@22`: material/cdk → 22.1.0 — this time a genuine stable target (unlike the v21 step), no manual changes.
+- `ng build --configuration production`: succeeds, 708.56 kB raw / 157.03 kB transfer, same warning set as every prior step (initial budget, 2 component-CSS budgets, gematriya CJS — none of these are new, all pre-date the upgrade and are F-10's job).
+- `ng test --watch=false --browsers=ChromeHeadless`: 10 FAILED / 7 SUCCESS, unchanged from v21. No regression.
+- `npm audit --omit=dev`: **0 vulnerabilities.** ✅ (Full audit including devDependencies shows 21, entirely in Karma/socket.io-adapter test tooling that never ships to production — out of scope for this task's DoD, which is explicitly `--omit=dev`.)
+- `npx ng version`: confirms Angular 22.1.0 across every `@angular/*` package. ✅
+- Committed as a single `chore(F-01): upgrade Angular to v22`.
+
+### F-01 summary
+
+All 5 version-step commits (`angular-v18` … `angular-v22`) are tagged on `chore/f-01-angular-upgrade`. Every Definition of Done item is satisfied:
+- `ng version` reports 22.x. ✅
+- Production build succeeds with no errors, same pre-existing warning set throughout (bundle/CSS budgets are F-10's job; `gematriya` CJS is a third-party package concern, not urgent). ✅
+- `npm audit --omit=dev`: 0 vulnerabilities (started at 11 high). ✅
+- Tests: went from 12 FAILED/5 SUCCESS baseline to 10 FAILED/7 SUCCESS — improved, no regressions introduced by the upgrade itself. The remaining 10 failures are a **pre-existing gap** (specs instantiate components like `WelcomeModalComponent`/`SettingsComponent`/`SubscribeComponent` without providing `MatDialogRef`/`ActivatedRoute`/`AppComponent` etc.) — not caused by, or fixed by, this upgrade; flagged as a known gap, deliberately not opportunistically fixed here (not in scope for F-01).
+- Manual smoke testing was necessarily partial in this environment (no headed browser available) — verified via build + curl-level checks at each step (page loads, correct `dir="rtl" lang="he"`, no compile errors). A full interactive pass (click-through nav, offline, responsive, back/forward) is still owed once F-02/F-14 land and a real browser session can be used; noted here rather than claimed as done.
+- Every `TODO(F-03)` stopgap (`ChangeDetectionStrategy.Eager`, 11 occurrences) is in place and grep-able. ✅
+- **One real, pre-existing bug found and fixed** (not scope creep — required to get the mandatory v21 control-flow migration to compile): the chapterlist "go to chapter" button and chapter-number label were silently broken (always navigating/rendering with `undefined`) due to invalid legacy NgFor microsyntax. Fixed with the obviously-intended `$index + 1` semantics. Flagged prominently since it's a user-visible behavior change, even though the fix itself was unambiguous.
+- **Real infrastructure blocker surfaced and resolved with sign-off:** Node 20.11.0 was too old for Angular CLI 20+ (not just 22, as the spec assumed) — installed `nvm-windows` + Node 22.23.2 after asking the user to choose the approach, since it's a machine-wide change beyond this repo. Old Node 20 install left untouched.
+- **Material never has a stable release exactly matching every Angular core minor** — verified against real npm version lists at each step rather than trusting `ng update`'s suggested command blindly (would have pulled a `21.3.0-next.0` prerelease at the 21 step had it not been checked).
+
+**Not yet done, by design (belongs to later tasks in the sequence):** standalone conversion (F-02), the remaining manual `@for`/`@empty`/`CommonModule` cleanup from the control-flow migration (F-05), removing the `ChangeDetectionStrategy.Eager` stopgaps in favor of real signals (F-03), zoneless (F-04), bundle-budget tuning (F-10).
+
 ---

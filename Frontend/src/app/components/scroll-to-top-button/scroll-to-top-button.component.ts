@@ -1,4 +1,4 @@
-import { Component, Input, Renderer2 } from '@angular/core';
+import { Component, Input, Renderer2, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-scroll-to-top-button',
@@ -43,6 +43,7 @@ import { Component, Input, Renderer2 } from '@angular/core';
       }
     }
 `],
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     standalone: false
 })
 export class ScrollToTopButtonComponent {

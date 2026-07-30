@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { Router } from '@angular/router';
 
@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
     selector: 'app-entrance',
     templateUrl: './entrance.component.html',
     styleUrl: './entrance.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     standalone: false
 })
 export class EntranceComponent implements OnInit {

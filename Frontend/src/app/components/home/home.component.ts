@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
@@ -7,6 +7,7 @@ import { AppComponent } from '../../app.component';
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrl: './home.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     standalone: false
 })
 export class HomeComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { AppComponent } from '../../app.component';
@@ -7,6 +7,7 @@ import { AppComponent } from '../../app.component';
     selector: 'app-booklist',
     templateUrl: './booklist.component.html',
     styleUrl: './booklist.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     standalone: false
 })
 

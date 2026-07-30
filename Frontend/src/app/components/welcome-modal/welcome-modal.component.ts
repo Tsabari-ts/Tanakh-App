@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialogRef } from '@angular/material/dialog';
 
@@ -6,6 +6,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     selector: 'app-welcome-modal',
     templateUrl: './welcome-modal.component.html',
     styleUrl: './welcome-modal.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     standalone: false
 })
 export class WelcomeModalComponent {
