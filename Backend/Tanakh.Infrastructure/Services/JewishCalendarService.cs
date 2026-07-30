@@ -10,56 +10,52 @@ namespace Tanakh.Infrastructure.Services
 {
     public class JewishCalendarService : IJewishCalendarService
     {
-        public async Task<bool> IsBetweenCandleLightingAndHavdalahAsync(CancellationToken cancellationToken)
-        {
-            bool isBetweenCandleLightingAndHavdalah = false;
-            JewishCalendarContainer jewishCalendar = await FillJewishCalendarAsync(cancellationToken);
+        private static readonly TimeZoneInfo Jerusalem = TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem");
 
-            DateTime currentDay = DateTime.Now.Date;
+        public Task<bool> IsBetweenCandleLightingAndHavdalahAsync(CancellationToken cancellationToken) =>
+            IsBlockedAsync(DateTimeOffset.Now, cancellationToken);
+
+        public async Task<bool> IsBlockedAsync(DateTimeOffset instant, CancellationToken cancellationToken)
+        {
+            DateTimeOffset localInstant = TimeZoneInfo.ConvertTime(instant, Jerusalem);
+            DateTime localDate = localInstant.Date;
+
+            JewishCalendarContainer jewishCalendar = await FillJewishCalendarAsync(localDate.Year, cancellationToken);
 
             // items validated non-null in FillJewishCalendarAsync
             Item? todayObject = jewishCalendar.items!.FirstOrDefault(obj =>
+                obj.date.Date == localDate && (obj.category == "candles" || obj.category == "havdalah"));
+
+            if (todayObject is null)
             {
-                DateTime objDate = obj.date.Date;
-                return objDate == currentDay && (obj.category == "candles" || obj.category == "havdalah");
-            });
-
-            if (todayObject != null)
-            {
-                bool containsCandles = todayObject.category?.Contains("candles") == true;
-                bool containsHavdalah = todayObject.category?.Contains("havdalah") == true;
-
-                TimeSpan currentTime = DateTimeOffset.Now.TimeOfDay;
-
-                if (containsCandles)
-                {
-                    TimeSpan candlesTime = todayObject.date.TimeOfDay;
-                    bool isTimeBeforeCandles = currentTime < candlesTime;
-
-                    if (!isTimeBeforeCandles)
-                    {
-                        isBetweenCandleLightingAndHavdalah = !isTimeBeforeCandles;
-                    }
-                }
-                else if (containsHavdalah)
-                {
-                    TimeSpan havdalahTime = todayObject.date.TimeOfDay;
-                    bool isTimeAfterHavdalah = currentTime > havdalahTime;
-
-                    if (!isTimeAfterHavdalah)
-                    {
-                        isBetweenCandleLightingAndHavdalah = !isTimeAfterHavdalah;
-                    }
-                }
+                return false;
             }
 
-            return isBetweenCandleLightingAndHavdalah;
+            TimeSpan currentTime = localInstant.TimeOfDay;
+            TimeSpan eventTime = todayObject.date.TimeOfDay;
+
+            if (todayObject.category?.Contains("candles") == true)
+            {
+                // Blocked from candle-lighting until midnight; the following
+                // day's own "havdalah" entry covers the rest of the window.
+                return currentTime >= eventTime;
+            }
+
+            if (todayObject.category?.Contains("havdalah") == true)
+            {
+                // Blocked from midnight until Havdalah.
+                return currentTime <= eventTime;
+            }
+
+            return false;
         }
 
-        private static async Task<JewishCalendarContainer> FillJewishCalendarAsync(CancellationToken cancellationToken)
+        private static async Task<JewishCalendarContainer> FillJewishCalendarAsync(int year, CancellationToken cancellationToken)
         {
             HttpClient httpClient = new HttpClient();
-            HttpResponseMessage jsonResult = await httpClient.GetAsync("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&geo=geoname&geonameid=293397&M=on&s=on", cancellationToken);
+            HttpResponseMessage jsonResult = await httpClient.GetAsync(
+                $"https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&geo=geoname&geonameid=293397&M=on&s=on&year={year}",
+                cancellationToken);
             string json = await jsonResult.Content.ReadAsStringAsync(cancellationToken);
             JewishCalendarContainer? calendarContainer = JsonSerializer.Deserialize<JewishCalendarContainer>(json);
 
