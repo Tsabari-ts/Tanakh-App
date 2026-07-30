@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Infrastructure.Model;
 
@@ -9,10 +10,10 @@ namespace Tanakh.Infrastructure.Services
 {
     public class JewishCalendarService : IJewishCalendarService
     {
-        public async Task<bool> IsBetweenCandleLightingAndHavdalahAsync()
+        public async Task<bool> IsBetweenCandleLightingAndHavdalahAsync(CancellationToken cancellationToken)
         {
             bool isBetweenCandleLightingAndHavdalah = false;
-            JewishCalendarContainer jewishCalendar = await FillJewishCalendarAsync();
+            JewishCalendarContainer jewishCalendar = await FillJewishCalendarAsync(cancellationToken);
 
             DateTime currentDay = DateTime.Now.Date;
 
@@ -55,11 +56,11 @@ namespace Tanakh.Infrastructure.Services
             return isBetweenCandleLightingAndHavdalah;
         }
 
-        private static async Task<JewishCalendarContainer> FillJewishCalendarAsync()
+        private static async Task<JewishCalendarContainer> FillJewishCalendarAsync(CancellationToken cancellationToken)
         {
             HttpClient httpClient = new HttpClient();
-            HttpResponseMessage jsonResult = await httpClient.GetAsync("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&geo=geoname&geonameid=293397&M=on&s=on");
-            string json = await jsonResult.Content.ReadAsStringAsync();
+            HttpResponseMessage jsonResult = await httpClient.GetAsync("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&geo=geoname&geonameid=293397&M=on&s=on", cancellationToken);
+            string json = await jsonResult.Content.ReadAsStringAsync(cancellationToken);
             JewishCalendarContainer? calendarContainer = JsonSerializer.Deserialize<JewishCalendarContainer>(json);
 
             if (calendarContainer?.items is null)

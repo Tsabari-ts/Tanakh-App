@@ -16,6 +16,12 @@ namespace Tanakh.Api.Controllers
             this.emailSender = emailSender;
         }
 
+        // No CancellationToken parameter on these actions, deliberately: the only
+        // I/O here is the notification email, and IEmailSender.SendMessageAsync is
+        // designed to always run to completion regardless of client disconnect -
+        // the site owner still wants to know about the subscribe/unsubscribe
+        // request even if the visitor's tab closed right after submitting.
+
         /// <summary>Notifies the site owner by email that a new user wants to subscribe to reminders.</summary>
         [HttpPost("RegisterUser")]
         public async Task<IActionResult> RegisterNewUserAsync([FromBody] SubscribeEntity subscribeEntity)

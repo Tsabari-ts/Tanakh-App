@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Net;
 using System.Net.Mail;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Domain;
 using Tanakh.Infrastructure.Options;
@@ -33,7 +34,10 @@ namespace Tanakh.Infrastructure
                         Body = emailMessage.Body
                     };
 
-                    await smtpClient.SendMailAsync(message);
+                    // Deliberately CancellationToken.None, not request-bound: the site
+                    // owner still wants this notification even if the visitor's
+                    // client disconnects immediately after submitting.
+                    await smtpClient.SendMailAsync(message, CancellationToken.None);
                     isSuccessful = true;
                 }
             }

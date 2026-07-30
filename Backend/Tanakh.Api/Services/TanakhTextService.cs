@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Api.Model;
 using Tanakh.Infrastructure;
@@ -19,9 +20,9 @@ namespace Tanakh.Api.Services
             this.structureService = structureService;
         }
 
-        public async Task<TanakhContext?> GetChapterAsync(string book, string chapter)
+        public async Task<TanakhContext?> GetChapterAsync(string book, string chapter, CancellationToken cancellationToken)
         {
-            Dictionary<string, Book> dataDictionary = await BuildChapterDictionaryAsync();
+            Dictionary<string, Book> dataDictionary = await BuildChapterDictionaryAsync(cancellationToken);
             string chosenSection = book + " " + chapter;
 
             if (!dataDictionary.TryGetValue(chosenSection, out Book? bookData))
@@ -36,13 +37,13 @@ namespace Tanakh.Api.Services
             };
         }
 
-        private async Task<Dictionary<string, Book>> BuildChapterDictionaryAsync()
+        private async Task<Dictionary<string, Book>> BuildChapterDictionaryAsync(CancellationToken cancellationToken)
         {
             string cacheKey = "fullTanakh";
-            TanakhContainer tanakhContainer = await cacheProvider.GetFullTanakhFromCacheAsync(cacheKey);
+            TanakhContainer tanakhContainer = await cacheProvider.GetFullTanakhFromCacheAsync(cacheKey, cancellationToken);
             Dictionary<string, Book> dataDictionary = new Dictionary<string, Book>();
 
-            List<BaseStructure> structureBooks = await structureService.GetAllAsync();
+            List<BaseStructure> structureBooks = await structureService.GetAllAsync(cancellationToken);
             int currentBookIndex = 1;
 
             // structures validated non-null in CacheProvider.GetFullTanakhFromCacheAsync
