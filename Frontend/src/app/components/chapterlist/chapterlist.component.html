@@ -1,14 +1,14 @@
 
 <div class="centered-container">
-  @if (chapters) {
-    <div class="button-row">
-      @for (versesNumber of chapters; track $index; let chapterNumber = $index) {
-        <div>
-          <button class="chapter-button" (click)="goToChapter(chapterNumber + 1)">
-            פרק {{ getChapterName(chapterNumber + 1) }} ({{ versesNumber }})
-          </button>
-        </div>
-      }
-    </div>
-  }
+  <div class="button-row">
+    @for (versesNumber of chapters; track $index; let chapterNumber = $index) {
+      <div>
+        <button class="chapter-button" (click)="goToChapter(chapterNumber + 1)">
+          פרק {{ getChapterName(chapterNumber + 1) }} ({{ versesNumber }})
+        </button>
+      </div>
+    } @empty {
+      <p class="empty-state">לא נמצאו פרקים</p>
+    }
+  </div>
 </div>

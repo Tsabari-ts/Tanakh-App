@@ -195,3 +195,27 @@ All 5 version-step commits (`angular-v18` … `angular-v22`) are tagged on `chor
 - Final DoD sweep: `grep -rl "NgModule"` → empty. `grep -rl "standalone: false"` → empty. `grep -rl "TODO(F-03)"` → 11/11 present. No barrel modules. ✅ All satisfied.
 
 ---
+
+## F-05 · Migrate to the new control flow syntax (2026-07-31)
+
+**Branch:** `feat/f-05-control-flow`
+
+**⚠️ VERIFY finding:** `npx ng generate @angular/core:control-flow` reported "Nothing to be done" and `grep -rn "*ngIf\|*ngFor\|*ngSwitch"` across all templates returned nothing — the mandatory `control-flow-migration` that ran automatically during F-01's 20→21 step already converted every legacy template. This task's schematic step was a no-op; the work here is entirely the manual follow-up the spec calls out.
+
+- **Fixed `track` expressions on 2 of the object-iterating `@for` blocks** where the migration had defaulted to tracking the whole object (`track button`, `track item`) rather than a real field, per the spec's explicit warning about this:
+  - `home.component.html`: `tanakhButtons`/`buttons` are arrays of `{text, value, iconClass}` — `value` is the stable unique key (`'torah'`, `'prophets'`, `'settings'`, etc., also used for routing logic in `goTo()`). Changed `track button` → `track button.value`.
+  - `booklist.component.html`: `data` holds `BookData[]` (checked `models/BookData.ts`) — `title` is the stable English-book-title key already used by `goTo(item)` for navigation. Changed `track item` → `track item.title`.
+  - Left `track time` (`subscribe.component.html`, primitive strings) and `track word` (`entrance.component.html`, primitive strings, verified no duplicate values within any single slice) as-is — tracking a primitive value directly is correct, not the `$index` anti-pattern.
+  - **One documented exception remains:** `chapterlist.component.html` still uses `track $index`. This is deliberate, not an oversight — the F-01 bug-fix already established `let chapterNumber = $index` is needed to derive the 1-based chapter number, `chapters` is a static array that's never reordered/filtered, and verse-count values aren't a safe/unique tracking key on their own (two chapters can share a verse count). `$index` is the correct choice here.
+- **Added `@empty` blocks** to the two lists that come from an API call and can legitimately be empty:
+  - `booklist.component.html`: `@empty { <p class="empty-state">לא נמצאו ספרים</p> }`.
+  - `chapterlist.component.html`: restructured to drop the wrapping `@if (chapters)` (which was a no-op guard — `chapters: number[] = []`, and an empty array is truthy, so the `@if` never actually gated on emptiness) in favor of `@for (...) { } @empty { <p class="empty-state">לא נמצאו פרקים</p> }`, which is a strict improvement.
+  - **Noted, not fixed (out of scope for this task):** since neither component has a distinct "loading" state, the `@empty` block will also flash briefly while the initial API response is in flight (an empty/`undefined` iterable looks identical to `@for` whether it's "still loading" or "genuinely no results"). This is the same ambiguity `*ngIf="!list.length"` would have had; not a regression introduced here, just carried forward. A proper loading-state signal is a natural F-03 (signals) concern, not this task's.
+  - `home.component.html`'s two `@for` blocks (`tanakhButtons`, `buttons`) were **not** given `@empty` — they're hardcoded literal arrays in the component class, never empty by construction, so `@empty` would be dead code.
+- **`CommonModule` sweep**: already clean — `grep -rn "CommonModule" src/app` returns nothing. The standalone-conversion schematic (F-02) had already imported the specific directives each component needs (`NgClass`, etc.) rather than the whole `CommonModule`, so there was nothing left to trim here.
+- **`@if...as` sweep**: no `*ngIf="x as y"` patterns existed pre-migration, so nothing to convert to `@if (x; as y)`.
+- `ng build --configuration production`: succeeds, same warning set (budgets unaffected by this task, `gematriya` CJS unrelated).
+- `ng test --watch=false --browsers=ChromeHeadless`: 10 FAILED / 7 SUCCESS, unchanged.
+- Final DoD sweep: `grep -rn "*ngIf\|*ngFor\|*ngSwitch"` → empty. ✅ Every `@for` uses a stable identifier except the one documented `$index` exception. ✅ Every API-backed list has `@empty`. ✅ No `CommonModule` left to remove. ✅
+
+---
