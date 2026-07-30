@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **10 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-04 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **11 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-09 with zero re-derivation.
 
 ---
 
@@ -54,54 +54,68 @@ Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 | `694120e` | B-06: Replace Swashbuckle with built-in OpenAPI + Scalar |
 | `f286c51` | B-03: Enable Nullable Reference Types and fix every warning |
 | `cc897a5` | B-18: Migrate Newtonsoft.Json to System.Text.Json |
+| `53b7423` | B-04: Split into Tanakh.Domain/Infrastructure/Api/Tests |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
 ---
 
-## 4. Current backend state (as of `cc897a5`)
+## 4. Current backend state (as of `53b7423`)
+
+**As of B-04, the backend is 4 projects, not 1.** `Tanakh.sln` → `Tanakh.Domain` (zero package refs), `Tanakh.Infrastructure` (references Domain), `Tanakh.Api` (references both — this is the executable/startup project, renamed from the original `Tanakh.csproj`, same `UserSecretsId`), `Tanakh.Tests` (new, xUnit + NetArchTest.Rules, references all three).
 
 ```
 Backend/
-├── .config/dotnet-tools.json       (declares dotnet-ef 8.0.7 — unused, leftover, not yet addressed)
-├── .dockerignore                   (added B-08: bin/, obj/, .vs/, *.user)
-├── Caching/
-│   ├── ITanakhCache.cs             (added B-07, fixed B-03: TryGet<T> with [NotNullWhen(true)] out T?)
-│   └── MemoryTanakhCache.cs        (added B-07: IMemoryCache-backed, 12h expiration, Size=1/entry, SizeLimit=100)
-├── Controllers/
-│   ├── CacheProvider.cs            (not actually a controller — B-04 will move it; has guard-clause validation added B-03)
-│   ├── JewishCalendarController.cs (guard clause added B-03, GetJewishCalendar dead-line removed B-03)
-│   ├── SubscribeController.cs      (UNTOUCHED since original — still returns bare bool via Ok(isSuccessful); B-13's job)
-│   └── TanakhController.cs         (GetChapter 200-vs-404 bug fixed B-03)
-├── Data/
-│   ├── TanakhData.json             (22MB, Sefaria text data, moved from Properties/ in B-08)
-│   └── TanakhStructure.json        (moved from Properties/ in B-08)
-├── Dockerfile                      (added B-08: multi-stage, mcr.microsoft.com/dotnet/sdk:10.0 → aspnet:10.0)
-├── EmailSender.cs                  (rewritten B-10 for EmailOptions; try/catch scope fixed B-10 — was a real latent bug)
-├── GlobalExceptionHandler.cs       (added B-14: IExceptionHandler, generic ProblemDetails + traceId, full log server-side)
-├── Model/
-│   ├── JewishCalendarContainer.cs  (all-nullable rewrite B-03 — Newtonsoft-deserialized, mirrors hebcal.com shape)
-│   ├── SubscribeEntity.cs          (all `required` B-03 — STJ-bound via [FromBody], required IS enforced here)
-│   ├── TanakhContainer.cs          (all-nullable rewrite B-03 — Newtonsoft-deserialized, mirrors Sefaria API shape, ~150 properties, only ~9 ever read)
-│   ├── TanakhContext.cs            (all `required` except NextChapter/PrevChapter (nullable) B-03 — code-constructed, required IS enforced)
-│   └── TanakhStructure.cs          (all-nullable rewrite B-03 — Newtonsoft-deserialized)
-├── Options/
-│   └── EmailOptions.cs             (added B-10: EmailAddress/Password/RecipientAddress/SmtpServer/SmtpPort; bound via .Bind() only, NOT YET validated — B-09's job)
-├── Program.cs                      (minimal hosting model since B-02; see full current content in §4.1 below)
-├── Properties/
-│   ├── PublishProfiles/            (untouched, stale local publish profile pointing at C:\Users\Tomer\Desktop\tomer\Publish)
-│   └── launchSettings.json         (untouched)
-├── README.md                       (added B-10: documents Email:* config keys, dev via user-secrets, prod via Email__* env vars)
-├── Tanakh.csproj                   (see §4.2 below)
-├── Tanakh.sln                      (single project, untouched)
-├── appsettings.Development.json    (untouched — just Logging config)
-├── appsettings.json                (untouched — just Logging + AllowedHosts)
-└── global.json                     (added B-01: pins SDK 10.0.302)
+├── .config/dotnet-tools.json          (declares dotnet-ef 8.0.7 — unused, leftover, not yet addressed)
+├── .dockerignore                      (added B-08: bin/, obj/, .vs/, *.user — matches anywhere in the tree, still valid post-split)
+├── Dockerfile                         (updated B-04 for multi-project restore/publish of Tanakh.Api.csproj specifically; entrypoint Tanakh.Api.dll)
+├── README.md                          (added B-10: documents Email:* config keys — untouched by B-04)
+├── Tanakh.sln                         (4 projects: Domain, Infrastructure, Api, Tests)
+├── global.json                        (added B-01: pins SDK 10.0.302 — applies to the whole Backend/ tree including all 4 project subfolders)
+├── Tanakh.Domain/                     (zero external PackageReferences — enforced by Tanakh.Tests' architecture test)
+│   ├── Tanakh.Domain.csproj
+│   ├── Caching/ITanakhCache.cs        (moved from old Backend/Caching/, namespace now Tanakh.Domain.Caching)
+│   ├── IEmailSender.cs                (NEW in B-04 — extracted so Infrastructure's EmailSender is swappable/mockable)
+│   └── EmailMessage.cs                (moved out of the old Model/SubscribeEntity.cs — it's the IEmailSender payload, not an HTTP-bound DTO)
+├── Tanakh.Infrastructure/              (references Domain only)
+│   ├── Tanakh.Infrastructure.csproj   (needs explicit Microsoft.Extensions.* package refs — a plain classlib doesn't get the ASP.NET Core shared framework)
+│   ├── CacheProvider.cs               (moved out of Controllers/, where it never belonged; namespace now Tanakh.Infrastructure)
+│   ├── EmailSender.cs                 (now implements IEmailSender; try/catch scope fixed B-10)
+│   ├── Caching/MemoryTanakhCache.cs
+│   ├── Options/EmailOptions.cs        (bound via .Bind() only, NOT YET validated — B-09's job)
+│   └── Model/                         (raw external-API-mirroring DTOs — Infrastructure concern, not Domain)
+│       ├── TanakhContainer.cs         (mirrors Sefaria API shape, ~150 properties, only ~9 ever read)
+│       ├── TanakhStructure.cs
+│       └── JewishCalendarContainer.cs (mirrors hebcal.com shape)
+├── Tanakh.Api/                        (references Domain + Infrastructure — the executable project; ContentRootPath at runtime is this project's output dir)
+│   ├── Tanakh.Api.csproj              (Sdk="Microsoft.NET.Sdk.Web"; same UserSecretsId as the old Tanakh.csproj)
+│   ├── Program.cs                     (minimal hosting model since B-02; see §4.1)
+│   ├── GlobalExceptionHandler.cs      (added B-14; namespace now Tanakh.Api)
+│   ├── Controllers/
+│   │   ├── TanakhController.cs        (GetChapter 200-vs-404 bug fixed B-03; logic UNCHANGED by B-04, still needs B-16's extraction)
+│   │   ├── JewishCalendarController.cs (still has the hardcoded-2024-01-30 debug date — flagged, not fixed, see B-16's Risks note)
+│   │   └── SubscribeController.cs     (now depends on IEmailSender, not concrete EmailSender; still returns bare bool via Ok(isSuccessful) — B-13's job)
+│   ├── Model/                         (request/response DTOs actually shaped by this API's own contract)
+│   │   ├── TanakhContext.cs           (Book — required-enforced, code-constructed)
+│   │   └── SubscribeEntity.cs         (SubscribeEntity/UnSubscribe — required-enforced, STJ [FromBody]-bound)
+│   ├── Data/
+│   │   ├── TanakhData.json            (22MB Sefaria text data — colocated here because CopyToOutputDirectory must land in the executable project's output dir)
+│   │   └── TanakhStructure.json
+│   ├── Properties/
+│   │   ├── PublishProfiles/           (untouched, stale local publish profile pointing at C:\Users\Tomer\Desktop\tomer\Publish — gitignored, was never tracked)
+│   │   └── launchSettings.json        (untouched)
+│   ├── appsettings.Development.json   (untouched)
+│   └── appsettings.json               (untouched)
+└── Tanakh.Tests/                       (new in B-04, references all three other projects)
+    ├── Tanakh.Tests.csproj            (xUnit + NetArchTest.Rules 1.3.2)
+    └── ArchitectureTests.cs           (asserts Tanakh.Domain has zero dependency on Infrastructure/Api/ASP.NET Core/EF Core — verified this actually catches a real violation, not a tautology, before trusting it)
 ```
 
-`Backend/CredentialsManager.cs` and `Backend/Model/Credentials.cs` were **deleted** in B-10 (replaced by `Options/EmailOptions.cs`).
+`Backend/CredentialsManager.cs` and `Backend/Model/Credentials.cs` were **deleted** in B-10 (replaced by `Options/EmailOptions.cs`, now `Tanakh.Infrastructure/Options/EmailOptions.cs`).
 
-### 4.1 Current `Program.cs` (full content, for reference — don't re-read, this is authoritative)
+No business logic moved during B-04 — controllers still contain the same logic they did before the split (JSON-to-response mapping, chapter navigation, candle-lighting time math). Extracting that into services is explicitly B-16's job, not B-04's.
+
+### 4.1 Current `Tanakh.Api/Program.cs` (full content, for reference — don't re-read, this is authoritative)
 
 ```csharp
 using Microsoft.AspNetCore.Builder;
@@ -110,10 +124,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
 using System.Diagnostics;
-using Tanakh;
-using Tanakh.Caching;
-using Tanakh.Controllers;
-using Tanakh.Options;
+using Tanakh.Api;
+using Tanakh.Domain;
+using Tanakh.Domain.Caching;
+using Tanakh.Infrastructure;
+using Tanakh.Infrastructure.Caching;
+using Tanakh.Infrastructure.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,7 +141,7 @@ builder.Services.AddSingleton<ITanakhCache, MemoryTanakhCache>();
 builder.Services.AddScoped<CacheProvider>();
 builder.Services.AddOptions<EmailOptions>()
     .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
-builder.Services.AddTransient<EmailSender>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails(options =>
@@ -167,21 +183,27 @@ app.Run();
 public partial class Program;
 ```
 
-**Middleware order is semantically load-bearing** — any future edit must preserve: (dev: exception page + OpenAPI/Scalar) OR (non-dev: exception handler + HSTS) → HTTPS redirect → routing → CORS → authorization → endpoints. This exact order is what B-14 verified.
+**Middleware order is semantically load-bearing** — any future edit must preserve: (dev: exception page + OpenAPI/Scalar) OR (non-dev: exception handler + HSTS) → HTTPS redirect → routing → CORS → authorization → endpoints. This exact order is what B-14 verified, and B-04 re-verified unchanged.
 
-### 4.2 Current `Tanakh.csproj` (full content)
+### 4.2 Current `Tanakh.Api/Tanakh.Api.csproj` (full content)
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b54476fa-a2b7-4e0a-a3fe-83715f7795c0</UserSecretsId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tanakh.Domain\Tanakh.Domain.csproj" />
+    <ProjectReference Include="..\Tanakh.Infrastructure\Tanakh.Infrastructure.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
@@ -199,7 +221,9 @@ public partial class Program;
 
 `Microsoft.OpenApi` is pinned explicitly to `2.11.0` (not left as a transitive dependency) because `Microsoft.AspNetCore.OpenApi 10.0.10` pulls in `Microsoft.OpenApi 2.0.0` which has a known high-severity NuGet advisory (NU1903) that fails restore outright. `2.11.0` is the same major version (binary-compatible, avoids repeating the 1.x→2.x namespace break from the original Swashbuckle upgrade) with the fix.
 
-**`TreatWarningsAsErrors=true` is unconditional** (not Release-only) — this matches this B-series spec's literal instruction. Note this differs from an unrelated Phase-1 infra spec (R-02/R-03) which wants Release-only; that spec has not been executed in this repo, so there's no actual conflict yet, but flag it if Phase 1 work ever starts here.
+**`TreatWarningsAsErrors=true` is unconditional** (not Release-only) on all 4 projects — this matches this B-series spec's literal instruction. Note this differs from an unrelated Phase-1 infra spec (R-02/R-03) which wants Release-only; that spec has not been executed in this repo, so there's no actual conflict yet, but flag it if Phase 1 work ever starts here.
+
+`Tanakh.Infrastructure.csproj` pins `Microsoft.Extensions.Caching.Memory`/`Configuration.Abstractions`/`Hosting.Abstractions`/`Logging.Abstractions`/`Options` all at `10.0.10` (matching the OpenApi package's pinned version) — these come for free via the ASP.NET Core shared framework in a `Sdk="Microsoft.NET.Sdk.Web"` project, but `Tanakh.Infrastructure` is a plain `Sdk="Microsoft.NET.Sdk"` classlib, so they need explicit `PackageReference`s.
 
 ---
 
@@ -231,7 +255,7 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 - **Deleting the ~140 unused Sefaria/hebcal DTO properties** (see §6) — flagged as a finding, not actioned. Ask the user before touching this if it comes up.
 - **`Backend/.config/dotnet-tools.json`** declares `dotnet-ef 8.0.7` as a local tool, but there is no EF Core, no database, and no migrations anywhere in this codebase — likely leftover from abandoned scaffolding predating this modernization effort. Not touched by any B-series task; flag if it becomes relevant.
-- **`Backend/Properties/PublishProfiles/FolderProfile.pubxml`** still points at `C:\Users\Tomer\Desktop\tomer\Publish` (the original dev's local path) — stale, unused by any current CI/deploy path, not touched.
+- **`Backend/Tanakh.Api/Properties/PublishProfiles/FolderProfile.pubxml`** (moved with the rest of `Properties/` in B-04) still points at `C:\Users\Tomer\Desktop\tomer\Publish` (the original dev's local path) — stale, unused by any current CI/deploy path, not touched. Note: this file is gitignored (`*.pubxml` in `.gitignore`) and was never actually tracked in git — it only exists on this local machine's disk.
 - The Angular upgrade (Frontend has 11 known high-severity vulnerabilities in `@angular/*` packages, confirmed via `npm audit --omit=dev`) is explicitly out of scope for both this B-series spec and the separate Phase 1 infra spec for this repo. Do not touch `Frontend/` under this backlog.
 - A parallel **Phase 1 infrastructure spec** exists for this same repo (repo layout, CI/CD, Docker Compose, Render/Neon/Cloudflare deployment) — only Task 0 (discovery) and one ad-hoc .NET 10 upgrade commit happened under that spec before this B-series backlog took over. They are complementary, not conflicting, but haven't been reconciled into one combined plan. If both specs are being executed against this repo, be aware R-01 (repo layout) will eventually want to move `Backend/`'s structure again (e.g. `docs/` conventions) and R-09 (Docker) will want to enhance the `Backend/Dockerfile` this session already added (non-root user, healthcheck, Alpine variant).
 
@@ -240,10 +264,9 @@ All five surfaced through direct investigation or forced compile errors — not 
 ## 8. Immediate next action for a new session
 
 1. Read this document in full.
-2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted.
-3. **B-18 is done** (commit `cc897a5`) — Newtonsoft.Json fully removed, both deserialization call sites on System.Text.Json, verified via before/after curl diff + re-run of the B-03 corrupted-JSON guard-clause test. Next task in wave order is **B-04**, which is a decision point.
-4. When you reach **B-04**, stop and present the project-split decision (§10) before moving any files.
-5. When you reach **B-16**, stop and present the Controllers-vs-Minimal-APIs decision (§10) before restructuring endpoints.
+2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
+3. **B-18 is done** (commit `cc897a5`) and **B-04 is done** (commit `53b7423`) — see §4 for the current 4-project layout. Next task in wave order is **B-09** (Options pattern), which has no decision point of its own, though it surfaces a real fail-fast-vs-graceful-degradation question for `EmailOptions` — see that task's detail in §9.
+4. When you reach **B-16**, stop and present the Controllers-vs-Minimal-APIs decision (§10) before restructuring endpoints — note the `required`-auto-400 verification caveat there should be re-checked given B-04 didn't change binding behavior, just project boundaries.
 
 ---
 
@@ -255,36 +278,18 @@ Completed this session. Both `JsonConvert.DeserializeObject` call sites (`CacheP
 
 ---
 
-### B-04 · Split into `Tanakh.Api`, `Tanakh.Domain`, `Tanakh.Infrastructure`, `Tanakh.Tests` · Wave 4 · P1 · M · **DECISION NEEDED**
+### B-04 · Split into `Tanakh.Api`, `Tanakh.Domain`, `Tanakh.Infrastructure`, `Tanakh.Tests` · Wave 4 · P1 · M · **DONE (`53b7423`)**
 
-See §10 for the decision to present before starting.
+Completed this session. Both decisions from §10 were resolved via `AskUserQuestion` before starting: (1) proceed with the full 4-project split (not folders-only), (2) split `Model/` by role rather than keeping it together. See §4 for the resulting file tree and current `Program.cs`/`Tanakh.Api.csproj` content.
 
-**Purpose:** establish clean layering; `CacheProvider` currently sits in `Controllers/` despite not being a controller.
-
-**Files expected to change:** essentially everything — this is a full project restructure. New files: `Tanakh.Domain.csproj`, `Tanakh.Infrastructure.csproj`, `Tanakh.Api.csproj` (renamed from today's `Tanakh.csproj`?), `Tanakh.Tests.csproj`, updated `Tanakh.sln`. Every existing `.cs` file moves to one of the three non-test projects.
-
-**Current state:** single project `Backend/Tanakh.csproj`, everything in one assembly, namespace `Tanakh` (with `Tanakh.Controllers`, `Tanakh.Model`, `Tanakh.Options`, `Tanakh.Caching` as sub-namespaces).
-
-**Proposed layering (per spec, confirm with user before executing):**
-
-| Project | Gets | Notes |
-|---|---|---|
-| `Tanakh.Domain` | `Model/Book`, `Model/TanakhContext` (rename? these are really response DTOs, not domain entities — worth discussing with user whether `Model/` as a whole belongs in Domain or is actually an API contract that belongs in `Tanakh.Api`), `ITanakhCache`, a new `ITanakhRepository`/similar contract for what `CacheProvider` does, `IEmailSender` contract, `IJewishCalendar` contract, domain exceptions (the `InvalidOperationException`s from B-03's guard clauses are candidates to become named domain exceptions here, e.g. `TanakhDataCorruptException`) | **Zero PackageReferences for ASP.NET Core/EF Core/anything web** — base class library only |
-| `Tanakh.Infrastructure` | `CacheProvider` (moved out of `Controllers/`, probably renamed), `MemoryTanakhCache`, `EmailSender`, the hebcal HTTP client logic from `JewishCalendarController.FillJewishCalendar`, the JSON data loader | References `Tanakh.Domain` |
-| `Tanakh.Api` | `Program.cs`, `Controllers/*Controller.cs` (or Minimal API endpoints, depending on B-16), `GlobalExceptionHandler.cs`, `Options/EmailOptions.cs` (or does this belong in Infrastructure? — worth asking), `appsettings*.json`, `Data/*.json` | References `Tanakh.Domain` + `Tanakh.Infrastructure` |
-| `Tanakh.Tests` | New. Unit tests for Domain, integration tests via `WebApplicationFactory<Program>` (the `public partial class Program;` marker added in B-02 exists specifically for this) | References all |
-
-**Also required:** an architecture test (NetArchTest or equivalent) asserting `Tanakh.Domain` never gains a forbidden reference — add this to `Tanakh.Tests` as part of this same task.
-
-**Verification/testing steps:**
-1. Move types one layer at a time, `dotnet build` after each move (never leave the tree non-compiling, per this spec's ground rule 1).
-2. Full solution build + the architecture test passes.
-3. Full runtime smoke test (every endpoint) — same curls used throughout this session.
-4. Docker build still works (`Backend/Dockerfile` will need its COPY paths updated for the new multi-project structure — this is a real, concrete follow-on change, not optional).
-
-**Expected commit message:** `B-04: Split into Tanakh.Domain/Infrastructure/Api/Tests`
-
-**Risks:** this is the highest-blast-radius task in the remaining backlog — touches every file. The `Dockerfile` from B-08 and the `.csproj`/`global.json` structure will all need coordinated updates. Recommend doing this as one deliberate, careful pass rather than incrementally, given the "never leave the tree non-compiling" rule is hard to satisfy with partial multi-project moves — commit only when the full solution builds and every endpoint is verified again.
+Key implementation notes for anyone touching this area later:
+- `Tanakh.Domain` ended up genuinely thin (as predicted): `ITanakhCache`, a new `IEmailSender` interface (extracted from the concrete `EmailSender` specifically so it could have a Domain-owned contract), and `EmailMessage` (judged to be the `IEmailSender` payload/domain concept, not an HTTP-bound DTO — moved out of the old `Model/SubscribeEntity.cs` file, which is otherwise Api-layer). No domain exceptions were introduced (the B-03 guard clauses' `InvalidOperationException`s were left as-is) — turning those into named exception types was judged to be B-16-adjacent scope (real domain modeling), not required for a structural split, and left as a future option rather than done unprompted.
+- The `ITanakhRepository`-for-`CacheProvider` idea floated in this section's original draft was **not** implemented — `CacheProvider` and the raw Sefaria/hebcal DTOs it returns (`TanakhContainer`, `List<BaseStructure>`) all live together in `Tanakh.Infrastructure`, and `Tanakh.Api` references `Tanakh.Infrastructure` directly. A repository contract whose return type is an Infrastructure-owned DTO can't live in `Tanakh.Domain` without breaking the dependency direction, so introducing a real Domain-facing service abstraction here was deferred to B-16, which is where the actual domain-shaped mapping (raw DTO → `Book`/`TanakhContext`) gets extracted out of the controller anyway.
+- `Tanakh.Infrastructure` is a plain `Sdk="Microsoft.NET.Sdk"` classlib, so it needed explicit `PackageReference`s for `Microsoft.Extensions.Caching.Memory`/`Configuration.Abstractions`/`Hosting.Abstractions`/`Logging.Abstractions`/`Options` (all pinned `10.0.10`) — these come for free via the ASP.NET Core shared framework in a Web SDK project but not in a plain classlib.
+- `Data/*.json` and `appsettings*.json` had to be colocated with `Tanakh.Api` (not left at `Backend/` root) — `CopyToOutputDirectory` only takes effect for the executable project whose output directory becomes `ContentRootPath` at runtime.
+- The architecture test (`Tanakh.Tests/ArchitectureTests.cs`, using `NetArchTest.Rules 1.3.2`) was verified to actually catch violations, not just pass trivially: temporarily added a real `Microsoft.AspNetCore.Mvc.ControllerBase` reference to a Domain type, confirmed the test failed and named the exact offending type, then reverted before committing.
+- `Backend/Dockerfile` now restores/publishes `Tanakh.Api/Tanakh.Api.csproj` specifically (project-reference graph pulls in Domain/Infrastructure automatically without needing the whole `.sln`); entrypoint is `Tanakh.Api.dll`. Verified with a real `docker build` + `docker run` + curl smoke test.
+- Full before/after curl diff against every endpoint (book listings, a full chapter body, the 200/404 chapter-lookup boundary, both Subscribe endpoints, the live hebcal.com-backed calendar endpoint, and the OpenAPI/Scalar dev endpoints) — all byte-identical to pre-split behavior. No business logic changed, only file/project locations and namespaces.
 
 ---
 
@@ -292,7 +297,7 @@ See §10 for the decision to present before starting.
 
 **Purpose:** typed, validated configuration that fails at startup rather than mid-request.
 
-**Files expected to change:** `Backend/Options/EmailOptions.cs` (add validation), new `Backend/Options/TanakhDataOptions.cs`, `Backend/Program.cs`, `Backend/Controllers/CacheProvider.cs` (remove the raw `configuration["TanakhData:DataDirectory"]` read from B-08).
+**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Infrastructure/Options/EmailOptions.cs` (add validation), new `Backend/Tanakh.Infrastructure/Options/TanakhDataOptions.cs`, `Backend/Tanakh.Api/Program.cs`, `Backend/Tanakh.Infrastructure/CacheProvider.cs` (remove the raw `configuration["TanakhData:DataDirectory"]` read from B-08).
 
 **Current state:**
 - `EmailOptions` exists (`Options/EmailOptions.cs`) but is bound with only `.Bind(...)` — **no `.ValidateDataAnnotations().ValidateOnStart()`, no `[Required]` attributes on its properties.** A missing `Email__Password` env var in Production today does NOT fail startup — it silently produces an empty-string default, and `EmailSender` gracefully returns `false` (per B-10's bug fix) rather than crashing. This task should decide: should Email config actually be required-at-startup (fail fast), or is graceful-degradation-to-no-email-sent the intended behavior for this app? **This is worth a quick confirmation with the user** — the spec's own B-09 definition of done ("deleting a required key... causes fail at startup") assumes fail-fast is wanted, but B-10 deliberately built graceful degradation. Reconcile before implementing.
@@ -344,7 +349,7 @@ See §10 for the decision to present before starting.
 
 **Purpose:** eliminate sync-over-async; thread-pool starvation risk.
 
-**Files expected to change:** `Backend/Controllers/JewishCalendarController.cs` (the known offender), `Backend/Controllers/CacheProvider.cs` (file reads), `Backend/Controllers/TanakhController.cs` (action method signatures need `async Task<IActionResult>`), `Backend/EmailSender.cs` (`SmtpClient.Send` → `SendMailAsync`), `Backend/Controllers/SubscribeController.cs` (action signatures).
+**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Controllers/JewishCalendarController.cs` (the known offender), `Backend/Tanakh.Infrastructure/CacheProvider.cs` (file reads), `Backend/Tanakh.Api/Controllers/TanakhController.cs` (action method signatures need `async Task<IActionResult>`), `Backend/Tanakh.Infrastructure/EmailSender.cs` (`SmtpClient.Send` → `SendMailAsync`), `Backend/Tanakh.Api/Controllers/SubscribeController.cs` (action signatures).
 
 **Current state:** `JewishCalendarController.GetJewishCalendar()` does `FillJewishCalendar().GetAwaiter().GetResult()` — confirmed still present as of this handoff (B-03 touched this file but did not address the sync-over-async call, since that's explicitly B-11's job, not B-03's). `CacheProvider` uses `StreamReader.ReadToEnd()` (sync) — should become `File.ReadAllTextAsync(...)`. `EmailSender.SendMessage` uses `SmtpClient.Send()` (sync, and `SmtpClient` itself is legacy/obsolete in modern .NET — consider whether this task should also flag `SmtpClient` obsolescence, though replacing it entirely is arguably beyond "make it async," worth a quick note to the user).
 
@@ -389,7 +394,7 @@ See §10 for the decision to present before starting.
 
 **Purpose:** one error shape for the whole API. `SubscribeController` currently returns a bare `bool`.
 
-**Files expected to change:** `Backend/Controllers/SubscribeController.cs` (the main target), `Backend/Program.cs` (already has `AddProblemDetails()` from B-14 — just needs to be leveraged, not re-added).
+**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Controllers/SubscribeController.cs` (the main target), `Backend/Tanakh.Api/Program.cs` (already has `AddProblemDetails()` from B-14 — just needs to be leveraged, not re-added).
 
 **Current state (verbatim, unchanged since original):**
 ```csharp
@@ -425,7 +430,7 @@ Both `RegisterNewUser` and `DeleteUser` follow this exact bare-bool-in-a-200 pat
 
 **Purpose:** give a load balancer/orchestrator something to probe. Directly relevant to the Phase 1 infra spec's Render deployment (cold-start tolerance).
 
-**Files expected to change:** `Backend/Program.cs`, possibly a new `Backend/HealthChecks/` folder with custom `IHealthCheck` implementations.
+**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Program.cs`, possibly a new `Backend/Tanakh.Infrastructure/HealthChecks/` folder with custom `IHealthCheck` implementations.
 
 **Implementation steps:**
 1. `/health/live` — trivial, no dependency checks: `app.MapHealthChecks("/health/live", new() { Predicate = _ => false });`
@@ -447,7 +452,7 @@ Both `RegisterNewUser` and `DeleteUser` follow this exact bare-bool-in-a-200 pat
 
 **Purpose:** move all routes under `/api/v1` before any external client depends on unversioned paths.
 
-**Files expected to change:** `Backend/Tanakh.csproj` (add `Asp.Versioning.Http` + `Asp.Versioning.Mvc.ApiExplorer` if still on Controllers by this point), `Backend/Program.cs`, every controller's `[Route]` attribute (or Minimal API route registrations, depending on B-16's outcome).
+**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Tanakh.Api.csproj` (add `Asp.Versioning.Http` + `Asp.Versioning.Mvc.ApiExplorer` if still on Controllers by this point), `Backend/Tanakh.Api/Program.cs`, every controller's `[Route]` attribute (or Minimal API route registrations, depending on B-16's outcome).
 
 **Critical pre-check, spelled out because it's easy to miss:** the spec says *"If any client already depends on the current unversioned paths, keep them as redirects or aliases for a deprecation window — ask before removing them outright."* **The Angular frontend is exactly such a client** — `Frontend/src/app/services/api-call.service.ts` hardcodes `https://localhost:44308/JewishCalendar/...`, `https://localhost:44308/Tanakh/...`, `https://localhost:44308/Subscribe/...` (confirmed during the original Phase 1 discovery pass on this repo — these are unversioned, hardcoded, and also a hardcoded-localhost issue in their own right, unrelated to this task). **This means B-15 will break the live Frontend integration unless either (a) the Frontend is updated in the same change (out of this backlog's stated scope), or (b) old unversioned routes are kept as aliases during a deprecation window.** This is not a hypothetical "ask before removing" — there is a confirmed real client depending on the unversioned paths today. Surface this prominently before starting B-15.
 
@@ -467,19 +472,9 @@ Both `RegisterNewUser` and `DeleteUser` follow this exact bare-bool-in-a-200 pat
 
 ## 10. Decision points — present both, wait for the answer
 
-### B-04: project split
+### B-04: project split — **RESOLVED, see B-04's entry in §9**
 
-**Option A — proceed with the spec's exact 4-project split** (`Tanakh.Domain`/`Tanakh.Infrastructure`/`Tanakh.Api`/`Tanakh.Tests`), as detailed in §9 above.
-- **Pros:** matches the spec exactly; clean dependency-inversion boundary; sets up B-16's service-extraction work with a natural home for services; architecture test enforces the boundary going forward.
-- **Cons:** for an app this small (5 controllers' worth of logic, no database, ~15 source files total), 4 projects is arguably heavier machinery than the problem needs; touches every file at once (highest blast radius of any remaining task); the `Model/` classes are genuinely ambiguous about which layer they belong to (see the open question flagged in §9 — are they domain entities or API contracts?).
-- **My recommendation:** proceed with the split as specified, but **resolve the `Model/` placement question explicitly with the user first** — I'd lean toward: request/response DTOs (`TanakhContext`, `Book`) belong conceptually closer to `Tanakh.Api` (they're literally shaped by what the API returns), while `TanakhContainer`/`JewishCalendarContainer`/`TanakhStructure` (the raw external-API-mirroring shapes) belong in `Tanakh.Infrastructure` (they're deserialization DTOs for infrastructure concerns — reading a JSON file, calling hebcal.com — not domain concepts at all). This leaves `Tanakh.Domain` fairly thin (mostly the `ITanakhCache`/`IEmailSender`/repository-style contracts + maybe a genuinely domain-shaped `Chapter`/`Verse` if B-16's service extraction produces one) — which is fine and normal for an app this size.
-
-**Option B — skip or defer the physical project split, keep logical separation via folders/namespaces only.**
-- **Pros:** much lower risk, avoids touching every file at once, still gets meaningful benefit if B-16's service extraction happens first (folders like `Services/`, `Contracts/` inside the single project).
-- **Cons:** doesn't satisfy the spec's literal definition of done (a real architecture test requires real project boundaries — you can't enforce "Domain has zero ASP.NET Core references" with folders alone, only with separate assemblies) — this would be a deviation from the given spec, not just an implementation-detail choice.
-- **Not recommended** unless the user explicitly wants to descope this task.
-
-**Ask the user: proceed with Option A (with the Model/ placement resolved as above), or something else?**
+User chose Option A (full 4-project split) via `AskUserQuestion`, then chose "split by role" for `Model/` placement (also via `AskUserQuestion`) when asked as a follow-up. Both are implemented and committed in `53b7423`. Left here for historical record; nothing further to decide.
 
 ### B-16: Controllers vs Minimal APIs
 
