@@ -1,34 +1,37 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiCallService {
+  private readonly baseUrl = environment.apiUrl;
+
   constructor(private http:HttpClient) { }
 
     getHolidays() {
-    return this.http.get<any>(`https://localhost:44308/JewishCalendar/getJewishCalendar`);
+    return this.http.get<any>(`${this.baseUrl}/JewishCalendar/getJewishCalendar`);
   }
 
   getVerses(book:string, chapter: string): Observable<any> {
-    return this.http.get<any>(`https://localhost:44308/Tanakh/books/${book}/${chapter}`);
+    return this.http.get<any>(`${this.baseUrl}/Tanakh/books/${book}/${chapter}`);
   }
 
   getBookList(section:string): Observable<any> {
-    return this.http.get<any>(`https://localhost:44308/Tanakh/books/${section}`);
+    return this.http.get<any>(`${this.baseUrl}/Tanakh/books/${section}`);
   }
 
   getBookByTitle(book:string): Observable<any> {
-    return this.http.get<any>(`https://localhost:44308/Tanakh/books/main/${book}`);
+    return this.http.get<any>(`${this.baseUrl}/Tanakh/books/main/${book}`);
   }
 
   subscribe(subscriptionRequest: any) {
-    return this.http.post(`https://localhost:44308/api/v1/subscriptions`, subscriptionRequest, { responseType: 'text' });
+    return this.http.post(`${this.baseUrl}/api/v1/subscriptions`, subscriptionRequest, { responseType: 'text' });
   }
 
   updateReadingProgress(readingProgress: any) {
-    return this.http.post(`https://localhost:44308/api/v1/reading-progress`, readingProgress, { responseType: 'text' });
+    return this.http.post(`${this.baseUrl}/api/v1/reading-progress`, readingProgress, { responseType: 'text' });
   }
 }
