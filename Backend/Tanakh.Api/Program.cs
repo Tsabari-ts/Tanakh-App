@@ -48,6 +48,7 @@ builder.Services.AddScoped<CacheProvider>();
 builder.Services.AddScoped<ITanakhStructureService, TanakhStructureService>();
 builder.Services.AddScoped<ITanakhTextService, TanakhTextService>();
 builder.Services.AddScoped<IJewishCalendarService, JewishCalendarService>();
+builder.Services.AddScoped<IReadingProgressService, ReadingProgressService>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
 builder.Services.AddOptions<EmailOptions>()

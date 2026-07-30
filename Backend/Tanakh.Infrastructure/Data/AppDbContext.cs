@@ -19,6 +19,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<Subscriber> Subscribers => Set<Subscriber>();
 
+        public DbSet<ReadingProgress> ReadingProgresses => Set<ReadingProgress>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
