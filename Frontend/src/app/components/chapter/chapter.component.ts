@@ -3,13 +3,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
+import { NgClass } from '@angular/common';
+import { ScrollToTopButtonComponent } from '../scroll-to-top-button/scroll-to-top-button.component';
 
 @Component({
     selector: 'app-chapter',
     templateUrl: './chapter.component.html',
     styleUrl: './chapter.component.css',
     changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
-    standalone: false
+    imports: [NgClass, ScrollToTopButtonComponent]
 })
 
 export class ChapterComponent implements OnInit {

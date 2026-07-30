@@ -1,4 +1,5 @@
 import { Component, Input, Renderer2, ChangeDetectionStrategy } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-scroll-to-top-button',
@@ -44,7 +45,7 @@ import { Component, Input, Renderer2, ChangeDetectionStrategy } from '@angular/c
     }
 `],
     changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
-    standalone: false
+    imports: [MatIcon]
 })
 export class ScrollToTopButtonComponent {
   constructor(private renderer: Renderer2) {}

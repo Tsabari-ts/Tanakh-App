@@ -9,8 +9,7 @@ import { AppComponent } from '../../app.component';
     selector: 'app-chapterlist',
     templateUrl: './chapterlist.component.html',
     styleUrl: './chapterlist.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager // TODO(F-03): remove after signals migration
 })
 export class ChapterlistComponent implements OnInit {
   section: string | null = "";
