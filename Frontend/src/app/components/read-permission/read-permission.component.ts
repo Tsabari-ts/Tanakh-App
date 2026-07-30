@@ -7,7 +7,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
     selector: 'app-read-permission',
     templateUrl: './read-permission.component.html',
     styleUrl: './read-permission.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatDialogActions]
 })
 

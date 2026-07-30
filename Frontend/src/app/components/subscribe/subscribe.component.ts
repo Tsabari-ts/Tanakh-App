@@ -10,7 +10,7 @@ import { NgClass } from '@angular/common';
     selector: 'app-subscribe',
     templateUrl: './subscribe.component.html',
     styleUrl: './subscribe.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, NgClass]
 })
 

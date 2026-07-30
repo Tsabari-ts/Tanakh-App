@@ -8,7 +8,7 @@ import { NgClass } from '@angular/common';
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     imports: [NgClass]
 })
 

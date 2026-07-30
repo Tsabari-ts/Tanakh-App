@@ -10,7 +10,7 @@ import { ScrollToTopButtonComponent } from '../scroll-to-top-button/scroll-to-to
     selector: 'app-chapter',
     templateUrl: './chapter.component.html',
     styleUrl: './chapter.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
     imports: [NgClass, ScrollToTopButtonComponent]
 })
 

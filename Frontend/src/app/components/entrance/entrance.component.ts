@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
     selector: 'app-entrance',
     templateUrl: './entrance.component.html',
     styleUrl: './entrance.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager
+    changeDetection: ChangeDetectionStrategy.Eager // TODO(F-03): remove after signals migration
 })
 export class EntranceComponent implements OnInit {
   isLoading: boolean = true;
