@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **14 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-12 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **15 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-13 with zero re-derivation.
 
 ---
 
@@ -58,6 +58,7 @@ Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 | `c1488e2` | B-09: Move remaining configuration to the Options pattern |
 | `ad122e1` | B-16: Extract business logic from controllers into services |
 | `e12c625` | B-11: Make all I/O asynchronous |
+| `d67e71c` | B-12: Add CancellationToken to endpoints and outbound calls |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
@@ -268,8 +269,8 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
-3. **B-18, B-04, B-09, B-16, and B-11 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`, `e12c625`) — see §4 for the current 4-project layout. Every I/O call in the app is now genuinely async (see B-11's entry in §9): `CacheProvider`, the 3 B-16 services, and `EmailSender` are all `Task`-returning with an `Async` suffix; all 3 controllers are `async Task<IActionResult>` with action methods also renamed `...Async` (safe — every route is explicit via attributes, not name-derived). `Microsoft.VisualStudio.Threading.Analyzers 18.7.23` is now active as errors on all 3 non-test projects. Next task in wave order is **B-12** (add `CancellationToken` to every endpoint/outbound call), which depends on B-11 (now satisfied) and has one real judgment call flagged in §9 (should `SubscribeController`'s email send use `RequestAborted` or run to completion regardless of client disconnect?) — surface it, don't guess.
-4. Grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` still returns zero hits as of `e12c625` — if a fresh session finds any, something has regressed.
+3. **B-18, B-04, B-09, B-16, B-11, and B-12 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`, `e12c625`, `d67e71c`) — see §4 for the current 4-project layout. Every I/O call is async with a `CancellationToken` threaded through from `HttpContext.RequestAborted` down to the file reads and the hebcal.com HTTP call. `SubscribeController`'s email send deliberately does **not** observe cancellation (see B-12's entry in §9 for why — confirmed with the user, not assumed). Next task in wave order is **B-13** (standardize errors on ProblemDetails / RFC 9457), which has no decision point but does have a real risk flagged twice in this doc: `SubscribeController`'s response shape is a live Angular-frontend contract — read `Frontend/src/app/services/api-call.service.ts` before changing what it returns.
+4. Grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` still returns zero hits as of `d67e71c` — if a fresh session finds any, something has regressed.
 
 ---
 
@@ -335,22 +336,13 @@ Verified: full solution build clean (Debug + Release, `-warnaserror`, analyzer a
 
 ---
 
-### B-12 · Add CancellationToken to every endpoint and outbound call · Wave 5 · P2 · S
+### B-12 · Add CancellationToken to every endpoint and outbound call · Wave 5 · P2 · S · **DONE (`d67e71c`)**
 
-**Purpose:** disconnecting a client should abort server-side work.
+Completed this session. `CancellationToken` threaded from `HttpContext.RequestAborted` (auto-bound by ASP.NET Core when a controller action declares the parameter) down through `TanakhController`/`JewishCalendarController` → the 3 B-16 services → `CacheProvider` → `File.ReadAllTextAsync`/`HttpClient.GetAsync`/`HttpContent.ReadAsStringAsync`.
 
-**Files expected to change:** all controller action methods (already `async Task<IActionResult>` since B-11), `CacheProvider`'s async methods, the 3 B-16 services (all already `Task`-returning with an `Async` suffix — just need a `CancellationToken` parameter threaded through each), `EmailSender`, `JewishCalendarService`'s `HttpClient` call.
+The judgment call this doc flagged was put to the user directly: **`SubscribeController`'s email send runs to completion regardless of client disconnect.** `SubscribeController`'s two actions take no `CancellationToken` parameter at all (with a comment explaining why), and `IEmailSender.SendMessageAsync` has no `CancellationToken` parameter on its interface — `EmailSender` internally passes `CancellationToken.None` to `SmtpClient.SendMailAsync` explicitly. Verified `SmtpClient.SendMailAsync(MailMessage, CancellationToken)` actually exists on .NET 10 by compiling a throwaway snippet against it first, rather than trusting the spec's own hedged wording about TFM support.
 
-**Depends on B-11 landing first** (can't thread a `CancellationToken` through sync methods meaningfully).
-
-**Implementation steps:**
-1. Add `CancellationToken cancellationToken` parameter to every action method — ASP.NET Core binds `HttpContext.RequestAborted` automatically, no extra wiring needed.
-2. Thread it through every service method, `File.ReadAllTextAsync(path, cancellationToken)`, `HttpClient.GetAsync(url, cancellationToken)`, `SmtpClient.SendMailAsync` (note: `SmtpClient` has no native `CancellationToken` overload in some TFMs — verify against .NET 10's actual `SmtpClient` API surface before assuming; if unsupported, flag it rather than faking cancellation support).
-3. Explicitly identify anything that must NOT be cancelled (the spec calls out audit-record-style writes) — in this codebase, there isn't an obvious candidate (no audit logging exists), but double-check `EmailSender`'s notification email arguably should complete even if the HTTP client disconnects (the user still wants to be notified of the subscribe/unsubscribe request even if the browser tab closes) — **flag this specific judgment call to the user**: should `SubscribeController`'s email send use `RequestAborted` (cancels with the request) or a separate, non-cancellable lifetime (e.g. `CancellationToken.None`, fire-and-forget with proper background-task handling)? This is exactly the kind of case the spec asks you to flag rather than decide silently.
-
-**Verification/testing steps:** since this is hard to verify via curl alone, the spec wants proof via "a log line or a test" that a disconnected client aborts server work — e.g. add a temporary artificial delay + log statement, start a request, kill the curl process mid-flight (`curl --max-time 0.5` against an endpoint with an injected delay), confirm a `TaskCanceledException`/`OperationCanceledException` is logged, then remove the artificial delay.
-
-**Expected commit message:** `B-12: Add CancellationToken to endpoints and outbound calls`
+Verified real cancellation, not just that it compiles: temporarily added a 5-second delay + a direct console log to one action, fired `curl --max-time 1`, confirmed the log line proving `OperationCanceledException` fired almost immediately (long before the artificial delay would complete), then removed the temporary code before committing. Also confirmed ASP.NET Core's own handling of client-disconnect cancellations doesn't surface through `GlobalExceptionHandler` — documented framework behavior (no client left to respond to), not a regression.
 
 ---
 
@@ -360,18 +352,17 @@ Verified: full solution build clean (Debug + Release, `-warnaserror`, analyzer a
 
 **Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Controllers/SubscribeController.cs` (the main target), `Backend/Tanakh.Api/Program.cs` (already has `AddProblemDetails()` from B-14 — just needs to be leveraged, not re-added).
 
-**Current state (verbatim, unchanged since original):**
+**Current state (verbatim, as of B-12 — logic unchanged since original, only async/naming updated by B-11/B-16):**
 ```csharp
 [HttpPost("RegisterUser")]
-public IActionResult RegisterNewUser([FromBody] SubscribeEntity subscribeEntity)
+public async Task<IActionResult> RegisterNewUserAsync([FromBody] SubscribeEntity subscribeEntity)
 {
-    bool isSuccessful = false;
     EmailMessage emailMessage = new EmailMessage { Subject = "...", Body = $"...{subscribeEntity.UserName}..." };
-    isSuccessful = emailSender.SendMessage(emailMessage);
+    bool isSuccessful = await emailSender.SendMessageAsync(emailMessage);
     return Ok(isSuccessful);
 }
 ```
-Both `RegisterNewUser` and `DeleteUser` follow this exact bare-bool-in-a-200 pattern.
+Both `RegisterNewUserAsync` and `DeleteUserAsync` follow this exact bare-bool-in-a-200 pattern.
 
 **Implementation steps:**
 1. Success → `200`/`201` with a meaningful body (not just `true`) — e.g. `{ "message": "Subscription request received" }` or similar; decide the exact shape with the user if it's user-facing (the Angular frontend currently reads this response — check `Frontend/src/app/services/api-call.service.ts` and whatever component calls `RegisterUser`/`DeleteUser` to see what shape it expects today, **since changing the response shape is a breaking change for the frontend** — this is worth flagging explicitly, since Frontend is out of scope for this backlog but consumes this exact contract).
