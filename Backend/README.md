@@ -60,3 +60,21 @@ Hashing__Pepper
 Azure Key Vault integration was intentionally not added — this app's deployment targets
 (Render/Neon/Cloudflare Pages, per the free-tier hosting plan) are not Azure, so there is no
 Key Vault to integrate with.
+
+## Database — dev seed data / reset
+
+See `docs/database.md` for full setup (docker-compose, roles, migrations). Once `ConnectionStrings__AppDb`/`ConnectionStrings__MigrationsDb` and `Hashing:Pepper` are configured and migrations have been applied:
+
+```bash
+# Populate sample data (subscribers across every status, reading positions,
+# some deliveries, some email events, a couple of suppression entries).
+# Idempotent - running it again does nothing if subscribers already exist.
+dotnet run -- --seed
+
+# Drop the schema (rolled all the way down via migrations, not a literal
+# DROP DATABASE - see DatabaseSeeder.ResetSchemaAsync for why), migrate back
+# up to latest, then seed.
+dotnet run -- --reset-db
+```
+
+Note the `--` before the flag — without it, `dotnet run` doesn't forward `--seed`/`--reset-db` to the app. Both are **hard-blocked outside `Development`** (`ASPNETCORE_ENVIRONMENT`) and throw if attempted anywhere else.

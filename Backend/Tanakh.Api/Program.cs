@@ -18,6 +18,7 @@ using Tanakh.Infrastructure.Data;
 using Tanakh.Infrastructure.HealthChecks;
 using Tanakh.Infrastructure.Options;
 using Tanakh.Infrastructure.Retention;
+using Tanakh.Infrastructure.Seeding;
 using Tanakh.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +54,7 @@ builder.Services.AddScoped<IReadingProgressService, ReadingProgressService>();
 builder.Services.AddSingleton<IHashingService, HashingService>();
 builder.Services.AddScoped<ISuppressionService, SuppressionService>();
 builder.Services.AddScoped<ISubscriberAnonymizationService, SubscriberAnonymizationService>();
+builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
 builder.Services.AddOptions<EmailOptions>()
@@ -78,6 +80,30 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
+
+// --seed / --reset-db: one-shot dev convenience commands, hard-blocked
+// outside Development so they can never run against staging/prod.
+if (args.Contains("--seed") || args.Contains("--reset-db"))
+{
+    if (!app.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException("--seed and --reset-db are only allowed in the Development environment.");
+    }
+
+    using (IServiceScope scope = app.Services.CreateScope())
+    {
+        IDatabaseSeeder seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeeder>();
+
+        if (args.Contains("--reset-db"))
+        {
+            await seeder.ResetSchemaAsync();
+        }
+
+        await seeder.SeedAsync();
+    }
+
+    return;
+}
 
 if (app.Environment.IsDevelopment())
 {
