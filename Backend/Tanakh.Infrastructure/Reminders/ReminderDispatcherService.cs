@@ -170,7 +170,9 @@ namespace Tanakh.Infrastructure.Reminders
 
             NextChapterResult next = await nextChapterResolver.ResolveAsync(subscriber.Id, cancellationToken);
             string subscriberToken = unsubscribeTokenService.Issue(subscriber.Id);
-            string targetUrl = $"{options.PublicBaseUrl}/books/{next.Section.ToLowerInvariant()}/{next.Book}/{next.Chapter}/false?sid={Uri.EscapeDataString(subscriberToken)}";
+            // T-22: lets analytics attribute reading sessions back to reminder emails.
+            string targetUrl = $"{options.PublicBaseUrl}/books/{next.Section.ToLowerInvariant()}/{next.Book}/{next.Chapter}/false" +
+                $"?sid={Uri.EscapeDataString(subscriberToken)}&src=reminder&utm_source=email&utm_medium=reminder&utm_campaign=daily";
             string unsubscribeUrl = $"{options.ApiBaseUrl}/api/v1/subscriptions/unsubscribe?token={Uri.EscapeDataString(subscriberToken)}";
 
             delivery.TargetUrl = targetUrl;
