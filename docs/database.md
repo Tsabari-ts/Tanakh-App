@@ -106,3 +106,24 @@ the last drill. Two independent mechanisms are in place:
 2. **Scheduled `pg_dump` to object storage** — a provider-independent second
    copy, so a Neon-account-level incident doesn't leave us with zero backups.
    Runs daily (see the scheduled job / CI workflow that invokes it).
+
+## Raw SQL policy
+
+All queries go through EF Core / LINQ, which parameterizes automatically. If
+raw SQL is ever genuinely needed:
+
+- **Allowed**: `FromSql($"...")` / `ExecuteSql($"...")` (the `FormattableString`
+  overloads — interpolated values are parameterized), or `FromSqlRaw`/
+  `ExecuteSqlRaw` with explicit `NpgsqlParameter` objects.
+- **Forbidden**: `FromSqlRaw($"...")` or `ExecuteSqlRaw($"...")` built from C#
+  string interpolation or concatenation — these are the unparameterized,
+  injectable overloads. Also forbidden: building `ORDER BY`/table names from
+  user input (can't be parameterized — use a whitelist map instead).
+
+`.github/workflows/backend-ci.yml` greps every push/PR for
+`FromSqlRaw`/`ExecuteSqlRaw` and fails the build on any hit — the intent is
+that this repo has zero legitimate uses of either, so any hit needs a human
+to look at it, not a smarter grep. If a real, parameterized use of
+`FromSqlRaw`/`ExecuteSqlRaw` is ever added, update the CI step to allow-list
+that specific line with a comment explaining why `FromSql`/`ExecuteSql`
+wasn't enough.

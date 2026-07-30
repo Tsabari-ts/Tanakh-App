@@ -1,0 +1,47 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "Backend/**"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "Backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: Backend/global.json
+
+      # D-11: raw, unparameterized SQL is the SQL-injection risk this repo
+      # forbids - see Tanakh.Infrastructure/Data's XML docs. FromSql/ExecuteSql
+      # (FormattableString overloads) and FromSqlRaw/ExecuteSqlRaw with
+      # explicit NpgsqlParameter objects are fine; this only catches the Raw
+      # overloads by name, so any future justified use must be reviewed by
+      # hand and can be allow-listed here with a comment explaining why.
+      - name: Guard against raw SQL query APIs
+        run: |
+          if grep -rn "FromSqlRaw\|ExecuteSqlRaw" --include=*.cs .; then
+            echo "::error::FromSqlRaw/ExecuteSqlRaw found - use FromSql/ExecuteSql (FormattableString) or parameterize explicitly. See D-11 in docs/database.md."
+            exit 1
+          fi
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -warnaserror
+
+      - name: Test
+        run: dotnet test --no-build
