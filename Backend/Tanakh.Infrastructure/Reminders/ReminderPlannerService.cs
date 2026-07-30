@@ -71,7 +71,8 @@ namespace Tanakh.Infrastructure.Reminders
             AppDbContext dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             List<Subscriber> activeSubscribers = await dbContext.Subscribers
-                .Where(s => s.Status == SubscriberStatus.Active)
+                .Where(s => s.Status == SubscriberStatus.Active
+                    && (s.PausedUntil == null || s.PausedUntil < DateTimeOffset.UtcNow))
                 .ToListAsync(cancellationToken);
 
             int inserted = 0;
@@ -91,24 +92,12 @@ namespace Tanakh.Infrastructure.Reminders
                     continue;
                 }
 
-                DateTimeOffset nowLocal = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, subscriberTimeZone);
-                DateOnly localDate = DateOnly.FromDateTime(nowLocal.Date);
-
-                DateTimeOffset scheduledFor = LocalTimeResolver.Resolve(localDate, subscriber.PreferredTime, subscriberTimeZone);
-
-                // The slot already passed today (e.g. this cycle ran late) -
-                // schedule for tomorrow rather than sending immediately.
-                if (scheduledFor < DateTimeOffset.UtcNow)
-                {
-                    scheduledFor = LocalTimeResolver.Resolve(localDate.AddDays(1), subscriber.PreferredTime, subscriberTimeZone);
-                }
-
+                // NextOccurrenceResolver already returns a UTC-offset value -
                 // Npgsql only accepts UTC-offset DateTimeOffset values for
                 // timestamptz parameters, and the DB always round-trips
-                // scheduled_for as UTC anyway - normalize before it's used
-                // for the idempotency key or the insert, so both match what
-                // a later read of the same row would recompute.
-                scheduledFor = scheduledFor.ToUniversalTime();
+                // scheduled_for as UTC anyway.
+                DateTimeOffset scheduledFor = NextOccurrenceResolver.ComputeNext(
+                    DateTimeOffset.UtcNow, subscriber.PreferredTime, subscriberTimeZone);
 
                 string idempotencyKey = ReminderDelivery.ComputeIdempotencyKey(subscriber.Id, scheduledFor);
                 Guid id = Guid.CreateVersion7();
@@ -141,18 +130,7 @@ namespace Tanakh.Infrastructure.Reminders
             return new TimeOnly(int.Parse(parts[1]), int.Parse(parts[0]));
         }
 
-        private static DateTimeOffset ComputeNextRun(TimeOnly localTime, TimeZoneInfo timeZone)
-        {
-            DateTimeOffset nowLocal = TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, timeZone);
-            DateOnly today = DateOnly.FromDateTime(nowLocal.Date);
-
-            DateTimeOffset candidate = LocalTimeResolver.Resolve(today, localTime, timeZone);
-            if (candidate <= DateTimeOffset.UtcNow)
-            {
-                candidate = LocalTimeResolver.Resolve(today.AddDays(1), localTime, timeZone);
-            }
-
-            return candidate;
-        }
+        private static DateTimeOffset ComputeNextRun(TimeOnly localTime, TimeZoneInfo timeZone) =>
+            NextOccurrenceResolver.ComputeNext(DateTimeOffset.UtcNow, localTime, timeZone);
     }
 }

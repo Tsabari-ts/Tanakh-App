@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Domain;
 using Tanakh.Domain.Entities;
+using Tanakh.Domain.Scheduling;
 using Tanakh.Infrastructure.Data;
 using Tanakh.Infrastructure.Options;
 
@@ -190,6 +191,90 @@ namespace Tanakh.Infrastructure.Services
             await dbContext.ReminderDeliveries
                 .Where(d => d.SubscriberId == subscriberId && d.Status == DeliveryStatus.Pending)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(d => d.Status, DeliveryStatus.Skipped), cancellationToken);
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<SubscriberPreferences?> GetPreferencesAsync(Guid subscriberId, CancellationToken cancellationToken = default)
+        {
+            Subscriber? subscriber = await dbContext.Subscribers
+                .FirstOrDefaultAsync(s => s.Id == subscriberId, cancellationToken);
+
+            if (subscriber is null || subscriber.Status != SubscriberStatus.Active)
+            {
+                return null;
+            }
+
+            return new SubscriberPreferences(
+                subscriber.Email, subscriber.DisplayName, subscriber.PreferredTime,
+                subscriber.SkipShabbatHolidays, subscriber.PausedUntil);
+        }
+
+        public async Task UpdatePreferencesAsync(
+            Guid subscriberId,
+            TimeOnly? preferredTime,
+            bool? skipShabbatHolidays,
+            bool pauseFor30Days,
+            bool resume,
+            CancellationToken cancellationToken = default)
+        {
+            Subscriber? subscriber = await dbContext.Subscribers
+                .FirstOrDefaultAsync(s => s.Id == subscriberId, cancellationToken);
+
+            if (subscriber is null || subscriber.Status != SubscriberStatus.Active)
+            {
+                return;
+            }
+
+            bool schedulingChanged = preferredTime is not null && preferredTime.Value != subscriber.PreferredTime;
+
+            if (schedulingChanged)
+            {
+                subscriber.PreferredTime = preferredTime!.Value;
+            }
+
+            if (skipShabbatHolidays is not null)
+            {
+                subscriber.SkipShabbatHolidays = skipShabbatHolidays.Value;
+            }
+
+            if (pauseFor30Days)
+            {
+                subscriber.PausedUntil = DateTimeOffset.UtcNow.AddDays(30);
+            }
+            else if (resume)
+            {
+                subscriber.PausedUntil = null;
+            }
+
+            bool isPausedNow = subscriber.PausedUntil is not null && subscriber.PausedUntil > DateTimeOffset.UtcNow;
+
+            if (schedulingChanged || pauseFor30Days || resume)
+            {
+                // Cancel whatever was already planned - a stale time or a
+                // pause shouldn't still send today.
+                await dbContext.ReminderDeliveries
+                    .Where(d => d.SubscriberId == subscriberId && d.Status == DeliveryStatus.Pending)
+                    .ExecuteDeleteAsync(cancellationToken);
+            }
+
+            if (!isPausedNow && (schedulingChanged || resume))
+            {
+                // Replan immediately rather than waiting for tomorrow's
+                // planner run, so a same-day time change (or resuming) takes
+                // effect right away.
+                TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(subscriber.Timezone);
+                DateTimeOffset scheduledFor = NextOccurrenceResolver.ComputeNext(DateTimeOffset.UtcNow, subscriber.PreferredTime, timeZone);
+                string idempotencyKey = ReminderDelivery.ComputeIdempotencyKey(subscriberId, scheduledFor);
+
+                await dbContext.Database.ExecuteSqlInterpolatedAsync(
+                    $@"INSERT INTO reminder_deliveries
+                        (id, subscriber_id, scheduled_for, status, attempt_count, idempotency_key, created_at, updated_at)
+                       VALUES
+                        ({Guid.CreateVersion7()}, {subscriberId}, {scheduledFor}, 'pending', 0, {idempotencyKey}, now(), now())
+                       ON CONFLICT (idempotency_key) DO NOTHING",
+                    cancellationToken);
+            }
 
             await dbContext.SaveChangesAsync(cancellationToken);
         }

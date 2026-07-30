@@ -31,6 +31,10 @@ namespace Tanakh.Domain.Entities
 
         public string? UnsubscribeReason { get; set; }
 
+        // Active subscriber, but temporarily not receiving reminders until
+        // this instant (T-17 "pause for a month"). Null means not paused.
+        public DateTimeOffset? PausedUntil { get; set; }
+
         public string Locale { get; set; } = "he-IL";
     }
 }

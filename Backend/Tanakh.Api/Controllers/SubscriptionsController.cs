@@ -139,6 +139,61 @@ namespace Tanakh.Api.Controllers
             return Ok();
         }
 
+        /// <summary>Preference center: change reminder time, Shabbat/holiday skip, or pause - reached via the signed subscriber token from a reminder email footer.</summary>
+        [HttpGet("me")]
+        public async Task<IActionResult> GetPreferencesPageAsync([FromQuery] string token, CancellationToken cancellationToken)
+        {
+            if (!unsubscribeTokenService.TryValidate(token, out Guid subscriberId))
+            {
+                return InvalidManageTokenPage();
+            }
+
+            SubscriberPreferences? preferences = await subscriptionService.GetPreferencesAsync(subscriberId, cancellationToken);
+            if (preferences is null)
+            {
+                return Content(
+                    SubscriptionPages.Render("אין הרשמה פעילה", "לא נמצאה הרשמה פעילה לניהול.", options.PublicBaseUrl),
+                    "text/html; charset=utf-8");
+            }
+
+            string html = SubscriptionPages.RenderPreferencesForm(
+                token,
+                preferences.PreferredTime,
+                preferences.SkipShabbatHolidays,
+                preferences.PausedUntil,
+                $"{options.ApiBaseUrl}/api/v1/subscriptions/me");
+
+            return Content(html, "text/html; charset=utf-8");
+        }
+
+        [HttpPost("me")]
+        public async Task<IActionResult> UpdatePreferencesAsync([FromForm] UpdatePreferencesForm form, CancellationToken cancellationToken)
+        {
+            if (!unsubscribeTokenService.TryValidate(form.Token, out Guid subscriberId))
+            {
+                return InvalidManageTokenPage();
+            }
+
+            TimeOnly? preferredTime = TimeOnly.TryParse(form.PreferredTime, out TimeOnly parsed) ? parsed : null;
+            bool pause = form.Action == "pause";
+            bool resume = form.Action == "resume";
+
+            await subscriptionService.UpdatePreferencesAsync(
+                subscriberId, preferredTime, form.SkipShabbatHolidays, pause, resume, cancellationToken);
+
+            string message = pause
+                ? "התזכורות הושהו לחודש."
+                : resume
+                    ? "התזכורות חודשו."
+                    : "ההעדפות שלך עודכנו בהצלחה.";
+
+            return Content(SubscriptionPages.Render("העדכון בוצע", message, options.PublicBaseUrl), "text/html; charset=utf-8");
+        }
+
+        private ContentResult InvalidManageTokenPage() => Content(
+            SubscriptionPages.Render("קישור לא תקין", "קישור הניהול אינו תקין.", options.PublicBaseUrl),
+            "text/html; charset=utf-8");
+
         private static bool IsValidEmail(string email)
         {
             try
