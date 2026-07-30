@@ -1,15 +1,18 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
 using System.Diagnostics;
+using System.Linq;
 using Tanakh.Api;
 using Tanakh.Api.Services;
 using Tanakh.Domain;
 using Tanakh.Domain.Caching;
 using Tanakh.Infrastructure;
 using Tanakh.Infrastructure.Caching;
+using Tanakh.Infrastructure.HealthChecks;
 using Tanakh.Infrastructure.Options;
 using Tanakh.Infrastructure.Services;
 
@@ -29,6 +32,8 @@ builder.Services.AddOptions<TanakhDataOptions>()
 builder.Services.AddOptions<EmailOptions>()
     .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddHealthChecks()
+    .AddCheck<TanakhDataHealthCheck>("tanakh-data", tags: new[] { "ready" });
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails(options =>
@@ -64,6 +69,24 @@ app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Liveness: is the process up and able to route requests at all - no
+// dependency checks (Predicate excludes every registered check).
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false
+});
+
+// Readiness: can this instance actually serve traffic correctly. Only
+// checks TanakhData/TanakhStructure file presence - the one dependency
+// this app's core function genuinely can't run without. SMTP/email is
+// deliberately excluded: it's an optional, gracefully-degraded feature
+// (see EmailOptions), not a readiness-gating dependency, and Subscribe
+// already reports its own failure per-request when email delivery fails.
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 
 app.Run();
 

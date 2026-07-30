@@ -25,6 +25,12 @@ namespace Tanakh.Infrastructure
                 ?? Path.Combine(environment.ContentRootPath, "Data");
         }
 
+        // Existence-only, deliberately not a full parse - used by the readiness
+        // health check, which needs to be cheap to call on every probe.
+        public bool DataFilesExist() =>
+            File.Exists(Path.Combine(dataDirectory, "TanakhData.json"))
+                && File.Exists(Path.Combine(dataDirectory, "TanakhStructure.json"));
+
         public async Task<TanakhContainer> GetFullTanakhFromCacheAsync(string cacheKey, CancellationToken cancellationToken)
         {
             if (cache.TryGet(cacheKey, out TanakhContainer? cached))
