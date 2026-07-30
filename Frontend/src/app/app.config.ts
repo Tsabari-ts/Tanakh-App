@@ -1,4 +1,4 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withXhr, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -11,6 +11,7 @@ import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
     provideAnimations(),
     provideHttpClient(withXhr(), withInterceptorsFromDi()),

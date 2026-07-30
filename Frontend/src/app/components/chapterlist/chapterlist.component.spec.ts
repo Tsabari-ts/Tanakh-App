@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ChapterlistComponent } from './chapterlist.component';
 
@@ -8,7 +9,8 @@ describe('ChapterlistComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [ChapterlistComponent]
+    imports: [ChapterlistComponent],
+    providers: [provideZonelessChangeDetection()]
 })
     .compileComponents();
     
