@@ -428,3 +428,35 @@ Started only after F-03 was fully complete and merged, per the spec's hard depen
 **No code changes made.** Per rule 7 ("if a task turns out ... different [from the plan], stop and ask" was already exercised for F-14's premise mismatch; here the honest outcome is simpler — there is nothing to build, and forcing a `@defer` block around something that doesn't warrant one would be exactly the kind of change the ground rules warn against). Every DoD item is vacuously satisfied by having deferred nothing: no SEO-critical content is inside a `@defer` block (none exists), no layout shift from lazy content (none exists), bundle size is unaffected (confirmed no build changes were needed).
 
 ---
+
+## F-10 · Set strict budgets in `angular.json` (2026-07-31)
+
+**Branch:** `feat/f-10-budgets`
+
+Per the spec's explicit instruction to measure before locking anything in, and given F-08/F-09 optimization is already done (F-09's lazy-loading landed a ~46% initial-bundle reduction; F-08 confirmed there's nothing further to split), took the "optimize first, then lock in the real target" path rather than "current + 5%."
+
+**Measured real current usage** (fresh production build, no changes):
+- `initial`: 337.80 kB raw / 62.06 kB transfer
+- `allScript` (every JS chunk, initial + all lazy): computed by hand from the build output — 234.01 (main) + 273.69 + 9.95 + 7.08 + 5.22 + 4.31 + 3.80 + 2.84 + 0.731 (all lazy chunks) ≈ **541.63 kB raw**
+- `anyComponentStyle`: max was `entrance.component.css` at 2.53 kB (also `app.component.css` 2.14 kB, `subscribe.component.css` 2.29 kB — all three were already over the *old* 2 kB threshold, generating warnings since before this task)
+- `bundle` (styles.css + Material's prebuilt theme, combined initial CSS chunk): 103.79 kB raw
+
+**Set, with real headroom against the numbers above, not arbitrary round numbers:**
+```json
+{ "type": "initial", "maximumWarning": "350kb", "maximumError": "500kb" }
+{ "type": "allScript", "maximumWarning": "800kb", "maximumError": "1mb" }
+{ "type": "anyComponentStyle", "maximumWarning": "4kb", "maximumError": "8kb" }
+{ "type": "bundle", "name": "styles", "maximumWarning": "110kb", "maximumError": "150kb" }
+```
+- `initial`/`allScript`/`anyComponentStyle` match the spec's own suggested example values exactly — checked they weren't just copied blindly, they genuinely fit current usage with real (if not huge, for `initial`) margin.
+- `bundle`/`styles`: the spec's suggested `100kB` warning would have **immediately failed** — current usage (103.79 kB) already exceeds it. Adjusted to `110kB` to give ~6kB of real headroom instead of quietly inflating past what's honest. The 103.79 kB figure is dominated by `@angular/material/prebuilt-themes/indigo-pink.css` (the whole-theme prebuilt CSS file, not a custom-tokens theme) — shrinking this further would mean moving to M3 design tokens with a custom theme, which is F-01's open decision #1, already noted there as moot until someone actually wants to invest in a redesign. Not attempted here.
+- Result: **all three pre-existing component-CSS budget warnings, and the previous close-to-the-edge initial-budget situation, are gone** — confirmed via a clean rebuild with zero budget warnings (only the unrelated, pre-existing `gematriya` CJS notice remains).
+- **Verified the enforcement mechanism itself actually works**, per the DoD ("artificially adding a heavy library makes the build fail, then revert"): temporarily dropped `initial`'s `maximumError` to `300kb` (below the real 337.80 kB), rebuilt, confirmed a genuine `[ERROR] bundle initial exceeded maximum budget` and "Application bundle generation failed" — not just a warning — then reverted the threshold back to `500kb` and rebuilt clean. This is a slightly different mechanism than "add a heavy library" but tests the identical code path (the budget checker's error-vs-pass boundary), with less risk of leaving stray dependencies behind.
+- Added `"verify": "ng test --watch=false --browsers=ChromeHeadless && ng build --configuration production && npm audit --omit=dev --audit-level=high"` to `package.json`. **Deliberately omitted `ng lint`** from the spec's suggested script — this repo has no lint tooling configured at all (documented in the Baseline section of this log, unchanged since F-06); including it verbatim would make `npm run verify` fail immediately and unconditionally for everyone, which is worse than omitting a check that doesn't exist yet.
+- Checked for existing CI (`.github/workflows/`) before adding anything — found `backend-ci.yml` and `backend-backup.yml`, **no frontend workflow**. Per the spec's explicit instruction ("if not, record CI setup as launch checklist item L-05; do not set one up now"), did not create a new GitHub Actions workflow. Added **L-05** to `docs/LAUNCH-CHECKLIST.md`.
+- **Ran `npm run verify` end-to-end and confirmed its actual exit behavior**, not just that the script parses: it correctly exits non-zero (1) and correctly stops at the `ng test` step via `&&` short-circuiting — it never reaches `ng build`/`npm audit` in this repo's current state, because the **pre-existing** 10 failing tests (documented since the Baseline, unrelated to F-10 or any task in this log) make the first step fail. This is the *correct* behavior for a verify gate — it's supposed to fail when tests fail — but it does mean `npm run verify` can't be used as a green/red CI gate until that separate, already-tracked gap is addressed. Not fixed here; it predates this entire modernization effort and touching test infrastructure is explicitly out of scope per the ground rules ("Decline. Do not change test infrastructure mid-upgrade" — F-01's log).
+- `ng build --configuration production`: succeeds, clean, zero budget warnings.
+- `ng test --watch=false --browsers=ChromeHeadless`: 10 FAILED / 18 SUCCESS, unchanged (F-10 touches build config only, no source changes).
+- Values and rationale recorded above, per the DoD's explicit requirement that this be documented in `UPGRADE-LOG.md` rather than just committed silently.
+
+---
