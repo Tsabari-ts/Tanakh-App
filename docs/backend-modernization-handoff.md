@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **13 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-11 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **14 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-12 with zero re-derivation.
 
 ---
 
@@ -57,6 +57,7 @@ Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 | `53b7423` | B-04: Split into Tanakh.Domain/Infrastructure/Api/Tests |
 | `c1488e2` | B-09: Move remaining configuration to the Options pattern |
 | `ad122e1` | B-16: Extract business logic from controllers into services |
+| `e12c625` | B-11: Make all I/O asynchronous |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
@@ -267,8 +268,8 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
-3. **B-18, B-04, B-09, and B-16 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`) — see §4 for the current 4-project layout and §9 for what B-16 actually did (kept Controllers, kept `TanakhController` as one class, extracted 3 services, fixed the hardcoded-2024-01-30 date bug per explicit confirmation). Next task in wave order is **B-11** (make all I/O asynchronous), which has no decision point.
-4. Note the new `Tanakh.Infrastructure/Services/` and `Tanakh.Api/Services/` folders from B-16 — when you get to B-11, the sync `CacheProvider`/`TanakhStructureService`/`TanakhTextService`/`JewishCalendarService` call chain all needs to go async together (see B-11's updated file list in §9).
+3. **B-18, B-04, B-09, B-16, and B-11 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`, `e12c625`) — see §4 for the current 4-project layout. Every I/O call in the app is now genuinely async (see B-11's entry in §9): `CacheProvider`, the 3 B-16 services, and `EmailSender` are all `Task`-returning with an `Async` suffix; all 3 controllers are `async Task<IActionResult>` with action methods also renamed `...Async` (safe — every route is explicit via attributes, not name-derived). `Microsoft.VisualStudio.Threading.Analyzers 18.7.23` is now active as errors on all 3 non-test projects. Next task in wave order is **B-12** (add `CancellationToken` to every endpoint/outbound call), which depends on B-11 (now satisfied) and has one real judgment call flagged in §9 (should `SubscribeController`'s email send use `RequestAborted` or run to completion regardless of client disconnect?) — surface it, don't guess.
+4. Grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` still returns zero hits as of `e12c625` — if a fresh session finds any, something has regressed.
 
 ---
 
@@ -322,29 +323,15 @@ Verified: full solution build clean (Debug + Release, `-warnaserror`), architect
 
 ---
 
-### B-11 · Make all I/O asynchronous · Wave 5 · P1 · S
+### B-11 · Make all I/O asynchronous · Wave 5 · P1 · S · **DONE (`e12c625`)**
 
-**Purpose:** eliminate sync-over-async; thread-pool starvation risk.
+Completed this session. `CacheProvider` (`GetFullTanakhFromCacheAsync`/`GetTanakhStructureFromCacheAsync`, using `File.ReadAllTextAsync`), the 3 B-16 services, and `EmailSender` (`SendMessageAsync` via `SmtpClient.SendMailAsync`) are all genuinely `Task`-returning now — every method involved was also renamed with the `Async` suffix, including the controller action methods themselves (`GetBookListAsync`, `GetChapterAsync`, `GetJewishCalendarAsync`, `RegisterNewUserAsync`, `DeleteUserAsync`, etc.) — safe to rename because every route in this app is explicit via `[HttpGet]`/`[Route]` attributes, never derived from the method name.
 
-**Files expected to change (paths updated post-B-04/B-16):** `Backend/Tanakh.Infrastructure/Services/JewishCalendarService.cs` (the known offender — `FillJewishCalendar().GetAwaiter().GetResult()`), `Backend/Tanakh.Infrastructure/CacheProvider.cs` (file reads), `Backend/Tanakh.Infrastructure/Services/TanakhStructureService.cs` + `Backend/Tanakh.Api/Services/TanakhTextService.cs` (both call into `CacheProvider`, so both need `Task`-returning signatures once it does), `Backend/Tanakh.Api/Controllers/TanakhController.cs` + `JewishCalendarController.cs` (action method signatures need `async Task<IActionResult>`), `Backend/Tanakh.Infrastructure/EmailSender.cs` (`SmtpClient.Send` → `SendMailAsync`), `Backend/Tanakh.Api/Controllers/SubscribeController.cs` (action signatures).
+Added `Microsoft.VisualStudio.Threading.Analyzers 18.7.23` (checked against NuGet for the current stable version, not guessed) to all 3 non-test projects, active as errors via the existing `TreatWarningsAsErrors=true`. It immediately flagged **VSTHRD200** (missing `Async` suffix) on every controller action — fixed by renaming rather than suppressing the rule, since the rename was free here and keeps the analyzer meaningful for whoever touches this next, rather than carrying a standing exception list from day one.
 
-**Current state:** `JewishCalendarService.IsBetweenCandleLightingAndHavdalah()` does `FillJewishCalendar().GetAwaiter().GetResult()` (moved here verbatim from the controller in B-16 — B-16 explicitly did not fix this, since that's B-11's job). `CacheProvider` uses `StreamReader.ReadToEnd()` (sync) — should become `File.ReadAllTextAsync(...)`. `EmailSender.SendMessage` uses `SmtpClient.Send()` (sync, and `SmtpClient` itself is legacy/obsolete in modern .NET — consider whether this task should also flag `SmtpClient` obsolescence, though replacing it entirely is arguably beyond "make it async," worth a quick note to the user).
+`ITanakhCache`/`MemoryTanakhCache` deliberately left synchronous — `IMemoryCache` access is in-memory dictionary lookups, not real I/O, so there's nothing to make async there.
 
-**Implementation steps:**
-1. `CacheProvider.GetFullTanakhFromCache`/`GetTanakhStructureFromCache` → `async Task<TanakhContainer>`/`async Task<List<BaseStructure>>`, using `File.ReadAllTextAsync`.
-2. `JewishCalendarService`'s private `FillJewishCalendar` already returns `Task<JewishCalendarContainer>` — just remove the `.GetAwaiter().GetResult()` call site in `IsBetweenCandleLightingAndHavdalah()`, make it `async Task<bool>`, and update `IJewishCalendarService`'s signature + `JewishCalendarController.GetJewishCalendar()` to `async Task<IActionResult>` accordingly.
-3. `TanakhStructureService`/`TanakhTextService`'s methods all need to become async all the way up to the controllers, since they call `CacheProvider`.
-4. `EmailSender.SendMessage` → `SendMessageAsync` using `SmtpClient.SendMailAsync(...)`; update `IEmailSender`'s signature too; `SubscribeController`'s two action methods become async.
-5. Add the threading analyzer as the spec asks (`Microsoft.VisualStudio.Threading.Analyzers` or built-in equivalent rules) as errors, to prevent regressions.
-
-**Verification/testing steps:**
-1. Grep for `.Result`, `.Wait()`, `.GetAwaiter().GetResult()`, `async void` — must return zero hits (excluding `Program.cs` top-level statements, which are inherently synchronous by design and not part of this rule).
-2. `dotnet build -warnaserror` clean with the new analyzer enabled.
-3. Full endpoint smoke test — response bodies must be byte-identical to before.
-
-**Expected commit message:** `B-11: Make all I/O asynchronous`
-
-**Risks:** low — mechanical `async`/`await` propagation. The threading analyzer package name/exact rule IDs should be verified against NuGet before adding (per this spec's ground rule 3: don't invent versions or flags, check first).
+Verified: full solution build clean (Debug + Release, `-warnaserror`, analyzer active), architecture test still passes, grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` returns zero hits anywhere in the solution, full endpoint smoke test byte-identical to the pre-B-11 baseline (confirming the method renames didn't touch any route), the B-03/B-09 corrupted-JSON guard-clause test re-verified against the new async file-read path, and a full Docker build + container run smoke test given the new package references.
 
 ---
 
@@ -352,7 +339,7 @@ Verified: full solution build clean (Debug + Release, `-warnaserror`), architect
 
 **Purpose:** disconnecting a client should abort server-side work.
 
-**Files expected to change:** all controller action methods (post-B-11, they're all `async` already), `CacheProvider`'s now-async methods, the 3 B-16 services, `EmailSender`, `JewishCalendarService`'s `HttpClient` call.
+**Files expected to change:** all controller action methods (already `async Task<IActionResult>` since B-11), `CacheProvider`'s async methods, the 3 B-16 services (all already `Task`-returning with an `Async` suffix — just need a `CancellationToken` parameter threaded through each), `EmailSender`, `JewishCalendarService`'s `HttpClient` call.
 
 **Depends on B-11 landing first** (can't thread a `CancellationToken` through sync methods meaningfully).
 
