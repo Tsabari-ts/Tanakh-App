@@ -1,7 +1,9 @@
 <div class="centered-container">
-<div class="button-row">
-  <button class="books-button" *ngFor="let item of data" (click)="goTo(item)">
-    {{ item.heTitle }}
-  </button>
-</div>
+  <div class="button-row">
+    @for (item of data; track item) {
+      <button class="books-button" (click)="goTo(item)">
+        {{ item.heTitle }}
+      </button>
+    }
+  </div>
 </div>
