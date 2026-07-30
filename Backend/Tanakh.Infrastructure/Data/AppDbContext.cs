@@ -29,6 +29,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
 
+        public DbSet<AuditLogEntry> AuditLog => Set<AuditLogEntry>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
