@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -7,16 +7,16 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
     selector: 'app-read-permission',
     templateUrl: './read-permission.component.html',
     styleUrl: './read-permission.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatDialogActions]
 })
 
 export class ReadPermissionComponent implements OnInit{
   userHasConfirmedReading = false;
-  isButtonDisabled = false;
-  isSavedInProgress = false;
-  isSavedSuccessful = false;
-  progressValue = 0;
+  readonly isButtonDisabled = signal(false);
+  readonly isSavedInProgress = signal(false);
+  readonly isSavedSuccessful = signal(false);
+  readonly progressValue = signal(0);
   loadingInterval: any;
   book: string = '';
   private hasStorage = 'HasStorage';
@@ -28,7 +28,7 @@ export class ReadPermissionComponent implements OnInit{
       this.userHasConfirmedReading = this.data.additionalData.userHasConfirmedReading;
     }
 
-    ngOnInit(): void {   
+    ngOnInit(): void {
       if(this.userHasConfirmedReading){
         this.startLoading();
       }
@@ -36,13 +36,13 @@ export class ReadPermissionComponent implements OnInit{
 
     startLoading(): void {
   const duration = 3000;
-  const interval = 30; 
+  const interval = 30;
   const steps = (duration / interval);
   const stepSize = 100 / steps;
 
   this.loadingInterval = setInterval(() => {
-    if (this.progressValue < 200) {
-      this.progressValue += stepSize;
+    if (this.progressValue() < 200) {
+      this.progressValue.update(v => v + stepSize);
     } else {
       this.stopLoading();
     }
@@ -57,7 +57,7 @@ stopLoading(): void {
   clearInterval(this.loadingInterval);
   if(this.userHasConfirmedReading){
     this.saveSectionToLocalStorage();
-    this.dialogRef.close(); 
+    this.dialogRef.close();
   }
 }
 
@@ -66,22 +66,22 @@ stopLoading(): void {
   }
 
   saveAndClose(): void {
-    this.isButtonDisabled = true;
-    this.isSavedInProgress = true;
+    this.isButtonDisabled.set(true);
+    this.isSavedInProgress.set(true);
    this.startLoading();
 
     setTimeout(() => {
       this.stopLoading();
-    
+
       setTimeout(() => {
         this.saveSectionToLocalStorage();
-        this.isSavedInProgress = false;
-        this.isSavedSuccessful = true;
-    
+        this.isSavedInProgress.set(false);
+        this.isSavedSuccessful.set(true);
+
         setTimeout(() => {
           this.dialogRef.close();
-        }, 2000);  
-      }, 1000);  
+        }, 2000);
+      }, 1000);
     }, 1000);
   }
 
@@ -89,7 +89,7 @@ stopLoading(): void {
     let section = this.data.additionalData.sectionRef.section;
     let nextChapter = this.data.additionalData.sectionRef.nextChapter;
     let sectionData = section + " " + nextChapter;
-  
+
     localStorage.setItem(this.hasStorage, 'true');
     localStorage.setItem(this.sectionRef, sectionData);
   }

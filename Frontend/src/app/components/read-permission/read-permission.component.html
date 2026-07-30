@@ -14,7 +14,7 @@
           <p>מתבצעת שמירה...</p>
           <br>
             <div class="progress-container">
-              <div class="progress-bar" [style.width.%]="progressValue"></div>
+              <div class="progress-bar" [style.width.%]="progressValue()"></div>
             </div>
           </div>
         </div>
@@ -34,14 +34,14 @@
             <b>{{ "האם לשמור את הפרק?" }}</b>
             <br><br>
             <div mat-dialog-actions>
-              <button class="save-button" (click)="saveAndClose()" [disabled]="isButtonDisabled">שמירת הפרק</button>
+              <button class="save-button" (click)="saveAndClose()" [disabled]="isButtonDisabled()">שמירת הפרק</button>
             </div>
-            @if (isSavedInProgress) {
+            @if (isSavedInProgress()) {
               <div class="progress-container">
-                <div class="progress-bar" [style.width.%]="progressValue"></div>
+                <div class="progress-bar" [style.width.%]="progressValue()"></div>
               </div>
             }
-            @if (isSavedSuccessful) {
+            @if (isSavedSuccessful()) {
               <div>
                 <span class="serverResponse">הפרק נשמר בהצלחה</span>
               </div>

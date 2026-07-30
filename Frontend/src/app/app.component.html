@@ -3,7 +3,7 @@
 <div class="container">
   <div class="title">
     <h1>פרק תנ"ך ביום</h1>
-    @if (showButton) {
+    @if (showButton()) {
       <button class="return-button" (click)="goBack()">
         <span id="hide-text">חזרה</span>
         <div class="icon" [ngClass]="returnIcon"></div>

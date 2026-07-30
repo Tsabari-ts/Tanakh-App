@@ -1,4 +1,5 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { AppComponent } from '../../app.component';
@@ -7,36 +8,41 @@ import { AppComponent } from '../../app.component';
     selector: 'app-booklist',
     templateUrl: './booklist.component.html',
     styleUrl: './booklist.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class BooklistComponent implements OnInit {
   section: string | null = "";
-  data: any;
-  loadError = false;
+  readonly data = signal<any>(undefined);
+  readonly loadError = signal(false);
 
     constructor(private activatedRoute: ActivatedRoute,
                 private apiService: ApiCallService,
                 private router: Router,
-                private appComponent: AppComponent) {
-                  this.appComponent.showButton = true;
+                private appComponent: AppComponent,
+                private destroyRef: DestroyRef) {
+                  this.appComponent.showButton.set(true);
                  }
 
   ngOnInit(): void {
-    this.activatedRoute.params.subscribe(p => {
+    this.activatedRoute.params
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(p => {
       this.section = p['section'];
-      
+
       if (this.section != null) {
-        this.apiService.getBookList(this.section).subscribe(data => {
+        this.apiService.getBookList(this.section)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(data => {
           if (data.error) {
             console.log(data.error);
-            this.loadError = true;
+            this.loadError.set(true);
             return;
           }
-          this.data = data;
+          this.data.set(data);
         }, (error) => {
           console.log(error);
-          this.loadError = true;
+          this.loadError.set(true);
         })
       }
     })

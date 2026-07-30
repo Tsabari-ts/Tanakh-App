@@ -60,16 +60,16 @@
                   }
                 </div>
                 <br>
-                  <button class="go-setting-button" type="submit" [disabled]="isButtonDisabled">הירשם</button>
+                  <button class="go-setting-button" type="submit" [disabled]="isButtonDisabled()">הירשם</button>
                 </form><br>
-                @if (isRequestInProgress) {
+                @if (isRequestInProgress()) {
                   <div class="progress-container">
-                    <div class="progress-bar" [style.width.%]="progressValue"></div>
+                    <div class="progress-bar" [style.width.%]="progressValue()"></div>
                   </div>
                 }
-                @if (isRequestSuccessful) {
+                @if (isRequestSuccessful()) {
                   <div>
-                    <span class="serverResponse">{{serverResponse}}</span>
+                    <span class="serverResponse">{{serverResponse()}}</span>
                   </div>
                 }
               </div>

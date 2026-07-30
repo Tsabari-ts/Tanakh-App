@@ -1,19 +1,19 @@
 
 <div class="centered-container" #contentContainer>
 
-  @if (loadError) {
+  @if (loadError()) {
     <div class="empty-state">
       <p>אירעה שגיאה בטעינת הפרק. ייתכן שהפרק אינו קיים.</p>
       <button class="end-button" type="button" (click)="returnToHomePage()">חזרה לדף הבית</button>
     </div>
   } @else {
     <p class="tittle">
-      {{title}}
+      {{title()}}
     </p>
-    @if (data) {
+    @if (data()) {
       <div>
         <p class="sentences">
-          {{ data }}
+          {{ data() }}
           <br>
             <button class="end-button" (click)="finishedReading()">סיימתי לקרוא</button>
           </p>
