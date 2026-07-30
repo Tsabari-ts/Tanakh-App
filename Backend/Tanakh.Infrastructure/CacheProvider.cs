@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using Tanakh.Domain.Caching;
 using Tanakh.Infrastructure.Model;
+using Tanakh.Infrastructure.Options;
 
 namespace Tanakh.Infrastructure
 {
@@ -15,10 +16,10 @@ namespace Tanakh.Infrastructure
         private readonly ITanakhCache cache;
         private readonly string dataDirectory;
 
-        public CacheProvider(ITanakhCache cache, IHostEnvironment environment, IConfiguration configuration)
+        public CacheProvider(ITanakhCache cache, IHostEnvironment environment, IOptions<TanakhDataOptions> dataOptions)
         {
             this.cache = cache;
-            dataDirectory = configuration["TanakhData:DataDirectory"]
+            dataDirectory = dataOptions.Value.DataDirectory
                 ?? Path.Combine(environment.ContentRootPath, "Data");
         }
 

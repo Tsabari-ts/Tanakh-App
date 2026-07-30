@@ -19,6 +19,8 @@ builder.Services.AddMemoryCache(options =>
 });
 builder.Services.AddSingleton<ITanakhCache, MemoryTanakhCache>();
 builder.Services.AddScoped<CacheProvider>();
+builder.Services.AddOptions<TanakhDataOptions>()
+    .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
 builder.Services.AddOptions<EmailOptions>()
     .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
 builder.Services.AddTransient<IEmailSender, EmailSender>();

@@ -3,7 +3,7 @@
 ## Configuration
 
 All secrets are supplied via configuration, never committed to the repo. The app reads an
-`Email` section bound to `Tanakh.Options.EmailOptions`:
+`Email` section bound to `Tanakh.Infrastructure.Options.EmailOptions`:
 
 | Key | Purpose |
 |---|---|
@@ -13,12 +13,19 @@ All secrets are supplied via configuration, never committed to the repo. The app
 | `Email:SmtpServer` | SMTP host |
 | `Email:SmtpPort` | SMTP port |
 
-If any of these are missing, `EmailSender.SendMessage` returns `false` instead of sending —
-it does not crash the request.
+Email configuration is entirely optional and has no startup validation, by design: if any of
+these are missing (or only some are set), `EmailSender.SendMessage` returns `false` instead of
+sending — it does not crash the request, and the app starts normally either way.
+
+There's also a `TanakhData` section bound to `Tanakh.Infrastructure.Options.TanakhDataOptions`:
+
+| Key | Purpose |
+|---|---|
+| `TanakhData:DataDirectory` | Overrides where `TanakhData.json`/`TanakhStructure.json` are read from. Optional — defaults to `Data/` under the app's content root. |
 
 ### Development
 
-This project already has a `UserSecretsId` in `Tanakh.csproj`. Set secrets locally with:
+This project already has a `UserSecretsId` in `Tanakh.Api/Tanakh.Api.csproj`. Set secrets locally with:
 
 ```
 dotnet user-secrets set "Email:EmailAddress" "your-address@example.com"
