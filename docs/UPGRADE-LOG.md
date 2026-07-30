@@ -80,3 +80,23 @@ Tracks what changed, what broke, and what was deferred for each task in `docs/TA
 - Manual grep confirms zero remaining callers of `LoadLocalStorage` and zero remaining debug-only `console.log`s. ✅
 
 ---
+
+## F-01 · Upgrade Angular 17 → 22 (2026-07-31 onward)
+
+**Branch:** `chore/f-01-angular-upgrade`
+
+Preparation: `git status` clean, `npm ci` clean install, baseline `ng build --configuration production` green (see Baseline section). `node -v` = v20.11.0, no version manager installed — flagged as a blocker for the 21→22 step specifically, not for 17→21.
+
+### 17 → 18 (2026-07-31)
+
+- `npx ng update @angular/core@18 @angular/cli@18`: core/cli/animations/common/compiler/forms/platform-browser(-dynamic)/router/service-worker → 18.2.14, `@angular-devkit/build-angular`/`@angular/cli` → 18.2.21, `typescript` → 5.5.4, `zone.js` → 0.14.10.
+  - Automated migration replaced `HttpClientModule` with `provideHttpClient(withInterceptorsFromDi())` in `app.module.ts` — expected, matches the direction F-07 formalizes later.
+  - "Migrate to new build system" optional migration: **not needed**, `angular.json` was already on the `@angular-devkit/build-angular:application` (esbuild) builder before this upgrade started.
+- `npx ng update @angular/material@18`: material/cdk → 18.2.14. **No manual SCSS changes required** — ⚠️ VERIFY correction: the spec's biggest anticipated 17→18 pain point (M2→M3 Sass function renames, `mat.define-light-theme` → `mat.m2-define-light-theme`) does not apply to this app. It has no custom Material theme file; it only imports the prebuilt `@angular/material/prebuilt-themes/indigo-pink.css`, so there is no `mat.define-*`/`mat.get-*` call anywhere in the codebase (confirmed via grep). Open decision #1 (stay on M2 vs move to M3 tokens) is therefore moot for now — nothing to decide until a custom theme is introduced.
+- `ng build --configuration production`: succeeds. Bundle grew slightly (666.45 kB raw / 148.30 kB transfer vs 622.66 kB / 139.81 kB baseline after F-15) — same 3 warning types as before (initial budget, 2 component-CSS budgets, `gematriya` CJS). Not investigated further; budget tuning is F-10's job, later in the sequence.
+- `ng test --watch=false --browsers=ChromeHeadless`: 12 FAILED / 5 SUCCESS — identical to the pre-upgrade baseline, no new failures.
+- Smoke test: served `dist/tanakh/browser` via `http-server` on `localhost:8080`. `/` returns 200 with correct `<html dir="rtl" lang="he">` and loads. Deep route `/books/main` returns 404 — this is `http-server` not doing SPA fallback (no `-P` catch-all flag used), not an app regression; it's the same class of issue F-14 already exists to fix architecturally. Full interactive browser testing (click-through navigation, offline, responsive) was **not** performed — this environment has no headed browser available; build/test/curl-level verification substitutes for it at each intermediate version step. A full manual pass will be done once the upgrade sequence (and F-14) land.
+- `npm audit --omit=dev`: not yet re-checked at this intermediate step; will check after the full 17→22 sequence completes, since intermediate versions are stepping stones, not a shipped state.
+- Committed as a single `chore(F-01): upgrade Angular to v18` (core/cli and material updates squashed together, since `ng update` required a clean tree between the two commands but they represent one logical version step per the spec).
+
+---
