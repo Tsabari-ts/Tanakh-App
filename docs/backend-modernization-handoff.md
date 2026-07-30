@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **9 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-18 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **10 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-04 with zero re-derivation.
 
 ---
 
@@ -39,7 +39,7 @@ export DOTNET_ROOT="C:\Users\Tomer\dotnet10"; export PATH="C:\Users\Tomer\dotnet
 
 ## 3. Commits made this session (chronological, oldest first)
 
-Full history: `git log --oneline` from `dba9c4f` through `f286c51`.
+Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 
 | Commit | Message |
 |---|---|
@@ -53,12 +53,13 @@ Full history: `git log --oneline` from `dba9c4f` through `f286c51`.
 | `b96b1b0` | B-07: Replace System.Runtime.Caching with IMemoryCache behind ITanakhCache |
 | `694120e` | B-06: Replace Swashbuckle with built-in OpenAPI + Scalar |
 | `f286c51` | B-03: Enable Nullable Reference Types and fix every warning |
+| `cc897a5` | B-18: Migrate Newtonsoft.Json to System.Text.Json |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
 ---
 
-## 4. Current backend state (as of `f286c51`)
+## 4. Current backend state (as of `cc897a5`)
 
 ```
 Backend/
@@ -185,7 +186,6 @@ public partial class Program;
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.11.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.16.16" />
   </ItemGroup>
 
@@ -241,7 +241,7 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted.
-3. Start **B-18** (next task in wave order — see full spec below). It has no decision point, so no need to check in before starting, but per this spec's ground rules, still stop and ask if anything unexpected turns up (e.g. `[JsonProperty]` attributes not accounted for below, or a second test project convention already in place).
+3. **B-18 is done** (commit `cc897a5`) — Newtonsoft.Json fully removed, both deserialization call sites on System.Text.Json, verified via before/after curl diff + re-run of the B-03 corrupted-JSON guard-clause test. Next task in wave order is **B-04**, which is a decision point.
 4. When you reach **B-04**, stop and present the project-split decision (§10) before moving any files.
 5. When you reach **B-16**, stop and present the Controllers-vs-Minimal-APIs decision (§10) before restructuring endpoints.
 
@@ -249,44 +249,9 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 ## 9. Remaining tasks — full detail
 
-### B-18 · Migrate Newtonsoft.Json → System.Text.Json · Wave 3 · P3 · M
+### B-18 · Migrate Newtonsoft.Json → System.Text.Json · Wave 3 · P3 · M · **DONE (`cc897a5`)**
 
-**Purpose:** STJ is faster and ships with the framework; remove the last third-party JSON dependency.
-
-**Files expected to change:**
-- `Backend/Tanakh.csproj` — remove `Newtonsoft.Json` PackageReference.
-- `Backend/Controllers/CacheProvider.cs` — both `JsonConvert.DeserializeObject<T>(...)` calls → `JsonSerializer.Deserialize<T>(...)`.
-- `Backend/Controllers/JewishCalendarController.cs` — same, in `FillJewishCalendar`.
-- Possibly `Backend/Program.cs` — if `[FromBody]` behavior needs any STJ options tweaks (see risk below), configure via `builder.Services.AddControllers().AddJsonOptions(...)` or `builder.Services.ConfigureHttpJsonOptions(...)`.
-- No `[JsonProperty]`/`[JsonConverter]` attributes exist anywhere in the current `Model/` classes (confirmed by grep during B-03's work) — nothing to translate to `[JsonPropertyName]`.
-
-**Current state:** `CacheProvider.cs` deserializes `TanakhData.json` → `TanakhContainer` and `TanakhStructure.json` → `TanakhStructure` via `Newtonsoft.Json.JsonConvert.DeserializeObject<T>`. `JewishCalendarController.FillJewishCalendar` deserializes the hebcal.com HTTP response the same way. `SubscribeEntity`/`UnSubscribe` request bodies already go through **System.Text.Json** today (ASP.NET Core's default `[FromBody]` binder — `AddNewtonsoftJson()` is never called in `Program.cs`), so those are *already* on STJ and don't need touching for B-18 itself — B-18 is really about the two `JsonConvert.DeserializeObject` call sites plus the package removal.
-
-**Critical, concrete risk verified this session:** `Backend/Data/TanakhStructure.json`'s top-level JSON key is **lowercase** `structures`, while the C# property is `TanakhStructure.Structures` (capital S). Newtonsoft matches case-insensitively by default; **STJ is case-sensitive by default** and will silently leave `Structures` null (not throw) unless you either (a) rename the C# property to `structures` (lowercase, matching JSON exactly — the spec's own stated preference: "fix the property names to match the JSON exactly (prefer the latter)"), or (b) pass `JsonSerializerOptions { PropertyNameCaseInsensitive = true }` to `JsonSerializer.Deserialize`. **Recommendation: option (a)** — rename `TanakhStructure.Structures` to `TanakhStructure.structures` (matches this project's existing convention: every other property in `Model/TanakhContainer.cs` and `Model/JewishCalendarContainer.cs` is already lowercase/camelCase to match their source JSON verbatim; `Structures` was the one outlier). Before doing this, dump the actual top-level keys of `Data/TanakhData.json` too (it's 22MB — use `node -e "console.log(Object.keys(JSON.parse(require('fs').readFileSync('Data/TanakhData.json','utf8'))))"` or similar, don't try to open it in an editor) to confirm `TanakhContainer.structures` casing matches (it already does — `structures` lowercase, confirmed this session, see §5 bug #2's investigation).
-
-**Other STJ behavioral differences to check deliberately (per spec):**
-- Trailing commas / comments: unlikely to be present in these auto-generated data files, but verify `JsonSerializerOptions` doesn't need `AllowTrailingCommas`/`ReadCommentHandling` — check by just trying `JsonSerializer.Deserialize` against the real files first before adding options preemptively.
-- Missing fields → `default` (same as Newtonsoft's null-for-reference-types behavior) — this is exactly what B-03's guard clauses in `CacheProvider`/`FillJewishCalendar` already defend against, so no new risk here, just confirm the guard clauses still fire correctly under STJ (they check for `null`, which STJ also produces for missing fields on nullable reference-typed properties).
-- No enums are serialized as strings anywhere in this codebase (confirmed by grep — no `enum` types exist in `Model/`) — `JsonStringEnumConverter` is not needed.
-- `DateTime` handling: `JewishCalendarContainer.date`/`Item.date` are `DateTime` (not `DateTimeOffset`). STJ's default `DateTime` parsing is ISO-8601-only and stricter than Newtonsoft's. hebcal.com's API returns ISO-8601 dates (standard), so this is _expected_ to be fine, but **verify by actually calling `GET /JewishCalendar/getJewishCalendar` against the real hebcal.com endpoint after the migration** — this is a live external API, no mocking exists, so this is a real integration test, not a mock.
-
-**"Before/after" data-loading test the spec asks for:** the spec wants a test that "loads TanakhData.json and TanakhStructure.json and asserts on specific known values... Run it against Newtonsoft first to capture the baseline, then against STJ." **There is no test project in the solution yet** (B-04, which comes *after* B-18 in wave order, is what creates `Tanakh.Tests`). Options, in order of preference:
-1. Do this as a **manual, scripted verification** instead of an automated test: before touching any code, run the app on the current Newtonsoft-based code and capture known values via curl (e.g. total book count from `GET /Tanakh/books/torah`, a specific verse's text from `GET /Tanakh/books/Genesis/1`, chapter counts for a few books) into a scratch file. After migrating to STJ, re-run the same curls and diff. This satisfies the spirit of the requirement without a premature test project.
-2. Alternatively, ask the user whether to pull B-04's `Tanakh.Tests` project creation forward to happen first, just for this one test — this would be a deviation from the spec's stated wave order, so **ask before doing this**, don't silently reorder.
-Recommendation: do (1). It's lower-risk, doesn't reorder the spec, and still gives a real before/after comparison.
-
-**Verification/testing steps:**
-1. `dotnet build -warnaserror` clean (Debug and Release).
-2. Capture baseline curl outputs (Newtonsoft) per the before/after plan above.
-3. Migrate the two `DeserializeObject` call sites + rename `Structures`→`structures`.
-4. Remove `Newtonsoft.Json` PackageReference, confirm `dotnet build` still succeeds with no missing-reference errors (i.e. nothing else in the codebase references `Newtonsoft` — grep to confirm zero hits after removal).
-5. Re-run the same curls, diff against baseline — must match exactly.
-6. Re-run the B-03 guard-clause verification (corrupt a copy of `TanakhStructure.json` in a build-output directory, confirm the same clean 500 + named exception behavior still works under STJ).
-7. Hit the live hebcal.com-backed endpoint (`GET /JewishCalendar/getJewishCalendar`) for real — this is the one call site with genuine external-API date-parsing risk.
-
-**Expected commit message:** `B-18: Migrate Newtonsoft.Json to System.Text.Json`
-
-**Risks:** the lowercase-`structures` case-sensitivity trap (documented above, already diagnosed — don't rediscover it the hard way). Otherwise low risk; this is a small, contained codebase with only 2 real deserialization call sites.
+Completed this session. Both `JsonConvert.DeserializeObject` call sites (`CacheProvider.cs`, `JewishCalendarController.FillJewishCalendar`) migrated to `JsonSerializer.Deserialize`; `Newtonsoft.Json` PackageReference removed from `Tanakh.csproj`; `TanakhStructure.Structures` renamed to lowercase `structures` to match the JSON key exactly (STJ's case-sensitivity — Newtonsoft matched case-insensitively and would have masked this). Verified via a real before/after curl diff (book listings, a full chapter's text, the 200/404 chapter-lookup boundary, and the live hebcal.com-backed calendar endpoint) — all response bodies byte-identical to the Newtonsoft baseline. Re-ran the B-03 corrupted-`TanakhStructure.json` guard-clause test against a build-output copy — the same named `InvalidOperationException` + clean 500 fires identically under STJ. No `[JsonProperty]`/enum/date-parsing surprises turned up. `dotnet build -warnaserror` clean in both Debug and Release.
 
 ---
 
