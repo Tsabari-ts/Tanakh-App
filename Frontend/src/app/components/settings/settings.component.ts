@@ -22,7 +22,7 @@ export class SettingsComponent implements OnInit {
   isPwaInstalled = localStorage.getItem('pwaInstalled') === 'true';
   userHasSubscribed = localStorage.getItem('userHasSubscribed') === 'true'; 
   
-  subscribeButton:string = this.userHasSubscribed ? 'בטל קבלת תזכורת' : 'הירשם לתזכורת יומית';
+  subscribeButton:string = this.userHasSubscribed ? 'נרשמת לתזכורת' : 'הירשם לתזכורת יומית';
   subscribeIcon:string = 'calendar-icon';
   contactUsButton: string = 'צור קשר';
   contactUsIcon:string = 'email-icon';

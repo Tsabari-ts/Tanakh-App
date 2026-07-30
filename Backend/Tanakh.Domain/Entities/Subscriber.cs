@@ -17,6 +17,8 @@ namespace Tanakh.Domain.Entities
 
         public string Timezone { get; set; } = "Asia/Jerusalem";
 
+        public bool SkipShabbatHolidays { get; set; } = true;
+
         public SubscriberStatus Status { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }

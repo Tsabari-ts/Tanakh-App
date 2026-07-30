@@ -54,6 +54,7 @@ builder.Services.AddScoped<IReadingProgressService, ReadingProgressService>();
 builder.Services.AddSingleton<IHashingService, HashingService>();
 builder.Services.AddScoped<ISuppressionService, SuppressionService>();
 builder.Services.AddScoped<ISubscriberAnonymizationService, SubscriberAnonymizationService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
@@ -63,6 +64,8 @@ builder.Services.AddOptions<HashingOptions>()
     .Bind(builder.Configuration.GetSection(HashingOptions.SectionName));
 builder.Services.AddOptions<RetentionOptions>()
     .Bind(builder.Configuration.GetSection(RetentionOptions.SectionName));
+builder.Services.AddOptions<RemindersOptions>()
+    .Bind(builder.Configuration.GetSection(RemindersOptions.SectionName));
 builder.Services.AddHostedService<RetentionHostedService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddHealthChecks()

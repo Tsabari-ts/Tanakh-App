@@ -24,11 +24,7 @@ export class ApiCallService {
     return this.http.get<any>(`https://localhost:44308/Tanakh/books/main/${book}`);
   }
 
-  RegisterNewUser(userData: any) {
-    return this.http.post<any>(`https://localhost:44308/Subscribe/RegisterUser`, userData);
-  }
-
-  DeleteSubscribedUser(unSubscribe: any) {
-    return this.http.post<any>(`https://localhost:44308/Subscribe/DeleteUser`, unSubscribe);
+  subscribe(subscriptionRequest: any) {
+    return this.http.post(`https://localhost:44308/api/v1/subscriptions`, subscriptionRequest, { responseType: 'text' });
   }
 }

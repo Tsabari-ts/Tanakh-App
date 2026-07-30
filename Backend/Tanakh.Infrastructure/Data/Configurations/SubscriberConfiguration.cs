@@ -37,6 +37,10 @@ namespace Tanakh.Infrastructure.Data.Configurations
                 .HasDefaultValue("Asia/Jerusalem")
                 .IsRequired();
 
+            builder.Property(s => s.SkipShabbatHolidays)
+                .HasDefaultValue(true)
+                .IsRequired();
+
             builder.Property(s => s.Locale)
                 .HasDefaultValue("he-IL")
                 .IsRequired();
