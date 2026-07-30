@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **16 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-17 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **17 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-15 (the last remaining task) with zero re-derivation.
 
 ---
 
@@ -60,6 +60,7 @@ Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 | `e12c625` | B-11: Make all I/O asynchronous |
 | `d67e71c` | B-12: Add CancellationToken to endpoints and outbound calls |
 | `ec40b93` | B-13: Standardize errors on ProblemDetails |
+| `e913f20` | B-17: Add health checks |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
@@ -270,8 +271,8 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
-3. **B-18, B-04, B-09, B-16, B-11, B-12, and B-13 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`, `e12c625`, `d67e71c`, `ec40b93`) — see §4 for the current 4-project layout. `SubscribeController`'s two endpoints now return `502 application/problem+json` on a genuine email-send failure instead of a soft `Ok(false)`; the success response stays a bare `Ok(true)` deliberately (see B-13's entry in §9 — this was checked against the live Angular frontend contract, not assumed). Only 2 tasks remain: **B-17** (health checks, next in wave order, no decision point but one real design question about SMTP-responsiveness flagged in §9) and **B-15** (API versioning under `/api/v1`, last — has the highest real-world-impact risk in the whole backlog since the frontend hardcodes unversioned routes today).
-4. Grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` still returns zero hits as of `d67e71c` — if a fresh session finds any, something has regressed.
+3. **17 of 18 tasks are done.** Only **B-15** (API versioning under `/api/v1`) remains — see its entry in §9 before starting. It has the highest real-world-impact risk in the whole backlog: the Angular frontend hardcodes unversioned routes (`https://localhost:44308/Tanakh/...` etc.) today, so this task can break the live app unless handled deliberately (alias the old routes during a deprecation window, or coordinate with a frontend update — ask the user, don't guess, exactly as flagged below).
+4. `/health/live` and `/health/ready` exist as of B-17 (`e913f20`) — readiness only checks Tanakh data file presence, deliberately excludes SMTP (see B-17's entry in §9 for why). Grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` still returns zero hits as of `d67e71c` — if a fresh session finds any, something has regressed.
 
 ---
 
@@ -358,25 +359,13 @@ This works because Angular's `HttpClient` routes any non-2xx response to the err
 
 ---
 
-### B-17 · Add health checks · Wave 5 · P1 · S
+### B-17 · Add health checks · Wave 5 · P1 · S · **DONE (`e913f20`)**
 
-**Purpose:** give a load balancer/orchestrator something to probe. Directly relevant to the Phase 1 infra spec's Render deployment (cold-start tolerance).
+Completed this session. `/health/live` excludes every registered check (`Predicate = _ => false`) — pure "is the process up" liveness. `/health/ready` runs one check, `TanakhDataHealthCheck` (new, `Backend/Tanakh.Infrastructure/HealthChecks/`, tagged `"ready"`), which calls a new `CacheProvider.DataFilesExist()` (existence-only, not a full parse — kept cheap deliberately since readiness gets probed frequently).
 
-**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Program.cs`, possibly a new `Backend/Tanakh.Infrastructure/HealthChecks/` folder with custom `IHealthCheck` implementations.
+The SMTP-responsiveness question this section flagged got resolved differently than originally scoped: put to the user directly, and the answer was **don't check SMTP at all**, not just "pick a check style." Reasoning, confirmed rather than assumed: B-09 already decided `EmailOptions` is optional with graceful degradation and no startup validation; the real dev secrets today only have `Email:Password` set, so any TCP-connect-style check against the (empty) `SmtpServer` would always fail — gating readiness on that would make this instance permanently report "not ready" despite serving Tanakh content correctly, directly contradicting B-09's own design. `SubscribeController` already reports its own `502` per-request (since B-13) when email delivery specifically fails, which is the right granularity for that concern — a whole-instance readiness check was the wrong tool for it.
 
-**Implementation steps:**
-1. `/health/live` — trivial, no dependency checks: `app.MapHealthChecks("/health/live", new() { Predicate = _ => false });`
-2. `/health/ready` — checks: **no database exists in this app** (confirmed repeatedly across this whole modernization effort — this is a static-JSON-file + SMTP-email app, not a DB-backed one), so "database reachable" from the spec's generic template doesn't apply. Substitute: (a) `TanakhData.json`/`TanakhStructure.json` present and parseable — a lightweight custom `IHealthCheck` that checks file existence (not a full parse, to keep it cheap) is enough; (b) email provider responsive — **this is genuinely tricky without sending a real test email or a fake SMTP handshake; recommend a short-timeout TCP-connect check to the configured SMTP host/port rather than a full auth handshake, and confirm this approach with the user before implementing**, since "responsive" for SMTP is ambiguous and a wrong implementation could either be too strict (false negative on every deploy) or meaningless (true even when broken).
-3. Tag-based split per the spec's exact code sample.
-
-**Verification/testing steps:**
-1. Both endpoints return 200 when healthy.
-2. `/health/ready` returns 503 when unhealthy — since there's no DB to "stop" for testing, simulate by temporarily renaming `Data/TanakhData.json` in a running instance (same technique used throughout B-03/B-08 testing) and confirming `/health/ready` goes to 503 while `/health/live` stays 200.
-3. Confirm response bodies don't leak file paths, connection details, or exception info (spec's explicit requirement) — check this carefully, it's an easy thing to get wrong with default ASP.NET Core health check UI output.
-
-**Expected commit message:** `B-17: Add health checks`
-
-**Risks:** the SMTP-responsiveness check design — flagged above, ask before implementing a specific approach.
+Verified live, not just reasoned about: both endpoints 200 under normal conditions; renamed `TanakhData.json` out from under a *running* instance and confirmed `/health/ready` → 503 while `/health/live` stayed 200 (caught a real gotcha here — `dotnet run` resolves `ContentRootPath` to the project source folder, not the build output directory, so the first attempt silently touched the wrong copy of the file and the health check didn't budge; switched to running `dotnet Tanakh.Api.dll` directly from its own `bin/Debug/net10.0/` output, the same technique used in B-09/B-11's verification, to make the rename actually affect the running instance). Confirmed the response body is plain `"Unhealthy"` text, no paths or exception details. Full Docker build + container run re-verified given the new package reference, health endpoints confirmed working inside the container too.
 
 ---
 
