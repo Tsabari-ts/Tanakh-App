@@ -234,3 +234,34 @@ All 5 version-step commits (`angular-v18` … `angular-v22`) are tagged on `chor
 - DoD sweep: every route uses `loadComponent`. ✅ Chunk-per-route confirmed. ✅ Initial bundle smaller (recorded both numbers above). ✅ All existing URLs unchanged (no redirects needed since nothing moved). ✅ Every route has a `title`. ✅
 
 ---
+
+## F-14 · Fix the dead-end deep link (2026-07-31) — scope substantially revised, with user sign-off
+
+**Branch:** `feat/f-14-deep-link-error-handling` (misnamed relative to final scope — kept for branch-per-task history, not renamed)
+
+**⚠️ VERIFY finding — the spec's core premise does not hold in this codebase.** The spec describes `BookService` as an in-memory singleton populated only via prior `booklist` navigation, causing a chapter-list/chapter URL opened in a fresh tab to render blank. Checked the actual code before writing a single resolver:
+- `BooklistComponent`, `ChapterlistComponent`, and `ChapterComponent` each independently call the API straight from `ActivatedRoute.params` inside their own `ngOnInit()`. None of them read state set by a *different* component or a *previous* navigation.
+- `BookService` (`services/book.service.ts`) is a 20-line class holding one field (`chapter: number[]`); it is set and read only within the same synchronous callback inside `ChapterlistComponent.ngOnInit()` — confirmed via `grep -rn "bookService" src/` returning exactly one file.
+- Checked the actual backend (`Backend/Tanakh.Api/Controllers/TanakhController.cs`): `GET /Tanakh/books/main/{book}` (single book by title) and `GET /Tanakh/books/{book}/{chapter}` (single chapter's text) both already exist and take no dependency on prior requests — this directly answers the spec's own open decision #3 ("does the API support fetching a single book/chapter by ID?") with **yes**, and confirms the frontend already uses exactly these endpoints today.
+- There is **no `reminders` route or feature in this frontend at all** (backend-only so far, per git history — preference center, UTM tracking, admin dashboard). The spec's "F-14 unblocks the reminders feature" justification doesn't apply here.
+
+**Surfaced this to the user before proceeding** (a plan-invalidating finding, not just a "larger than scoped" one) and got explicit direction: skip the resolver/cache architecture (it would solve a problem that doesn't exist here) and instead fix the one legitimate gap that *does* match the DoD — **no friendly error handling on a failed fetch**. Previously, an invalid book/section/chapter, or any API failure, just did `console.log(error)` and left the component's data field at its initial empty value; for `BooklistComponent`/`ChapterlistComponent` this now happens to render the F-05 `@empty` message (misleadingly labeled "not found" even for a genuine network error), and for `ChapterComponent` it rendered a fully blank page (no `@empty`-equivalent existed there — it's not a list).
+
+**Changes:**
+- Added `loadError = false` to all three components; set to `true` in both the `data.error` branch and the HTTP error callback of each fetch.
+- `BooklistComponent` / `ChapterlistComponent`: template now branches `@if (loadError) { <error message> } @else { <existing @for/@empty content> }`, so a genuine fetch failure is now distinguishable from "the section/book legitimately has nothing in it."
+- `ChapterComponent`: added a proper error branch with a "חזרה לדף הבית" (back to home) button, replacing what was a silently blank page (no title, no scroll controls, nothing) on any chapter-load failure.
+  - **Found and fixed a second latent bug while wiring this up**: `returnToHomePage()` existed but was never called from any template (confirmed via grep) and navigated to `/homepage` — not a real route (the actual route is `/home`). Since I was about to make this method live for the first time (wiring it to the new error state's back button), fixing its route target was required for the new code to actually work, not tangential cleanup.
+  - **Fixed a template nesting bug introduced by my own first-pass edit**: initially placed the `@else` block's closing `}` after the `centered-container` div's closing tag instead of before it, which would have left that div permanently unclosed whenever `loadError` was true. Caught by re-reading the diff structure before running the build; the build's clean pass then confirmed the corrected nesting compiles.
+- Left the `@empty` message wording as-is in booklist/chapterlist (a pre-existing F-05 ambiguity between "loading" and "genuinely empty" that isn't new — see F-05's log entry); adding a real loading-state distinction is a natural F-03 (signals) concern, not this one.
+- Did **not** attempt a full live end-to-end test (spin up the .NET backend + Postgres + apply migrations) — the Tanakh content endpoints don't need the database, but `Program.cs` registers `AddDbContextPool` unconditionally at startup, and setting up a throwaway Postgres instance just to click through a URL is disproportionate to what static analysis (reading both the Angular components and the actual controller) already answered unambiguously. Flagging this limitation rather than claiming a live-browser verification that didn't happen.
+- `ng build --configuration production`: succeeds, bundle unchanged from F-09 (363.84 kB).
+- `ng test --watch=false --browsers=ChromeHeadless`: 10 FAILED / 7 SUCCESS, unchanged.
+
+**DoD status relative to the original spec (context: scope was revised, so not every line applies):**
+- [N/A] Resolver-per-route architecture — not built, by direction, because the bug it would fix doesn't exist here.
+- [x] Invalid ID / failed fetch produces a friendly Hebrew message rather than a blank screen, on all three affected screens.
+- [x] No component depends on state set by a previous navigation (was already true, verified rather than assumed).
+- [N/A] Automated resolver tests — no resolvers were written.
+
+---

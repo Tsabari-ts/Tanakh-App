@@ -15,6 +15,7 @@ export class ChapterlistComponent implements OnInit {
   section: string | null = "";
   book: string | null = "";
   chapters: number[] = [];
+  loadError = false;
 
   constructor(private activatedRoute: ActivatedRoute,
               private router: Router,
@@ -38,6 +39,7 @@ export class ChapterlistComponent implements OnInit {
           }
         }, (error) => {
           console.log(error);
+          this.loadError = true;
         });
       }
     })
