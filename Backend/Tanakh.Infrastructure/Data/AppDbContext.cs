@@ -21,6 +21,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<ReadingProgress> ReadingProgresses => Set<ReadingProgress>();
 
+        public DbSet<ReminderDelivery> ReminderDeliveries => Set<ReminderDelivery>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
