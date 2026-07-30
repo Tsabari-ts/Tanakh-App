@@ -47,6 +47,14 @@ namespace Tanakh.Infrastructure
                         Body = emailMessage.Body
                     };
 
+                    if (emailMessage.Headers is not null)
+                    {
+                        foreach ((string name, string value) in emailMessage.Headers)
+                        {
+                            message.Headers.Add(name, value);
+                        }
+                    }
+
                     // Deliberately CancellationToken.None, not request-bound: the site
                     // owner still wants this notification even if the visitor's
                     // client disconnects immediately after submitting.

@@ -18,11 +18,16 @@ namespace Tanakh.Api.Controllers
     public class SubscriptionsController : ControllerBase
     {
         private readonly ISubscriptionService subscriptionService;
+        private readonly IUnsubscribeTokenService unsubscribeTokenService;
         private readonly RemindersOptions options;
 
-        public SubscriptionsController(ISubscriptionService subscriptionService, IOptions<RemindersOptions> options)
+        public SubscriptionsController(
+            ISubscriptionService subscriptionService,
+            IUnsubscribeTokenService unsubscribeTokenService,
+            IOptions<RemindersOptions> options)
         {
             this.subscriptionService = subscriptionService;
+            this.unsubscribeTokenService = unsubscribeTokenService;
             this.options = options.Value;
         }
 
@@ -96,6 +101,42 @@ namespace Tanakh.Api.Controllers
             };
 
             return Content(html, "text/html; charset=utf-8");
+        }
+
+        /// <summary>Unsubscribes via the link a human clicks in a reminder email footer - single click, no login, no confirmation step.</summary>
+        [HttpGet("unsubscribe")]
+        public async Task<IActionResult> UnsubscribeViaLinkAsync([FromQuery] string token, CancellationToken cancellationToken)
+        {
+            bool valid = unsubscribeTokenService.TryValidate(token, out Guid subscriberId);
+
+            if (valid)
+            {
+                await subscriptionService.UnsubscribeAsync(subscriberId, cancellationToken);
+            }
+
+            string html = valid
+                ? SubscriptionPages.Render(
+                    "הביטול בוצע",
+                    "לא יישלחו אליך עוד תזכורות. נרשמתי בטעות? אפשר להירשם מחדש דרך האתר.",
+                    options.PublicBaseUrl)
+                : SubscriptionPages.Render(
+                    "קישור לא תקין",
+                    "קישור הביטול אינו תקין.",
+                    options.PublicBaseUrl);
+
+            return Content(html, "text/html; charset=utf-8");
+        }
+
+        /// <summary>RFC 8058 One-Click unsubscribe - invoked by the mail provider itself (List-Unsubscribe-Post), not by a human viewing a page. Must act immediately and return a bare 200.</summary>
+        [HttpPost("unsubscribe")]
+        public async Task<IActionResult> UnsubscribeOneClickAsync([FromQuery] string token, CancellationToken cancellationToken)
+        {
+            if (unsubscribeTokenService.TryValidate(token, out Guid subscriberId))
+            {
+                await subscriptionService.UnsubscribeAsync(subscriberId, cancellationToken);
+            }
+
+            return Ok();
         }
 
         private static bool IsValidEmail(string email)

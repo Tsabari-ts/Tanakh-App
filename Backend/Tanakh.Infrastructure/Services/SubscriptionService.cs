@@ -155,6 +155,45 @@ namespace Tanakh.Infrastructure.Services
             return ConfirmationOutcome.Confirmed;
         }
 
+        public async Task UnsubscribeAsync(Guid subscriberId, CancellationToken cancellationToken = default)
+        {
+            Subscriber? subscriber = await dbContext.Subscribers
+                .FirstOrDefaultAsync(s => s.Id == subscriberId, cancellationToken);
+
+            if (subscriber is null)
+            {
+                return;
+            }
+
+            if (subscriber.Status != SubscriberStatus.Unsubscribed)
+            {
+                subscriber.Status = SubscriberStatus.Unsubscribed;
+                subscriber.UnsubscribedAt = DateTimeOffset.UtcNow;
+                subscriber.UnsubscribeReason = "user_requested";
+            }
+
+            string emailHash = hashingService.HashEmail(subscriber.Email);
+            bool alreadySuppressed = await dbContext.SuppressionEntries
+                .AnyAsync(e => e.EmailHash == emailHash, cancellationToken);
+
+            if (!alreadySuppressed)
+            {
+                await dbContext.SuppressionEntries.AddAsync(new SuppressionEntry
+                {
+                    Id = Guid.CreateVersion7(),
+                    EmailHash = emailHash,
+                    Reason = SuppressionReason.Unsubscribe,
+                    Source = "unsubscribe-link"
+                }, cancellationToken);
+            }
+
+            await dbContext.ReminderDeliveries
+                .Where(d => d.SubscriberId == subscriberId && d.Status == DeliveryStatus.Pending)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(d => d.Status, DeliveryStatus.Skipped), cancellationToken);
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         private async Task RecordConsentAsync(Guid subscriberId, string? ipAddress, string? userAgent, CancellationToken cancellationToken)
         {
             await dbContext.ConsentRecords.AddAsync(new ConsentRecord

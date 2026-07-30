@@ -28,5 +28,10 @@ namespace Tanakh.Domain
             CancellationToken cancellationToken = default);
 
         Task<ConfirmationOutcome> ConfirmAsync(string rawToken, CancellationToken cancellationToken = default);
+
+        // Idempotent - unsubscribe tokens carry no expiry and may be replayed
+        // (e.g. RFC 8058 one-click retries), so calling this twice for the
+        // same subscriber must be harmless.
+        Task UnsubscribeAsync(Guid subscriberId, CancellationToken cancellationToken = default);
     }
 }
