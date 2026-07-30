@@ -7,6 +7,13 @@
   </div>
 }
 
+@if (appUpdate.updateAvailable()) {
+  <div class="update-banner" role="status">
+    <span>יש גרסה חדשה של האפליקציה</span>
+    <button type="button" (click)="appUpdate.applyUpdate()">רענן עכשיו</button>
+  </div>
+}
+
 <div class="container">
   <div class="title">
     <h1>פרק תנ"ך ביום</h1>
