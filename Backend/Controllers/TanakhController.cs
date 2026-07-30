@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -25,18 +25,10 @@ namespace Tanakh.Controllers
             string cacheKey = "tanakhStructure";
             List<BaseStructure> books = cacheProvider.GetTanakhStructureFromCache(cacheKey);
 
-            if (books != null)
-            {
-                List<BaseStructure> relevantSections = books.Where(x => x.section.ToLower() == section).ToList();
+            List<BaseStructure> relevantSections = books.Where(x => x.section?.ToLower() == section).ToList();
 
-                return Ok(relevantSections);
-            }
-            else
-            {
-                return NotFound();
-            }
+            return Ok(relevantSections);
         }
-
 
         /// <summary>Looks up structure entries for a single book by title.</summary>
         /// <param name="book">The book title (e.g. "Genesis").</param>
@@ -46,16 +38,9 @@ namespace Tanakh.Controllers
             string cacheKey = "tanakhStructure";
             List<BaseStructure> books = cacheProvider.GetTanakhStructureFromCache(cacheKey);
 
-            if (books != null)
-            {
-                List<BaseStructure> relevantSections = books.Where(x => x.title == book).ToList();
+            List<BaseStructure> relevantSections = books.Where(x => x.title == book).ToList();
 
-                return Ok(relevantSections);
-            }
-            else
-            {
-                return NotFound();
-            }
+            return Ok(relevantSections);
         }
 
         /// <summary>Returns the Hebrew text and navigation data for a single chapter.</summary>
@@ -64,27 +49,21 @@ namespace Tanakh.Controllers
         [HttpGet("books/{book}/{chapter}")]
         public IActionResult GetChapter(string book, string chapter)
         {
-            TanakhContext context = new TanakhContext();
             Dictionary<string, Book> dataDictionary = Get();
             string chosenSection = book + " " + chapter;
 
-            if (dataDictionary.ContainsKey(chosenSection))
-            {
-                context = new TanakhContext
-                {
-                    ChosenSection = chosenSection,
-                    BookData = dataDictionary[chosenSection]
-                };
-            }
-
-            if (context != null)
-            {
-                return Ok(context);
-            }
-            else
+            if (!dataDictionary.TryGetValue(chosenSection, out Book? bookData))
             {
                 return NotFound();
             }
+
+            TanakhContext context = new TanakhContext
+            {
+                ChosenSection = chosenSection,
+                BookData = bookData
+            };
+
+            return Ok(context);
         }
 
         private Dictionary<string, Book> Get()
@@ -93,44 +72,43 @@ namespace Tanakh.Controllers
             TanakhContainer tanakhContainer = cacheProvider.GetFullTanakhFromCache(cacheKey);
             Dictionary<string, Book> dataDictionary = new Dictionary<string, Book>();
 
-            if (tanakhContainer != null)
+            int currentBookIndex = 1;
+
+            // structures validated non-null in CacheProvider.GetFullTanakhFromCache
+            foreach (Structure item in tanakhContainer.structures!)
             {
-                int currentBookIndex = 1;
+                string? nextSection = item.next;
 
-                foreach (Structure item in tanakhContainer.structures)
+                if (string.IsNullOrEmpty(nextSection))
                 {
-                    string nextSection = item.next;
+                    string nextBook = GetNextSection(currentBookIndex);
+                    currentBookIndex++;
 
-                    if (string.IsNullOrEmpty(nextSection))
+                    if (!string.IsNullOrEmpty(nextBook))
                     {
-                        string nextBook = GetNextSection(currentBookIndex);
-                        currentBookIndex++;
-
-                        if (!string.IsNullOrEmpty(nextBook))
-                        {
-                            nextSection = nextBook + " " + "1";
-                        }
+                        nextSection = nextBook + " " + "1";
                     }
-
-                    string chosenSection = item.sectionRef;
-                    string episodeData = string.Join(" ", item.he);
-                    string verses = Regex.Replace(episodeData, @"<[^>]+>", "");
-
-                    Book testy = new Book
-                    {
-                        BookName = item.book,
-                        HebrewTitle = item.heTitle,
-                        HebrewSectionRef = item.heSectionRef,
-                        length = item.length,
-                        NextChapter = nextSection,
-                        PrevChapter = item.prev,
-                        SectionRef = item.sectionRef,
-                        Verses = verses
-                    };
-
-                    dataDictionary.Add(chosenSection, testy);
-
                 }
+
+                // book/sectionRef/heTitle/heSectionRef/he validated non-null in CacheProvider.GetFullTanakhFromCache
+                string chosenSection = item.sectionRef!;
+                string episodeData = string.Join(" ", item.he!);
+                string verses = Regex.Replace(episodeData, @"<[^>]+>", "");
+
+                Book testy = new Book
+                {
+                    BookName = item.book!,
+                    HebrewTitle = item.heTitle!,
+                    HebrewSectionRef = item.heSectionRef!,
+                    length = item.length,
+                    NextChapter = nextSection,
+                    PrevChapter = item.prev,
+                    SectionRef = item.sectionRef!,
+                    Verses = verses
+                };
+
+                dataDictionary.Add(chosenSection, testy);
+
             }
 
             return dataDictionary;
@@ -146,7 +124,7 @@ namespace Tanakh.Controllers
             if (currentBookIndex < books.Count)
             {
                 BaseStructure nextBook = books[currentBookIndex];
-                book = nextBook.book;
+                book = nextBook.book ?? string.Empty;
             }
 
             return book;

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Tanakh.Caching
 {
@@ -21,9 +22,9 @@ namespace Tanakh.Caching
             this.logger = logger;
         }
 
-        public bool TryGet<T>(string key, out T value) where T : class
+        public bool TryGet<T>(string key, [NotNullWhen(true)] out T? value) where T : class
         {
-            if (cache.TryGetValue(key, out T cached))
+            if (cache.TryGetValue(key, out T? cached) && cached is not null)
             {
                 logger.LogDebug("Cache hit for {CacheKey}", key);
                 value = cached;

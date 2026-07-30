@@ -1,20 +1,22 @@
-﻿namespace Tanakh.Model
+namespace Tanakh.Model
 {
     public class TanakhContext
     {
-        public string ChosenSection { get; set; }
-        public Book BookData { get; set; }
+        public required string ChosenSection { get; set; }
+        public required Book BookData { get; set; }
     }
 
     public class Book
     {
-        public string BookName { get; set; }
-        public string HebrewTitle { get; set; }
+        public required string BookName { get; set; }
+        public required string HebrewTitle { get; set; }
         public int length { get; set; }
-        public string NextChapter { get; set; }
-        public string PrevChapter { get; set; }
-        public string Verses { get; set; }
-        public string SectionRef { get; set; }
-        public string HebrewSectionRef { get; set; }
+        // Legitimately null for a book's first (no PrevChapter) or last
+        // (no NextChapter) chapter.
+        public string? NextChapter { get; set; }
+        public string? PrevChapter { get; set; }
+        public required string Verses { get; set; }
+        public required string SectionRef { get; set; }
+        public required string HebrewSectionRef { get; set; }
     }
 }

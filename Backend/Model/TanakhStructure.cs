@@ -1,20 +1,24 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Tanakh.Model
 {
+    // Deserialized with Newtonsoft.Json, which does not enforce `required`,
+    // so every property is nullable. `section`, `title`, and `book` (the
+    // fields this app reads) are validated non-null at the point of
+    // deserialization in CacheProvider.GetTanakhStructureFromCache.
     public class TanakhStructure
     {
-        public List<BaseStructure> Structures { get; set; }
+        public List<BaseStructure>? Structures { get; set; }
     }
 
     public class BaseStructure
     {
-        public string section { get; set; }
-        public string heTitle { get; set; }
-        public string title { get; set; }
+        public string? section { get; set; }
+        public string? heTitle { get; set; }
+        public string? title { get; set; }
         public int length { get; set; }
-        public List<int> chapters { get; set; }
-        public string book { get; set; }
-        public string heBook { get; set; }
+        public List<int>? chapters { get; set; }
+        public string? book { get; set; }
+        public string? heBook { get; set; }
     }
 }
