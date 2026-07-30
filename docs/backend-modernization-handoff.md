@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **12 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-16 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **13 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-11 with zero re-derivation.
 
 ---
 
@@ -56,6 +56,7 @@ Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 | `cc897a5` | B-18: Migrate Newtonsoft.Json to System.Text.Json |
 | `53b7423` | B-04: Split into Tanakh.Domain/Infrastructure/Api/Tests |
 | `c1488e2` | B-09: Move remaining configuration to the Options pattern |
+| `ad122e1` | B-16: Extract business logic from controllers into services |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
@@ -266,8 +267,8 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
-3. **B-18, B-04, and B-09 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`) — see §4 for the current 4-project layout. `TanakhDataOptions` now formalizes the `TanakhData:DataDirectory` key; `EmailOptions` deliberately has **no** startup validation (see B-09's entry in §9 for why — an all-or-nothing partial-config check was tried and reverted because it broke against the real dev secrets state, which only has `Email:Password` set). Next task in wave order is **B-16**, which is a decision point.
-4. When you reach **B-16**, stop and present the Controllers-vs-Minimal-APIs decision (§10) before restructuring endpoints — note the `required`-auto-400 verification caveat there should be re-checked given B-04 didn't change binding behavior, just project boundaries.
+3. **B-18, B-04, B-09, and B-16 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`, `ad122e1`) — see §4 for the current 4-project layout and §9 for what B-16 actually did (kept Controllers, kept `TanakhController` as one class, extracted 3 services, fixed the hardcoded-2024-01-30 date bug per explicit confirmation). Next task in wave order is **B-11** (make all I/O asynchronous), which has no decision point.
+4. Note the new `Tanakh.Infrastructure/Services/` and `Tanakh.Api/Services/` folders from B-16 — when you get to B-11, the sync `CacheProvider`/`TanakhStructureService`/`TanakhTextService`/`JewishCalendarService` call chain all needs to go async together (see B-11's updated file list in §9).
 
 ---
 
@@ -304,27 +305,20 @@ The fail-fast-vs-graceful-degradation question for `EmailOptions` was put to the
 
 ---
 
-### B-16 · Controllers vs Minimal APIs · Wave 4 · P3 · M · **DECISION NEEDED**
+### B-16 · Controllers vs Minimal APIs · Wave 4 · P3 · M · **DONE (`ad122e1`)**
 
-See §10 for the decision to present before starting.
+Both sub-decisions were put to the user directly before touching anything: (1) kept **Controllers** (not Minimal APIs) — this app's 5 simple endpoints have no complex binding needs, so there was nothing to gain from the switch and a real, if small, risk of losing the `[ApiController]` auto-400 behavior verified in B-03; (2) kept `TanakhController` as **one class** rather than splitting it by responsibility — its routes are unversioned and the Angular frontend hardcodes calls to `/Tanakh/books/...`, so a multi-class split would need every new controller's route explicitly pinned back to the same prefix for no real benefit on a 3-endpoint controller.
 
-**Purpose:** the architectural choice is secondary; the non-negotiable part is **no business logic inside endpoint methods**.
+What actually happened: three services extracted, split by which project owns the DTOs they touch (this is also where B-04's deferred "repository contract for `CacheProvider`" question resolved itself naturally):
+- `Tanakh.Infrastructure/Services/TanakhStructureService` (`ITanakhStructureService`: `GetAll`/`GetBySection`/`GetByTitle`) — wraps `CacheProvider`'s structure lookups. Lives in Infrastructure because it only touches Infrastructure-owned `BaseStructure`, no Api DTO involved.
+- `Tanakh.Infrastructure/Services/JewishCalendarService` (`IJewishCalendarService`: `IsBetweenCandleLightingAndHavdalah`) — the hebcal.com HTTP call + candle-lighting/Havdalah window calculation, moved verbatim out of `JewishCalendarController`. Same reasoning: only touches `JewishCalendarContainer`/`Item`.
+- `Tanakh.Api/Services/TanakhTextService` (`ITanakhTextService`: `GetChapter`) — the JSON-to-response mapping and chapter-navigation calculation, moved out of `TanakhController.Get()`/`GetNextSection()`. Lives in **Api**, not Infrastructure, specifically because it's the piece that bridges Infrastructure's raw DTOs (`TanakhContainer`/`BaseStructure`) into Api's own response DTOs (`TanakhContext`/`Book`) — this return type can't live in Domain without breaking the dependency direction, which is exactly the tension B-04 flagged and deferred to this point.
 
-**Files expected to change:** all of `Controllers/` (or their Minimal-API-endpoint replacements), likely new `Services/` or similar in whichever project layer B-04 established.
+`SubscribeController` was left untouched — it already just maps input into an `EmailMessage` and delegates to `IEmailSender`, satisfying "bind input, call a service, map result" as-is.
 
-**Current state:** `TanakhController` has 3 endpoints plus 2 private helper methods (`Get()`, `GetNextSection()`) that contain real business logic (JSON-to-response-model mapping, chapter navigation calculation) directly in the controller. `JewishCalendarController` has 1 endpoint with real business logic (candle-lighting/Havdalah time-window calculation) directly in the action method. `SubscribeController` has 2 endpoints, comparatively thin already (just builds an email and delegates to `EmailSender`).
+Also fixed, per explicit user confirmation while this exact code was being moved (not silently): the hardcoded `DateTime currentDay = new DateTime(2024, 01, 30);` in the candle-lighting check → `DateTime.Now.Date`. This is a real, if small, behavior change beyond a pure refactor — flagged and confirmed before doing it, per this spec's ground rules.
 
-**Implementation steps (regardless of Controllers vs Minimal APIs decision):**
-1. Extract `TanakhController.Get()`'s JSON-mapping logic and `GetNextSection()`'s navigation logic into a service (in Domain/Infrastructure per B-04's layering).
-2. Extract `JewishCalendarController`'s candle-lighting/Havdalah window calculation into a service.
-3. Split `TanakhController` by responsibility per the spec: text retrieval, search/list, structure/navigation — currently all three are jammed into one controller.
-4. Endpoint methods should do exactly 3 things: bind input, call a service, map the result to a response — verify every remaining endpoint method fits on one screen (spec's literal definition of done).
-
-**Verification/testing steps:** full endpoint smoke test after extraction — behavior must be identical, this is a pure refactor.
-
-**Expected commit message:** `B-16: Extract business logic from controllers into services` (+ mention Minimal APIs migration in the message if that's the chosen option)
-
-**Risks:** `JewishCalendarController`'s date logic has a hardcoded `DateTime currentDay = new DateTime(2024, 01, 30);` with the real `DateTime.Now.Date` line commented out directly below it — this looks like debug code left in from development, unrelated to any B-series task. **Flag this to the user when you reach B-16** (or sooner) — it's a pre-existing bug (the "is it candle-lighting time" check is currently pinned to Jan 30 2024 forever, making the whole endpoint always evaluate against a fixed historical date) that's out of scope for any task so far but is exactly the kind of thing worth a one-line mention rather than silent fixing, per this spec's ground rules about not silently expanding scope.
+Verified: full solution build clean (Debug + Release, `-warnaserror`), architecture test still passes, every controller method now fits on one screen (25–53 lines per file, one-line method bodies), full endpoint smoke test byte-identical to the pre-B-16 baseline, and the live hebcal.com-backed calendar endpoint still returns 200.
 
 ---
 
@@ -332,15 +326,15 @@ See §10 for the decision to present before starting.
 
 **Purpose:** eliminate sync-over-async; thread-pool starvation risk.
 
-**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Api/Controllers/JewishCalendarController.cs` (the known offender), `Backend/Tanakh.Infrastructure/CacheProvider.cs` (file reads), `Backend/Tanakh.Api/Controllers/TanakhController.cs` (action method signatures need `async Task<IActionResult>`), `Backend/Tanakh.Infrastructure/EmailSender.cs` (`SmtpClient.Send` → `SendMailAsync`), `Backend/Tanakh.Api/Controllers/SubscribeController.cs` (action signatures).
+**Files expected to change (paths updated post-B-04/B-16):** `Backend/Tanakh.Infrastructure/Services/JewishCalendarService.cs` (the known offender — `FillJewishCalendar().GetAwaiter().GetResult()`), `Backend/Tanakh.Infrastructure/CacheProvider.cs` (file reads), `Backend/Tanakh.Infrastructure/Services/TanakhStructureService.cs` + `Backend/Tanakh.Api/Services/TanakhTextService.cs` (both call into `CacheProvider`, so both need `Task`-returning signatures once it does), `Backend/Tanakh.Api/Controllers/TanakhController.cs` + `JewishCalendarController.cs` (action method signatures need `async Task<IActionResult>`), `Backend/Tanakh.Infrastructure/EmailSender.cs` (`SmtpClient.Send` → `SendMailAsync`), `Backend/Tanakh.Api/Controllers/SubscribeController.cs` (action signatures).
 
-**Current state:** `JewishCalendarController.GetJewishCalendar()` does `FillJewishCalendar().GetAwaiter().GetResult()` — confirmed still present as of this handoff (B-03 touched this file but did not address the sync-over-async call, since that's explicitly B-11's job, not B-03's). `CacheProvider` uses `StreamReader.ReadToEnd()` (sync) — should become `File.ReadAllTextAsync(...)`. `EmailSender.SendMessage` uses `SmtpClient.Send()` (sync, and `SmtpClient` itself is legacy/obsolete in modern .NET — consider whether this task should also flag `SmtpClient` obsolescence, though replacing it entirely is arguably beyond "make it async," worth a quick note to the user).
+**Current state:** `JewishCalendarService.IsBetweenCandleLightingAndHavdalah()` does `FillJewishCalendar().GetAwaiter().GetResult()` (moved here verbatim from the controller in B-16 — B-16 explicitly did not fix this, since that's B-11's job). `CacheProvider` uses `StreamReader.ReadToEnd()` (sync) — should become `File.ReadAllTextAsync(...)`. `EmailSender.SendMessage` uses `SmtpClient.Send()` (sync, and `SmtpClient` itself is legacy/obsolete in modern .NET — consider whether this task should also flag `SmtpClient` obsolescence, though replacing it entirely is arguably beyond "make it async," worth a quick note to the user).
 
 **Implementation steps:**
 1. `CacheProvider.GetFullTanakhFromCache`/`GetTanakhStructureFromCache` → `async Task<TanakhContainer>`/`async Task<List<BaseStructure>>`, using `File.ReadAllTextAsync`.
-2. `JewishCalendarController.FillJewishCalendar` already returns `Task<JewishCalendarContainer>` — just remove the `.GetAwaiter().GetResult()` call site in `GetJewishCalendar()` and make that method `async Task<IActionResult>`.
-3. `TanakhController`'s action methods and private `Get()`/`GetNextSection()` helpers all need to become async all the way up, since they call `CacheProvider`.
-4. `EmailSender.SendMessage` → `SendMessageAsync` using `SmtpClient.SendMailAsync(...)`; `SubscribeController`'s two action methods become async.
+2. `JewishCalendarService`'s private `FillJewishCalendar` already returns `Task<JewishCalendarContainer>` — just remove the `.GetAwaiter().GetResult()` call site in `IsBetweenCandleLightingAndHavdalah()`, make it `async Task<bool>`, and update `IJewishCalendarService`'s signature + `JewishCalendarController.GetJewishCalendar()` to `async Task<IActionResult>` accordingly.
+3. `TanakhStructureService`/`TanakhTextService`'s methods all need to become async all the way up to the controllers, since they call `CacheProvider`.
+4. `EmailSender.SendMessage` → `SendMessageAsync` using `SmtpClient.SendMailAsync(...)`; update `IEmailSender`'s signature too; `SubscribeController`'s two action methods become async.
 5. Add the threading analyzer as the spec asks (`Microsoft.VisualStudio.Threading.Analyzers` or built-in equivalent rules) as errors, to prevent regressions.
 
 **Verification/testing steps:**
@@ -358,7 +352,7 @@ See §10 for the decision to present before starting.
 
 **Purpose:** disconnecting a client should abort server-side work.
 
-**Files expected to change:** all controller action methods (post-B-11, they're all `async` already), `CacheProvider`'s now-async methods, `EmailSender`, `JewishCalendarController`'s `HttpClient` call.
+**Files expected to change:** all controller action methods (post-B-11, they're all `async` already), `CacheProvider`'s now-async methods, the 3 B-16 services, `EmailSender`, `JewishCalendarService`'s `HttpClient` call.
 
 **Depends on B-11 landing first** (can't thread a `CancellationToken` through sync methods meaningfully).
 
@@ -459,19 +453,9 @@ Both `RegisterNewUser` and `DeleteUser` follow this exact bare-bool-in-a-200 pat
 
 User chose Option A (full 4-project split) via `AskUserQuestion`, then chose "split by role" for `Model/` placement (also via `AskUserQuestion`) when asked as a follow-up. Both are implemented and committed in `53b7423`. Left here for historical record; nothing further to decide.
 
-### B-16: Controllers vs Minimal APIs
+### B-16: Controllers vs Minimal APIs — **RESOLVED, see B-16's entry in §9**
 
-**Option A — Minimal APIs with endpoint groups.**
-- **Pros:** less ceremony, better raw throughput, natural fit with the service-layer extraction this task requires anyway, more idiomatic for a small greenfield-feeling API surface, aligns with .NET's current general direction.
-- **Cons:** less familiar tooling for model binding/filters compared to Controllers (though for this app's simple `[FromBody]` binding needs, this is a non-issue); would mean re-touching every route again right after B-15 versions them (ordering consideration: doing B-16 before B-15 avoids double-touching routes).
-- **My recommendation:** Minimal APIs — this app has no complex model binding, no filters beyond what's already centralized in `Program.cs` (CORS, exception handling), and 5 simple endpoints. Minimal APIs fit cleanly and match where ASP.NET Core is heading for APIs like this.
-
-**Option B — keep Controllers, just clean them up** (extract business logic, split `TanakhController` by responsibility, keep `[ApiController]`/`ControllerBase`).
-- **Pros:** smaller diff, more familiar to most .NET developers, zero risk of losing any Controller-specific behavior (e.g. automatic 400 on `required`-violation, which was directly verified working in B-03 and is a real, load-bearing behavior now — **verify this exact behavior still works identically under Minimal APIs before committing to Option A**, since Minimal API model binding has historically had some differences from Controller binding for validation-error auto-400 behavior).
-- **Cons:** doesn't reduce ceremony; the spec frames Controllers as the "safer, more familiar" choice, implying Minimal APIs is the direction they'd prefer if the tradeoffs are acceptable.
-- **Recommendation stands for Option A, but only after confirming the `required`-property auto-400 behavior (verified in B-03 for Controllers) carries over identically to Minimal API endpoint parameter binding** — this is a concrete, checkable thing to verify before committing to the choice, not just a preference call.
-
-**Ask the user: Minimal APIs (my recommendation, pending the auto-400 verification above), or keep Controllers?**
+User chose to keep Controllers (not Minimal APIs — going against this document's own prior recommendation, which had been contingent on an auto-400 verification that was never actually needed once Controllers were chosen), and separately chose to keep `TanakhController` as one class rather than splitting it by responsibility, due to the Angular frontend's hardcoded `/Tanakh/books/...` routes. Both implemented and committed in `ad122e1`. Left here for historical record; nothing further to decide.
 
 ---
 
