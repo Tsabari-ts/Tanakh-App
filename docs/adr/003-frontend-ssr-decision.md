@@ -2,9 +2,9 @@
 
 ## Status
 
-Proposed. Awaiting explicit owner approval before any implementation, per
-the process this ADR was written under (F-11 of `docs/TANACH-APP-FRONTEND-SPEC.md`
-requires a decision before code).
+Accepted (2026-07-31). Owner approved deferring implementation until a
+production domain exists; SSG (not SSR) is the settled target approach
+for when it's built.
 
 ## Context
 
