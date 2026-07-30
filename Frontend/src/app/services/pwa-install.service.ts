@@ -1,43 +1,43 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root'
-})
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+@Injectable({ providedIn: 'root' })
 export class PwaInstallService {
-  deferredPrompt: any;
-  isPwaInstalled = localStorage.getItem('pwaInstalled') === 'true';
+  private deferredPrompt: BeforeInstallPromptEvent | null = null;
+  readonly canInstall = signal(false);
+  readonly isIos = signal(typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent));
+  readonly isStandalone = signal(
+    typeof window !== 'undefined' &&
+    (window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as { standalone?: boolean }).standalone === true),
+  );
 
-  constructor() { 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('beforeinstallprompt', (event) => {
-        // Prevent the mini-infobar from appearing on mobile
-        event.preventDefault();
-        // Stash the event so it can be triggered later.
-        this.deferredPrompt = event;
-      });
-    }
-  }
+  init(): void {
+    if (typeof window === 'undefined') return;
 
-  installPWA() {
-    if (this.deferredPrompt) {
-      this.deferredPrompt.prompt();
-      this.deferredPrompt.userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
-        if (choiceResult.outcome === 'accepted') {
-          localStorage.setItem('pwaInstalled', 'true');
-          this.isPwaInstalled = true;
-        }
-        this.deferredPrompt = null;
-      });
-    }
-  }
+    window.addEventListener('beforeinstallprompt', (event: Event) => {
+      event.preventDefault();
+      this.deferredPrompt = event as BeforeInstallPromptEvent;
+      this.canInstall.set(true);
+    });
 
-  checkServiceWorkerStatus() {
-    navigator.serviceWorker.getRegistration().then((registration) => {
-      if (!registration || !registration.active) {
-        localStorage.removeItem('pwaInstalled');
-        this.isPwaInstalled = false;
-      }
+    window.addEventListener('appinstalled', () => {
+      this.canInstall.set(false);
+      this.isStandalone.set(true);
+      this.deferredPrompt = null;
     });
   }
-  
+
+  async installPWA(): Promise<void> {
+    if (!this.deferredPrompt) return;
+
+    await this.deferredPrompt.prompt();
+    await this.deferredPrompt.userChoice;
+    this.deferredPrompt = null;
+    this.canInstall.set(false);
+  }
 }

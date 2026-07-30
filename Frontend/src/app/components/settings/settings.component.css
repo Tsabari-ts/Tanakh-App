@@ -87,7 +87,21 @@
   }
 
   .download-icon {
-    background-image: url('/assets/download.png'); 
+    background-image: url('/assets/download.png');
+  }
+
+  .svg-button:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .ios-install-hint {
+    max-width: 450px;
+    margin-block-start: 8px;
+    padding-inline: 16px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
   }
 
 

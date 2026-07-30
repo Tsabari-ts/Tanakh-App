@@ -5,13 +5,18 @@
             <div class="icon" [ngClass]="contactUsIcon"></div> 
             {{ contactUsButton }} 
           </button>
-          <button class="svg-button" (click)="downloadApp()">
-            <div class="icon" [ngClass]="downloadAppIcon"></div> 
-            {{ downloadAppButton }} 
+          <button class="svg-button" (click)="downloadApp()" [disabled]="pwaInstall.isStandalone()">
+            <div class="icon" [ngClass]="downloadAppIcon"></div>
+            {{ downloadAppButton() }}
           </button>
           <button class="svg-button" (click)="openSubscribe()">
-            <div class="icon" [ngClass]="subscribeIcon"></div> 
+            <div class="icon" [ngClass]="subscribeIcon"></div>
             {{ subscribeButton() }}
           </button>
       </div>
+      @if (pwaInstall.isIos() && !pwaInstall.isStandalone()) {
+        <p class="ios-install-hint">
+          להתקנת האפליקציה: לחצו על כפתור השיתוף בדפדפן ובחרו "הוספה למסך הבית".
+        </p>
+      }
   </div>
