@@ -24,9 +24,13 @@ namespace Tanakh.Domain.Entities
 
         public int AttemptCount { get; set; }
 
+        public DateTimeOffset? NextAttemptAt { get; set; }
+
         public string? LastError { get; set; }
 
         public required string IdempotencyKey { get; set; }
+
+        public string? TargetUrl { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }
 

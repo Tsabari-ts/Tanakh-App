@@ -11,7 +11,7 @@ namespace Tanakh.Infrastructure.Data.Configurations
         {
             builder.ToTable("reminder_deliveries", tb =>
             {
-                tb.HasCheckConstraint("ck_reminder_deliveries_status", "status IN ('pending','sent','failed','skipped')");
+                tb.HasCheckConstraint("ck_reminder_deliveries_status", "status IN ('pending','sending','sent','failed','skipped')");
             });
 
             builder.HasKey(r => r.Id);
@@ -30,6 +30,10 @@ namespace Tanakh.Infrastructure.Data.Configurations
 
             builder.Property(r => r.IdempotencyKey)
                 .IsRequired();
+
+            builder.Property(r => r.TargetUrl);
+
+            builder.Property(r => r.NextAttemptAt);
 
             builder.Property(r => r.CreatedAt)
                 .HasDefaultValueSql("now()")

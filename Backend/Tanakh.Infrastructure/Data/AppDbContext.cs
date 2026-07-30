@@ -31,6 +31,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<AuditLogEntry> AuditLog => Set<AuditLogEntry>();
 
+        public DbSet<ConfirmationToken> ConfirmationTokens => Set<ConfirmationToken>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
