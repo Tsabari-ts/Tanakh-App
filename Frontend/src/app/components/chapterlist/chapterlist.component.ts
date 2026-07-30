@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BookService } from '../../services/book.service';
 import { ApiCallService } from '../../services/api-call.service';
@@ -6,9 +6,11 @@ import gematriya from 'gematriya';
 import { AppComponent } from '../../app.component';
 
 @Component({
-  selector: 'app-chapterlist',
-  templateUrl: './chapterlist.component.html',
-  styleUrl: './chapterlist.component.css'
+    selector: 'app-chapterlist',
+    templateUrl: './chapterlist.component.html',
+    styleUrl: './chapterlist.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    standalone: false
 })
 export class ChapterlistComponent implements OnInit {
   section: string | null = "";

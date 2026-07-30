@@ -5,7 +5,7 @@ import { AppComponent } from './app.component';
 import { RouterModule } from '@angular/router';
 import { EntranceComponent } from './components/entrance/entrance.component';
 import { HomeComponent } from './components/home/home.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { SettingsComponent } from './components/settings/settings.component';
 import { BooklistComponent } from './components/booklist/booklist.component';
@@ -21,44 +21,37 @@ import { ScrollToTopButtonComponent } from './components/scroll-to-top-button/sc
 import { ReadPermissionComponent } from './components/read-permission/read-permission.component';
 import { environment } from '../environments/environment';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    EntranceComponent,
-    HomeComponent,
-    SettingsComponent,
-    BooklistComponent,
-    ChapterlistComponent,
-    ChapterComponent,
-    WelcomeModalComponent,
-    SubscribeComponent,
-    ScrollToTopButtonComponent,
-    ReadPermissionComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatDialogModule,
-    MatIconModule,
-    FormsModule,
-    RouterModule.forRoot([
-      {path:"",redirectTo:"entrance",pathMatch:"full"},
-      {path:"entrance", component:EntranceComponent},
-      {path:"home",component:HomeComponent},
-      {path:"settings",component:SettingsComponent},
-      {path:"books/:section",component:BooklistComponent},
-      {path:"books/:section/:book",component:ChapterlistComponent},
-      {path:"books/:section/:book/:chapterNumber/:keepReading",component:ChapterComponent},
-      {path:"*",redirectTo:"home"}
-    ]),
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: environment.enableServiceWorker,
-      registrationStrategy: 'registerWhenStable:30000'
-    })
-  ],
-  providers: [WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        EntranceComponent,
+        HomeComponent,
+        SettingsComponent,
+        BooklistComponent,
+        ChapterlistComponent,
+        ChapterComponent,
+        WelcomeModalComponent,
+        SubscribeComponent,
+        ScrollToTopButtonComponent,
+        ReadPermissionComponent
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        MatDialogModule,
+        MatIconModule,
+        FormsModule,
+        RouterModule.forRoot([
+            { path: "", redirectTo: "entrance", pathMatch: "full" },
+            { path: "entrance", component: EntranceComponent },
+            { path: "home", component: HomeComponent },
+            { path: "settings", component: SettingsComponent },
+            { path: "books/:section", component: BooklistComponent },
+            { path: "books/:section/:book", component: ChapterlistComponent },
+            { path: "books/:section/:book/:chapterNumber/:keepReading", component: ChapterComponent },
+            { path: "*", redirectTo: "home" }
+        ]),
+        ServiceWorkerModule.register('ngsw-worker.js', {
+            enabled: environment.enableServiceWorker,
+            registrationStrategy: 'registerWhenStable:30000'
+        })], providers: [WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent, provideHttpClient(withXhr(), withInterceptorsFromDi())] })
 export class AppModule { }

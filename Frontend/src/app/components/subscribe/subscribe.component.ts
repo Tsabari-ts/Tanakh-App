@@ -1,11 +1,13 @@
-import { Component, EventEmitter, Inject, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-subscribe',
-  templateUrl: './subscribe.component.html',
-  styleUrl: './subscribe.component.css'
+    selector: 'app-subscribe',
+    templateUrl: './subscribe.component.html',
+    styleUrl: './subscribe.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    standalone: false
 })
 
 export class SubscribeComponent {

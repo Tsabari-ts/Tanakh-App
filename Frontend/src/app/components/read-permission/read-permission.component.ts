@@ -1,10 +1,12 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-read-permission',
-  templateUrl: './read-permission.component.html',
-  styleUrl: './read-permission.component.css'
+    selector: 'app-read-permission',
+    templateUrl: './read-permission.component.html',
+    styleUrl: './read-permission.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    standalone: false
 })
 
 export class ReadPermissionComponent implements OnInit{
