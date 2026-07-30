@@ -1,4 +1,5 @@
-import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PwaInstallService } from '../../services/pwa-install.service';
 import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
@@ -8,7 +9,7 @@ import { NgClass } from '@angular/common';
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass]
 })
 
@@ -17,15 +18,16 @@ export class SettingsComponent implements OnInit {
               private el: ElementRef,
               private pwaInstall: PwaInstallService,
               private dialogService: DialogService,
-              private appComponent: AppComponent) {
-                this.appComponent.showButton = true;
+              private appComponent: AppComponent,
+              private destroyRef: DestroyRef) {
+                this.appComponent.showButton.set(true);
                }
 
   emailAddress = 'Tanakhdev@gmail.com';
   isPwaInstalled = localStorage.getItem('pwaInstalled') === 'true';
-  userHasSubscribed = localStorage.getItem('userHasSubscribed') === 'true'; 
-  
-  subscribeButton:string = this.userHasSubscribed ? 'נרשמת לתזכורת' : 'הירשם לתזכורת יומית';
+  userHasSubscribed = localStorage.getItem('userHasSubscribed') === 'true';
+
+  readonly subscribeButton = signal(this.userHasSubscribed ? 'נרשמת לתזכורת' : 'הירשם לתזכורת יומית');
   subscribeIcon:string = 'calendar-icon';
   contactUsButton: string = 'צור קשר';
   contactUsIcon:string = 'email-icon';
@@ -39,11 +41,13 @@ export class SettingsComponent implements OnInit {
   openSubscribe(){
   const dialogRef = this.dialogService.openSubscribeDialog();
 
-  dialogRef.componentInstance.subscriptionStatusChange.subscribe(
+  dialogRef.componentInstance.subscriptionStatusChange
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe(
     (changes:
        { newButtonName: string }
        ) => {
-    this.subscribeButton = changes.newButtonName;
+    this.subscribeButton.set(changes.newButtonName);
   });
   }
 

@@ -8,7 +8,7 @@ import { NgClass } from '@angular/common';
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrl: './home.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass]
 })
 export class HomeComponent implements OnInit {
@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
   constructor(private router: Router,
               private dialogService: DialogService,
               private appComponent: AppComponent,){
-                this.appComponent.showButton = false;
+                this.appComponent.showButton.set(false);
                }  
   
   ngOnInit(){

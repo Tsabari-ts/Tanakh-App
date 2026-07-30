@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiCallService } from '../../services/api-call.service';
 import { Router } from '@angular/router';
 
@@ -6,47 +7,49 @@ import { Router } from '@angular/router';
     selector: 'app-entrance',
     templateUrl: './entrance.component.html',
     styleUrl: './entrance.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntranceComponent implements OnInit {
-  isLoading: boolean = true;
-  isHolidayOrShabat = false;
-  
+  readonly isLoading = signal(true);
+  readonly isHolidayOrShabat = signal(false);
+
   words: string[] = [" ''וזאת", "התורה", "אשר", "שם", " ","משה", "לפני", "בני", "ישראל''"];
 
   currentIndex = 0;
-  shownWords: string[] = [];
+  readonly shownWords = signal<string[]>([]);
 
 
   constructor(private apiService:ApiCallService, private router: Router,
-              private elementRef: ElementRef) { }
-  
+              private elementRef: ElementRef, private destroyRef: DestroyRef) { }
+
   ngOnInit(): void {
     this.showNextWord();
-    this.apiService.getHolidays().subscribe(
+    this.apiService.getHolidays()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(
       (response) => {
-        this.isHolidayOrShabat = response;
+        this.isHolidayOrShabat.set(response);
 
-        if(this.isHolidayOrShabat){
-          this.isLoading = false;
+        if(response){
+          this.isLoading.set(false);
         }
         else{
-          this.isLoading = false;
+          this.isLoading.set(false);
            this.showNextWord();
-         }        
+         }
       },
       (error) => {
         console.error('Error loading data', error);
-        this.isLoading = true;
+        this.isLoading.set(true);
       }
     );
   }
 
   showNextWord() {
     if (this.currentIndex < this.words.length) {
-      this.shownWords.push(this.words[this.currentIndex]);
+      this.shownWords.update(words => [...words, this.words[this.currentIndex]]);
       this.currentIndex++;
-      
+
       setTimeout(() => {
         void this.elementRef.nativeElement.offsetWidth;
         this.showNextWord();

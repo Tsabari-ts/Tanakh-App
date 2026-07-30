@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Inject, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Inject, Output, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiCallService } from '../../services/api-call.service';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -10,7 +11,7 @@ import { NgClass } from '@angular/common';
     selector: 'app-subscribe',
     templateUrl: './subscribe.component.html',
     styleUrl: './subscribe.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, NgClass]
 })
 
@@ -18,13 +19,13 @@ export class SubscribeComponent {
   @Output() subscriptionStatusChange: EventEmitter<{
      newButtonName: string }> = new EventEmitter();
   private markSubscribeKey = 'userHasSubscribed';
-  serverResponse: string = '';
+  readonly serverResponse = signal('');
   subscribeSuccessful = false;
   userHasSubscribed = false;
-  isButtonDisabled: boolean = false;
-  isRequestInProgress: boolean = false;
-  isRequestSuccessful: boolean = false;
-  progressValue = 0;
+  readonly isButtonDisabled = signal(false);
+  readonly isRequestInProgress = signal(false);
+  readonly isRequestSuccessful = signal(false);
+  readonly progressValue = signal(0);
   loadingInterval: any;
 
   emailValue: string = '';
@@ -36,7 +37,8 @@ export class SubscribeComponent {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<SubscribeComponent>,
-    private apiService: ApiCallService) {
+    private apiService: ApiCallService,
+    private destroyRef: DestroyRef) {
       this.userHasSubscribed = localStorage.getItem(this.markSubscribeKey) === 'true';
     }
 
@@ -61,8 +63,8 @@ export class SubscribeComponent {
   }
 
   closeAndSubscribe() {
-    this.isButtonDisabled = true;
-    this.isRequestInProgress = true;
+    this.isButtonDisabled.set(true);
+    this.isRequestInProgress.set(true);
     this.startLoading();
 
     const subscriptionRequest = {
@@ -73,7 +75,9 @@ export class SubscribeComponent {
       consent: this.consentGiven
     };
 
-    this.apiService.subscribe(subscriptionRequest).subscribe(() => {
+    this.apiService.subscribe(subscriptionRequest)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
       this.subscribeSuccessful = true;
       this.markSubscribe();
     }, (error) => {
@@ -91,14 +95,14 @@ export class SubscribeComponent {
   setSubscribeServerResponse() {
     setTimeout(() => {
       if (this.subscribeSuccessful) {
-        this.serverResponse = 'שלחנו לך מייל אישור - יש ללחוץ על הקישור בו כדי להשלים את ההרשמה.';
+        this.serverResponse.set('שלחנו לך מייל אישור - יש ללחוץ על הקישור בו כדי להשלים את ההרשמה.');
         this.subscriptionStatusChange.emit({
           newButtonName: 'נרשמת לתזכורת' });
       } else {
-        this.serverResponse = 'הרישום נכשל, אנא נסה שוב מאוחר יותר';
+        this.serverResponse.set('הרישום נכשל, אנא נסה שוב מאוחר יותר');
       }
-      this.isRequestInProgress = false;
-      this.isRequestSuccessful = true;
+      this.isRequestInProgress.set(false);
+      this.isRequestSuccessful.set(true);
 
       setTimeout(() => {
         this.dialogRef.close();
@@ -107,15 +111,15 @@ export class SubscribeComponent {
   }
 
   startLoading(): void {
-    this.progressValue = 0;
+    this.progressValue.set(0);
     const duration = 3000;
     const interval = 10;
     const steps = (duration / interval);
     const stepSize = 100 / steps;
 
     this.loadingInterval = setInterval(() => {
-      if (this.progressValue < 100) {
-        this.progressValue += stepSize;
+      if (this.progressValue() < 100) {
+        this.progressValue.update(v => v + stepSize);
       } else {
         this.stopLoading();
       }

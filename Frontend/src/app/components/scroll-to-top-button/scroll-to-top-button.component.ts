@@ -44,7 +44,7 @@ import { MatIcon } from '@angular/material/icon';
       }
     }
 `],
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatIcon]
 })
 export class ScrollToTopButtonComponent {

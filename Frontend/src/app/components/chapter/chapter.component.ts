@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { DialogService } from '../../services/dialog.service';
@@ -10,7 +11,7 @@ import { ScrollToTopButtonComponent } from '../scroll-to-top-button/scroll-to-to
     selector: 'app-chapter',
     templateUrl: './chapter.component.html',
     styleUrl: './chapter.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager, // TODO(F-03): remove after signals migration
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass, ScrollToTopButtonComponent]
 })
 
@@ -18,11 +19,11 @@ export class ChapterComponent implements OnInit {
   section: string = "";
   chapter: string = "";
   book: string = "";
-  title: string | null = "";
+  readonly title = signal<string | null>("");
   keepReading: string | null = "";
-  data: any;
+  readonly data = signal<any>(undefined);
   nextChapter: any;
-  loadError = false;
+  readonly loadError = signal(false);
 
   isScrolling = false;
   isScrollingDown = false;
@@ -128,8 +129,9 @@ export class ChapterComponent implements OnInit {
     private apiService: ApiCallService,
     private router: Router,
     private appComponent: AppComponent,
-    private dialogService: DialogService) {
-    this.appComponent.showButton = true;
+    private dialogService: DialogService,
+    private destroyRef: DestroyRef) {
+    this.appComponent.showButton.set(true);
   }
 
 
@@ -139,38 +141,44 @@ export class ChapterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.activatedRoute.queryParams.subscribe(q => {
+    this.activatedRoute.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(q => {
       const subscriberToken = q['sid'];
       if (subscriberToken) {
         localStorage.setItem('subscriberToken', subscriberToken);
       }
     });
 
-    this.activatedRoute.params.subscribe(p => {
+    this.activatedRoute.params
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(p => {
       this.section = p['section'];
       this.book = p['book'];
       this.chapter = p['chapterNumber'];
       this.keepReading = p['keepReading'];
 
       if (this.chapter != null && this.book != null) {
-        this.apiService.getVerses(this.book, this.chapter).subscribe(data => {
+        this.apiService.getVerses(this.book, this.chapter)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(data => {
           if (data.error) {
             console.log(data.error);
-            this.loadError = true;
+            this.loadError.set(true);
             return;
           }
-          this.data = data.bookData.verses;
-          this.title = data.bookData.hebrewSectionRef;
+          this.data.set(data.bookData.verses);
+          this.title.set(data.bookData.hebrewSectionRef);
           this.nextChapter = data.bookData.nextChapter;
           this.reportReadingProgress();
         }, (error) => {
           console.log(error);
-          this.loadError = true;
+          this.loadError.set(true);
         })
       }
     })
 
-    this.createTitle(this.title);
+    this.createTitle(this.title());
   }
 
   reportReadingProgress(): void {
@@ -185,11 +193,13 @@ export class ChapterComponent implements OnInit {
       token: subscriberToken,
       book: this.book,
       chapter: chapterNumber
-    }).subscribe({ error: (error) => console.log(error) });
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: (error) => console.log(error) });
   }
 
   createTitle(title: any) {
-    this.title = title;
+    this.title.set(title);
   }
 
   GetNextChapter() {
@@ -214,21 +224,23 @@ export class ChapterComponent implements OnInit {
     this.chapter = chapter;
 
 
-    this.apiService.getVerses(book, chapter).subscribe(data => {
+    this.apiService.getVerses(book, chapter)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(data => {
       if (data.error) {
         console.log(data.error);
-        this.loadError = true;
+        this.loadError.set(true);
         return;
       }
-      this.data = data.bookData.verses;
-      this.title = data.bookData.hebrewSectionRef;
+      this.data.set(data.bookData.verses);
+      this.title.set(data.bookData.hebrewSectionRef);
       this.nextChapter = data.bookData.nextChapter;
       this.contentContainer.nativeElement.scrollTop = 0;
       this.reportReadingProgress();
 
     }, (error) => {
       console.log(error);
-      this.loadError = true;
+      this.loadError.set(true);
     })
   }
 
