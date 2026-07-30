@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Domain.Auditing;
+using Tanakh.Domain.Entities;
 
 namespace Tanakh.Infrastructure.Data
 {
@@ -15,6 +16,8 @@ namespace Tanakh.Infrastructure.Data
             : base(options)
         {
         }
+
+        public DbSet<Subscriber> Subscribers => Set<Subscriber>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
