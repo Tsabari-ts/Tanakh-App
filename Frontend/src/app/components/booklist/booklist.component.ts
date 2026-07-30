@@ -31,8 +31,6 @@ export class BooklistComponent implements OnInit {
             return;
           }
           this.data = data;
-
-          console.log(this.data);  
         }, (error) => {
           console.log(error)
         })

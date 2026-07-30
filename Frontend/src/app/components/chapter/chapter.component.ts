@@ -156,7 +156,6 @@ export class ChapterComponent implements OnInit {
           this.data = data.bookData.verses;
           this.title = data.bookData.hebrewSectionRef;
           this.nextChapter = data.bookData.nextChapter;
-          console.log(this.data);
           this.reportReadingProgress();
         }, (error) => {
           console.log(error)
@@ -186,11 +185,6 @@ export class ChapterComponent implements OnInit {
     this.title = title;
   }
 
-  LoadLocalStorage(data: any) {
-    localStorage['HasStorage'] = "true";
-    localStorage['SectionRef'] = this.section + " " + data.bookData.sectionRef;
-  }
-
   GetNextChapter() {
     let nextSection: string = this.nextChapter;
     let nextSectionParts: string[] = nextSection.split(' ');
@@ -209,8 +203,6 @@ export class ChapterComponent implements OnInit {
       chapter = nextSectionParts.slice(1).join(' ');
     }
 
-    console.log('Book:', book);
-    console.log('Chapter:', chapter);
     this.book = book;
     this.chapter = chapter;
 
@@ -223,7 +215,6 @@ export class ChapterComponent implements OnInit {
       this.data = data.bookData.verses;
       this.title = data.bookData.hebrewSectionRef;
       this.nextChapter = data.bookData.nextChapter;
-      console.log(this.data);
       this.contentContainer.nativeElement.scrollTop = 0;
       this.reportReadingProgress();
 
