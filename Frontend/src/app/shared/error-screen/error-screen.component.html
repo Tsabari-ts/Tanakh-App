@@ -1,0 +1,20 @@
+@if (errorState.state(); as state) {
+  @if (state.kind === 'fatal') {
+    <div class="error-screen" dir="rtl" lang="he" role="alert">
+      <h1>משהו השתבש</h1>
+      <p>אירעה שגיאה בלתי צפויה באפליקציה. ניתן לנסות שוב או לחזור לדף הבית.</p>
+      <div class="error-screen__actions">
+        <button type="button" (click)="reload()">נסה שוב</button>
+        <button type="button" (click)="backToHome()">חזרה לדף הבית</button>
+      </div>
+    </div>
+  } @else if (state.kind === 'reload') {
+    <div class="error-screen" dir="rtl" lang="he" role="alert">
+      <h1>עדכון זמין</h1>
+      <p>{{ state.message }}</p>
+      <div class="error-screen__actions">
+        <button type="button" (click)="reload()">רענן עכשיו</button>
+      </div>
+    </div>
+  }
+}

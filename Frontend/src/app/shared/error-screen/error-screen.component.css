@@ -1,0 +1,45 @@
+.error-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: #1a1a1ae6;
+  color: #fdfdfd;
+  font-family: 'Roboto', sans-serif;
+}
+
+.error-screen h1 {
+  margin: 0;
+  font-weight: 300;
+}
+
+.error-screen p {
+  max-width: 480px;
+  margin: 0;
+  color: #ccc;
+}
+
+.error-screen__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.error-screen__actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #333333e6;
+  color: #fdfdfd;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.error-screen__actions button:hover {
+  background: #4a4a4ae6;
+}
