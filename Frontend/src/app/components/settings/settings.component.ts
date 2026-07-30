@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy, DestroyRef, computed, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PwaInstallService } from '../../services/pwa-install.service';
 import { DialogService } from '../../services/dialog.service';
@@ -16,7 +16,7 @@ import { NgClass } from '@angular/common';
 export class SettingsComponent implements OnInit {
   constructor(private renderer: Renderer2,
               private el: ElementRef,
-              private pwaInstall: PwaInstallService,
+              readonly pwaInstall: PwaInstallService,
               private dialogService: DialogService,
               private appComponent: AppComponent,
               private destroyRef: DestroyRef) {
@@ -24,17 +24,19 @@ export class SettingsComponent implements OnInit {
                }
 
   emailAddress = 'Tanakhdev@gmail.com';
-  isPwaInstalled = localStorage.getItem('pwaInstalled') === 'true';
   userHasSubscribed = localStorage.getItem('userHasSubscribed') === 'true';
 
   readonly subscribeButton = signal(this.userHasSubscribed ? 'נרשמת לתזכורת' : 'הירשם לתזכורת יומית');
   subscribeIcon:string = 'calendar-icon';
   contactUsButton: string = 'צור קשר';
   contactUsIcon:string = 'email-icon';
-  downloadAppButton: string = this.isPwaInstalled ? 'האפליקציה מותקנת': 'הורדת אפליקציה';
+
+  readonly downloadAppButton = computed(() => {
+    if (this.pwaInstall.isStandalone()) return 'האפליקציה מותקנת';
+    if (this.pwaInstall.isIos()) return 'הוספה למסך הבית';
+    return 'הורדת אפליקציה';
+  });
   downloadAppIcon:string = 'download-icon';
-
-
 
   ngOnInit(): void {  }
 
@@ -59,6 +61,7 @@ export class SettingsComponent implements OnInit {
   }
 
   downloadApp(){
+    if (this.pwaInstall.isStandalone()) return;
     this.pwaInstall.installPWA();
   }
 }

@@ -1,9 +1,14 @@
 {
-  "name": "Tanakh",
-  "short_name": "Tanakh",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "name": "תנ\"ך",
+  "short_name": "תנ\"ך",
+  "description": "קריאת התנ\"ך המלא, גם ללא חיבור לאינטרנט",
+  "theme_color": "#333333",
+  "background_color": "#1a1a1a",
   "display": "standalone",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "he",
+  "categories": ["books", "education", "lifestyle"],
   "scope": "./",
   "start_url": "./",
   "icons": [

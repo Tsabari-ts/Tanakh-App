@@ -12,6 +12,7 @@ import { retryInterceptor } from './core/interceptors/retry.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { AppUpdateService } from './core/app-update.service';
+import { PwaInstallService } from './services/pwa-install.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000'
     }),
     provideAppInitializer(() => inject(AppUpdateService).init()),
+    provideAppInitializer(() => inject(PwaInstallService).init()),
     WelcomeModalComponent,
     SubscribeComponent,
     ReadPermissionComponent
