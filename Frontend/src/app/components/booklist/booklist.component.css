@@ -34,7 +34,7 @@ box-sizing: border-box;
     margin: 8px; 
     max-width: 450px;
     width: 500px;
-    padding-right: 180px;
+    padding-inline-start: 180px;
 }
 
 .button:hover {
@@ -51,7 +51,7 @@ box-sizing: border-box;
   padding: 20px; 
   font-size: 25px;
   width: 300px;
-  padding-right: 100px;
+  padding-inline-start: 100px;
 }
 
 
@@ -59,6 +59,6 @@ box-sizing: border-box;
   position: relative;
   margin-top: -215px;
   margin-bottom: 76px;
-  margin-right: 874px;
+  margin-inline-start: 874px;
 }
   }

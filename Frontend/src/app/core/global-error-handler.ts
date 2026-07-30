@@ -12,7 +12,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     // chunk load failure (new deploy while the user has the app open) — a reload fixes it
     const message = (error as Error)?.message ?? String(error);
     if (/ChunkLoadError|Loading chunk .* failed|dynamically imported module/i.test(message)) {
-      this.errorState.showReloadPrompt('גרסה חדשה זמינה. רענן את הדף כדי להמשיך.');
+      this.errorState.showReloadPrompt($localize`:@@errorHandler.reloadPrompt:גרסה חדשה זמינה. רענן את הדף כדי להמשיך.`);
       return;
     }
 

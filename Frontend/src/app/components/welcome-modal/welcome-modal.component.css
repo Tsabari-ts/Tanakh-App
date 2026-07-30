@@ -28,7 +28,7 @@
   }
 
   .go-setting-button{
-    margin-right: 25%;
+    margin-inline-start: 25%;
     width: 50%;
     height: 40px;
     background-color: #333333e6; 

@@ -6,15 +6,15 @@ import { MatIcon } from '@angular/material/icon';
     template: `
   <button class="scroll-to-top-button" (click)="scrollToTop()">
   <mat-icon>keyboard_arrow_up</mat-icon>
-  <div>קפוץ</div>
-  <div class="up-text">למעלה</div>
+  <div i18n="@@scrollToTop.jump">קפוץ</div>
+  <div class="up-text" i18n="@@scrollToTop.up">למעלה</div>
   </button>
 `,
     styles: [`
   .scroll-to-top-button {
     position: fixed;
     top: 300px;
-    right: 7%;
+    inset-inline-start: 7%;
     width: 45px;
     contain: content;
     display: none; 
@@ -32,13 +32,13 @@ import { MatIcon } from '@angular/material/icon';
 
 
   .up-text{
-    margin-right: -5px;
+    margin-inline-start: -5px;
   }
 
   @media screen and (max-width: 1024px) {
       .scroll-to-top-button{
         top: 300px;
-        right: 1%;
+        inset-inline-start: 1%;
         width: 40px;
         color: #fdfdfd; 
       }

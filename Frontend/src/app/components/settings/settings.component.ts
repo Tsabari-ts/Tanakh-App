@@ -26,15 +26,15 @@ export class SettingsComponent implements OnInit {
   emailAddress = 'Tanakhdev@gmail.com';
   userHasSubscribed = localStorage.getItem('userHasSubscribed') === 'true';
 
-  readonly subscribeButton = signal(this.userHasSubscribed ? 'נרשמת לתזכורת' : 'הירשם לתזכורת יומית');
+  readonly subscribeButton = signal(this.userHasSubscribed ? $localize`:@@subscribe.subscribedButton:נרשמת לתזכורת` : $localize`:@@settings.subscribeButton:הירשם לתזכורת יומית`);
   subscribeIcon:string = 'calendar-icon';
-  contactUsButton: string = 'צור קשר';
+  contactUsButton: string = $localize`:@@settings.contactUs:צור קשר`;
   contactUsIcon:string = 'email-icon';
 
   readonly downloadAppButton = computed(() => {
-    if (this.pwaInstall.isStandalone()) return 'האפליקציה מותקנת';
-    if (this.pwaInstall.isIos()) return 'הוספה למסך הבית';
-    return 'הורדת אפליקציה';
+    if (this.pwaInstall.isStandalone()) return $localize`:@@settings.appInstalled:האפליקציה מותקנת`;
+    if (this.pwaInstall.isIos()) return $localize`:@@settings.addToHomeScreen:הוספה למסך הבית`;
+    return $localize`:@@settings.downloadApp:הורדת אפליקציה`;
   });
   downloadAppIcon:string = 'download-icon';
 

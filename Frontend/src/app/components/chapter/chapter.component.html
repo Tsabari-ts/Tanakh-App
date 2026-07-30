@@ -3,8 +3,8 @@
 
   @if (loadError()) {
     <div class="empty-state">
-      <p>אירעה שגיאה בטעינת הפרק. ייתכן שהפרק אינו קיים.</p>
-      <button class="end-button" type="button" (click)="returnToHomePage()">חזרה לדף הבית</button>
+      <p i18n="@@chapter.loadError">אירעה שגיאה בטעינת הפרק. ייתכן שהפרק אינו קיים.</p>
+      <button class="end-button" type="button" (click)="returnToHomePage()" i18n="@@chapter.backToHome">חזרה לדף הבית</button>
     </div>
   } @else {
     <p class="tittle">
@@ -15,26 +15,26 @@
         <p class="sentences">
           {{ data() }}
           <br>
-            <button class="end-button" (click)="finishedReading()">סיימתי לקרוא</button>
+            <button class="end-button" (click)="finishedReading()" i18n="@@chapter.finishedReading">סיימתי לקרוא</button>
           </p>
         </div>
       }
 
       <div id="floatingDiv">
         <button class="svg-button" type="button" (click)="scrollDown()">
-          <span id="hide-text">למטה</span>
+          <span id="hide-text" i18n="@@chapter.scrollDown">למטה</span>
           <div class="icon" [ngClass]="downIcon"></div>
         </button>
         <button class="svg-button" type="button" (click)="stopScrolling()">
-          <span id="hide-text">עצור</span>
+          <span id="hide-text" i18n="@@chapter.stop">עצור</span>
           <div class="icon" [ngClass]="stopIcon"></div>
         </button>
         <button class="svg-button" type="button" (click)="scrollUp()">
-          <span id="hide-text">למעלה</span>
+          <span id="hide-text" i18n="@@chapter.scrollUp">למעלה</span>
           <div class="icon" [ngClass]="upIcon"></div>
         </button>
         <button class="svg-button" type="button" (click)="GetNextChapter()">
-          <span id="hide-text">פרק הבא</span>
+          <span id="hide-text" i18n="@@chapter.nextChapter">פרק הבא</span>
           <div class="icon" [ngClass]="nextIcon"></div>
         </button>
       </div>
