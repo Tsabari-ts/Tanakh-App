@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **17 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-15 (the last remaining task) with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **17 of 18 tasks are done and committed. B-15 (the last remaining task) was explicitly deferred by the user** — see §9's B-15 entry. This backlog is otherwise complete; this document remains a full handoff in case B-15 is picked up later or anything needs re-derivation.
 
 ---
 
@@ -271,7 +271,7 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
-3. **17 of 18 tasks are done.** Only **B-15** (API versioning under `/api/v1`) remains — see its entry in §9 before starting. It has the highest real-world-impact risk in the whole backlog: the Angular frontend hardcodes unversioned routes (`https://localhost:44308/Tanakh/...` etc.) today, so this task can break the live app unless handled deliberately (alias the old routes during a deprecation window, or coordinate with a frontend update — ask the user, don't guess, exactly as flagged below).
+3. **This backlog is effectively complete.** 17 of 18 tasks are done. **B-15** (API versioning under `/api/v1`) was presented to the user with three options — version + alias the old routes, version + update the frontend in the same change, or skip it — and the user chose to **skip it entirely for now**, given the real risk to the live Angular frontend's hardcoded unversioned routes. Don't start B-15 in a future session without checking with the user first; this wasn't an oversight, it was a deliberate call.
 4. `/health/live` and `/health/ready` exist as of B-17 (`e913f20`) — readiness only checks Tanakh data file presence, deliberately excludes SMTP (see B-17's entry in §9 for why). Grep for `.Result`/`.Wait()`/`.GetAwaiter().GetResult()`/`async void` still returns zero hits as of `d67e71c` — if a fresh session finds any, something has regressed.
 
 ---
@@ -369,7 +369,9 @@ Verified live, not just reasoned about: both endpoints 200 under normal conditio
 
 ---
 
-### B-15 · Introduce API versioning · Wave 6 · P3 · S
+### B-15 · Introduce API versioning · Wave 6 · P3 · S · **DEFERRED — user's explicit choice, not started**
+
+Presented to the user as three options once every other task was done: (a) version the routes and keep the old unversioned ones as aliases during a deprecation window, (b) version the routes and update the Angular frontend's hardcoded URLs in the same change, or (c) skip it entirely for now. **The user chose (c) — skip it.** Nothing below was implemented. If a future session is asked to pick this up, re-confirm the choice is still (c) before doing anything, rather than assuming the deferral has expired — the original reasoning (real risk to the live frontend's hardcoded unversioned routes) hasn't changed just because time has passed.
 
 **Purpose:** move all routes under `/api/v1` before any external client depends on unversioned paths.
 
