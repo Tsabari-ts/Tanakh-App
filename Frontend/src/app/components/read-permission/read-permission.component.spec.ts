@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ReadPermissionComponent } from './read-permission.component';
 
@@ -8,7 +9,8 @@ describe('ReadPermissionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [ReadPermissionComponent]
+    imports: [ReadPermissionComponent],
+    providers: [provideZonelessChangeDetection()]
 })
     .compileComponents();
     

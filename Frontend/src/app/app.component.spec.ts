@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
 
@@ -9,6 +10,7 @@ describe('AppComponent', () => {
         RouterTestingModule,
         AppComponent
     ],
+    providers: [provideZonelessChangeDetection()],
 }).compileComponents();
   });
 

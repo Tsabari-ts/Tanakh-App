@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 
 import { ScrollToTopButtonComponent } from './scroll-to-top-button.component';
 
@@ -8,7 +9,8 @@ describe('ScrollToTopButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [ScrollToTopButtonComponent]
+    imports: [ScrollToTopButtonComponent],
+    providers: [provideZonelessChangeDetection()]
 })
     .compileComponents();
     
