@@ -1,0 +1,40 @@
+name: Database Backup
+
+# Daily provider-independent second copy of the database - see
+# docs/database.md "Backups". Neon's own point-in-time restore is the
+# primary/fast recovery path; this exists so a Neon-account-level incident
+# doesn't leave us with zero backups.
+#
+# Requires a repo secret DIRECT_DATABASE_URL (the direct/unpooled Neon
+# connection string for the environment being backed up) - not yet
+# configured, since no Neon project exists for this app yet. Until it is,
+# this workflow will fail at the "Take backup" step; that's expected, not a
+# bug, until staging/prod are provisioned per docs/database.md.
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Take backup
+        env:
+          DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
+          BACKUP_DIR: ./backup-out
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          bash Backend/db/dumps/pg_dump.sh
+
+      # Artifact storage is the "provider-independent" copy for now - a
+      # deployment with access to real object storage (S3/R2/etc.) should
+      # add an upload step here and can keep or drop this one.
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tanakh-db-backup-${{ github.run_id }}
+          path: backup-out/*.dump
+          retention-days: 90

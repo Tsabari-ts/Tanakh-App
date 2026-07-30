@@ -114,9 +114,16 @@ the last drill. Two independent mechanisms are in place:
    branch for a configurable retention window (set per-project in the Neon
    console). This is the primary, fast recovery path for "restore to 10
    minutes ago" scenarios.
-2. **Scheduled `pg_dump` to object storage** — a provider-independent second
-   copy, so a Neon-account-level incident doesn't leave us with zero backups.
-   Runs daily (see the scheduled job / CI workflow that invokes it).
+2. **Scheduled `pg_dump`** — a provider-independent second copy, so a
+   Neon-account-level incident doesn't leave us with zero backups.
+   `db/dumps/pg_dump.sh` does the dump; `.github/workflows/backend-backup.yml`
+   runs it daily and uploads the result as a GitHub Actions artifact
+   (90-day retention). This needs the `DIRECT_DATABASE_URL` repo secret set
+   to the direct/unpooled connection string once staging/prod Neon projects
+   exist — until then the workflow is in place but will fail at the backup
+   step, which is expected. A deployment with real object storage
+   (S3/R2/etc.) available can add an upload step there instead of (or in
+   addition to) the artifact upload.
 
 ## Raw SQL policy
 
