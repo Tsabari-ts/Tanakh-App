@@ -27,6 +27,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<SuppressionEntry> SuppressionEntries => Set<SuppressionEntry>();
 
+        public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

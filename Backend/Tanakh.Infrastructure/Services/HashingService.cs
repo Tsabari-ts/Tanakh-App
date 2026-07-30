@@ -16,25 +16,29 @@ namespace Tanakh.Infrastructure.Services
             this.options = options.Value;
         }
 
-        public string HashEmail(string email)
+        public string Hash(string value)
         {
-            // Validated lazily, not in the constructor: HashEmail is only
-            // ever called from within ISuppressionService.IsSuppressedAsync,
-            // itself only called from inside EmailSender's try/catch - so a
-            // missing pepper surfaces as "don't send" (fail closed), not an
-            // unhandled exception during DI activation.
+            // Validated lazily, not in the constructor: for the suppression
+            // path, Hash is only ever called from within
+            // ISuppressionService.IsSuppressedAsync, itself only called
+            // from inside EmailSender's try/catch - so a missing pepper
+            // surfaces as "don't send" (fail closed), not an unhandled
+            // exception during DI activation.
             if (string.IsNullOrEmpty(options.Pepper))
             {
                 throw new InvalidOperationException(
-                    "Hashing:Pepper must be configured - suppression checks cannot run without it.");
+                    "Hashing:Pepper must be configured - hashing cannot run without it.");
             }
 
-            // Normalized so the same address always hashes the same way
-            // regardless of how it was typed/stored.
-            string normalized = email.Trim().ToLowerInvariant();
             byte[] pepper = Encoding.UTF8.GetBytes(options.Pepper);
-            byte[] hash = HMACSHA256.HashData(pepper, Encoding.UTF8.GetBytes(normalized));
+            byte[] hash = HMACSHA256.HashData(pepper, Encoding.UTF8.GetBytes(value));
             return Convert.ToHexStringLower(hash);
+        }
+
+        public string HashEmail(string email)
+        {
+            string normalized = email.Trim().ToLowerInvariant();
+            return Hash(normalized);
         }
     }
 }
