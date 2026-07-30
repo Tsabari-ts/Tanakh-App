@@ -171,3 +171,27 @@ All 5 version-step commits (`angular-v18` … `angular-v22`) are tagged on `chor
 **Not yet done, by design (belongs to later tasks in the sequence):** standalone conversion (F-02), the remaining manual `@for`/`@empty`/`CommonModule` cleanup from the control-flow migration (F-05), removing the `ChangeDetectionStrategy.Eager` stopgaps in favor of real signals (F-03), zoneless (F-04), bundle-budget tuning (F-10).
 
 ---
+
+## F-02 · Convert to standalone components (2026-07-31)
+
+**Branch:** `feat/f-02-standalone`
+
+- Ran the 3-mode schematic in order, with a build+test checkpoint and commit after each:
+  1. `--mode=convert-to-standalone`: 11 components + `app.module.ts` + 11 spec files updated.
+  2. `--mode=prune-ng-modules`: "Nothing to be done" — this app only ever had a single root `AppModule`, no purely-declarative feature modules to prune.
+  3. `--mode=standalone-bootstrap`: deleted `app.module.ts`; `main.ts` rewritten to `bootstrapApplication()` with everything (routes, legacy modules via `importProvidersFrom`) inlined.
+  - **Found:** the standalone-conversion schematics silently strip trailing same-line comments when they rewrite a file's AST — all 11 `// TODO(F-03)` tags added during F-01 were gone after step 1. Re-applied them via a scripted sed pass (same pattern as F-01), verified 11/11 present again.
+- **Manual follow-up** (per spec, done after the schematic):
+  - Created `app.config.ts` as the single source of global providers and `app.routes.ts` holding the (still-eager, non-lazy) route table extracted from `main.ts` — lazy `loadComponent` conversion is F-09's job, not this one.
+  - Replaced `importProvidersFrom(BrowserModule, ...)` with idiomatic standalone providers: dropped `BrowserModule` (redundant under `bootstrapApplication`), `BrowserAnimationsModule` → `provideAnimations()`, `AppRoutingModule` → `provideRouter(routes, withComponentInputBinding())` (the `withComponentInputBinding()` is added now per the spec's explicit note that F-14 needs it later — inert until then), `ServiceWorkerModule.register(...)` → `provideServiceWorker(...)`, kept `provideHttpClient(withXhr(), withInterceptorsFromDi())` as-is (F-07 replaces `withInterceptorsFromDi()` with real functional interceptors later).
+  - **Verified `MatDialogModule`/`MatIconModule` were safe to drop globally**, not just assumed: `MatDialog` is `providedIn: 'root'` (checked `dialog.service.ts` — injected via plain constructor DI, no module needed), and the `convert-to-standalone` schematic had *already* given each dialog component (`welcome-modal`, `subscribe`, `read-permission`) its own fine-grained imports of the specific standalone directives it uses (`MatDialogTitle`, `MatIcon`, `CdkScrollable`, etc.) rather than the whole NgModule — better than the spec's own example expected.
+  - Kept `WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent` listed directly as `providers` in `app.config.ts`, matching what was already present (oddly) in the original `app.module.ts` before any of this migration started. This predates F-02 and looks like vestigial pre-Ivy `entryComponents`-era boilerplate (components don't need explicit providing to be dialog content under Ivy), but removing it is opportunistic cleanup outside F-02's scope — left untouched, noted here for whoever eventually does a provider-list audit.
+  - Found and deleted `app-routing.module.ts` — orphaned by this task's own changes (nothing references `AppRoutingModule` once `app.routes.ts` + `provideRouter` replaced it); this is dead code created by F-02 itself, not pre-existing, so removing it is in scope (not an F-15 violation).
+  - No `SharedModule`/`MaterialModule` barrel existed to dismantle (confirmed via `find`).
+- `ng build --configuration production`: succeeds. **Bundle shrank meaningfully — 669.09 kB raw / 148.72 kB transfer, down from 708.56 kB / 157.03 kB at the end of F-01** (~39 kB less), from dropping the unnecessary blanket `BrowserModule`/`MatDialogModule`/`MatIconModule` imports. Satisfies the DoD requirement that bundle size not grow — it shrank instead.
+- `ng build --configuration development`: also succeeds (2.45 MB, expected for unminified dev output) — confirms `ng serve`'s config path still works.
+- `ng test --watch=false --browsers=ChromeHeadless`: 10 FAILED / 7 SUCCESS throughout every sub-step, unchanged from the F-01 baseline.
+- Smoke test: served the production build, `/` returns 200 with correct `<html dir="rtl" lang="he">`.
+- Final DoD sweep: `grep -rl "NgModule"` → empty. `grep -rl "standalone: false"` → empty. `grep -rl "TODO(F-03)"` → 11/11 present. No barrel modules. ✅ All satisfied.
+
+---
