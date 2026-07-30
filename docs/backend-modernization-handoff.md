@@ -2,7 +2,7 @@
 
 **Written:** 2026-07-30
 **Repo:** `C:\Users\Tomer\Desktop\tomer\myProjects\Tanakh` (git remote `Tsabari-ts/Tanakh-App`, public, default branch `master`)
-**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **11 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-09 with zero re-derivation.
+**Scope:** 18-task ASP.NET Core modernization spec (B-01..B-18), executed one task per commit, in the wave order below. **12 of 18 tasks are done and committed.** This document is a complete handoff so a fresh session can continue at B-16 with zero re-derivation.
 
 ---
 
@@ -55,6 +55,7 @@ Full history: `git log --oneline` from `dba9c4f` through `cc897a5`.
 | `f286c51` | B-03: Enable Nullable Reference Types and fix every warning |
 | `cc897a5` | B-18: Migrate Newtonsoft.Json to System.Text.Json |
 | `53b7423` | B-04: Split into Tanakh.Domain/Infrastructure/Api/Tests |
+| `c1488e2` | B-09: Move remaining configuration to the Options pattern |
 
 **Note on ordering vs the spec's recommended wave order:** the spec lists `B-08, B-10, B-14` as Wave 1 and `B-05, B-07, B-06` as Wave 2 — executed in exactly that order. Within B-01/B-02 (Wave 0) and B-03 (Wave 3), also exactly as specified. No reordering happened; the commit list above **is** the wave order, task-by-task.
 
@@ -265,7 +266,7 @@ All five surfaced through direct investigation or forced compile errors — not 
 
 1. Read this document in full.
 2. Verify the environment is still as described in §2 (SDK location, global.json, user-secrets state) — a `dotnet --list-sdks` (with the PATH prefix) and `git log --oneline -12` are enough to confirm nothing has drifted. Note `Backend/Tanakh.csproj` no longer exists — the entry point is now `Backend/Tanakh.Api/Tanakh.Api.csproj`; adjust any hardcoded paths in your own commands accordingly (e.g. `dotnet run` from `Backend/Tanakh.Api/`, not `Backend/`).
-3. **B-18 is done** (commit `cc897a5`) and **B-04 is done** (commit `53b7423`) — see §4 for the current 4-project layout. Next task in wave order is **B-09** (Options pattern), which has no decision point of its own, though it surfaces a real fail-fast-vs-graceful-degradation question for `EmailOptions` — see that task's detail in §9.
+3. **B-18, B-04, and B-09 are all done** (commits `cc897a5`, `53b7423`, `c1488e2`) — see §4 for the current 4-project layout. `TanakhDataOptions` now formalizes the `TanakhData:DataDirectory` key; `EmailOptions` deliberately has **no** startup validation (see B-09's entry in §9 for why — an all-or-nothing partial-config check was tried and reverted because it broke against the real dev secrets state, which only has `Email:Password` set). Next task in wave order is **B-16**, which is a decision point.
 4. When you reach **B-16**, stop and present the Controllers-vs-Minimal-APIs decision (§10) before restructuring endpoints — note the `required`-auto-400 verification caveat there should be re-checked given B-04 didn't change binding behavior, just project boundaries.
 
 ---
@@ -293,31 +294,13 @@ Key implementation notes for anyone touching this area later:
 
 ---
 
-### B-09 · Move all configuration to the Options pattern · Wave 4 · P1 · S
+### B-09 · Move all configuration to the Options pattern · Wave 4 · P1 · S · **DONE (`c1488e2`)**
 
 **Purpose:** typed, validated configuration that fails at startup rather than mid-request.
 
-**Files expected to change (paths updated post-B-04):** `Backend/Tanakh.Infrastructure/Options/EmailOptions.cs` (add validation), new `Backend/Tanakh.Infrastructure/Options/TanakhDataOptions.cs`, `Backend/Tanakh.Api/Program.cs`, `Backend/Tanakh.Infrastructure/CacheProvider.cs` (remove the raw `configuration["TanakhData:DataDirectory"]` read from B-08).
+**Current state: DONE (commit `c1488e2`).** `TanakhDataOptions` (new, `Backend/Tanakh.Infrastructure/Options/TanakhDataOptions.cs`) replaces `CacheProvider`'s raw `configuration["TanakhData:DataDirectory"]` read — `CacheProvider` now takes `IOptions<TanakhDataOptions>`. Verified end-to-end: pointed `TanakhData:DataDirectory` at an alternate directory, then corrupted that directory's copy of `TanakhStructure.json` and confirmed the resulting 500 named that exact override path (proving the option actually flows through, not silently falling back to the default). Grepped the whole solution afterward for `IConfiguration[`/`.GetSection(`/`.GetValue<` — zero hits outside `Program.cs`.
 
-**Current state:**
-- `EmailOptions` exists (`Options/EmailOptions.cs`) but is bound with only `.Bind(...)` — **no `.ValidateDataAnnotations().ValidateOnStart()`, no `[Required]` attributes on its properties.** A missing `Email__Password` env var in Production today does NOT fail startup — it silently produces an empty-string default, and `EmailSender` gracefully returns `false` (per B-10's bug fix) rather than crashing. This task should decide: should Email config actually be required-at-startup (fail fast), or is graceful-degradation-to-no-email-sent the intended behavior for this app? **This is worth a quick confirmation with the user** — the spec's own B-09 definition of done ("deleting a required key... causes fail at startup") assumes fail-fast is wanted, but B-10 deliberately built graceful degradation. Reconcile before implementing.
-- `CacheProvider`'s constructor does `configuration["TanakhData:DataDirectory"] ?? Path.Combine(environment.ContentRootPath, "Data")` — a raw string-indexed `IConfiguration` read, explicitly flagged in B-08's commit message as "a stopgap ahead of the proper Options class B-09 introduces."
-
-**Implementation steps:**
-1. Create `TanakhDataOptions` with a `DataDirectory` property (nullable/optional — it has a legitimate default, doesn't need `[Required]`).
-2. Decide (ask user) whether `EmailOptions` should be `ValidateOnStart`-required or stay optional/graceful. If required: add `[Required]`/`[EmailAddress]` attributes, `.ValidateDataAnnotations().ValidateOnStart()` in `Program.cs`. If staying optional: document explicitly in `Backend/README.md` why (referencing B-10's graceful-degradation design), and add a lighter validation (e.g. all-or-nothing: either all 5 Email keys are set, or none are — a partially-configured state is probably a real misconfiguration worth failing loudly on).
-3. Update `CacheProvider` to take `IOptions<TanakhDataOptions>` instead of raw `IConfiguration`.
-4. Grep the whole solution for remaining `IConfiguration[` / `.GetSection(` / `.GetValue<` outside `Program.cs` — should be zero after this task.
-
-**Verification/testing steps:**
-1. `dotnet build -warnaserror` clean.
-2. If `EmailOptions` becomes `ValidateOnStart`-required: delete the `Email:Password` user secret (⚠️ **back it up first** — `dotnet user-secrets list` to capture the real value before removing, restore it after the test), confirm the app fails to start with a clear message naming the missing key, then restore the secret.
-3. Confirm `TanakhData:DataDirectory` override still works (this was tested in B-08 — re-verify after the refactor).
-4. Full endpoint smoke test.
-
-**Expected commit message:** `B-09: Move configuration to the Options pattern`
-
-**Risks:** the fail-fast-vs-graceful-degradation question for Email config is a real design decision, not mechanical — don't guess, ask.
+The fail-fast-vs-graceful-degradation question for `EmailOptions` was put to the user directly: **keep graceful degradation as-is, no startup validation at all.** An all-or-nothing "partially configured is an error" validation was actually implemented and tested first — it immediately broke startup against the real dev secrets state (`Email:Password` is the only one of 5 keys set, and has been all session) — so it was reverted per explicit instruction rather than silently reconciled one way or the other. `EmailOptions` is bound via plain `.Bind()`, nothing more. `README.md` updated to state this explicitly and to document the new `TanakhData:DataDirectory` key, plus fix stale `Tanakh.csproj`/`Tanakh.Options` path references left from B-04.
 
 ---
 
