@@ -4,9 +4,10 @@ import { ApiCallService } from '../../services/api-call.service';
 import { AppComponent } from '../../app.component';
 
 @Component({
-  selector: 'app-booklist',
-  templateUrl: './booklist.component.html',
-  styleUrl: './booklist.component.css'
+    selector: 'app-booklist',
+    templateUrl: './booklist.component.html',
+    styleUrl: './booklist.component.css',
+    standalone: false
 })
 
 export class BooklistComponent implements OnInit {

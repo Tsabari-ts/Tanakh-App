@@ -4,9 +4,10 @@ import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrl: './home.component.css',
+    standalone: false
 })
 export class HomeComponent implements OnInit {
   showButtons: boolean = true;

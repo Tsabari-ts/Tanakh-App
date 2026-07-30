@@ -2,9 +2,10 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-read-permission',
-  templateUrl: './read-permission.component.html',
-  styleUrl: './read-permission.component.css'
+    selector: 'app-read-permission',
+    templateUrl: './read-permission.component.html',
+    styleUrl: './read-permission.component.css',
+    standalone: false
 })
 
 export class ReadPermissionComponent implements OnInit{

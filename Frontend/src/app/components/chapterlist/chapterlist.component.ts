@@ -6,9 +6,10 @@ import gematriya from 'gematriya';
 import { AppComponent } from '../../app.component';
 
 @Component({
-  selector: 'app-chapterlist',
-  templateUrl: './chapterlist.component.html',
-  styleUrl: './chapterlist.component.css'
+    selector: 'app-chapterlist',
+    templateUrl: './chapterlist.component.html',
+    styleUrl: './chapterlist.component.css',
+    standalone: false
 })
 export class ChapterlistComponent implements OnInit {
   section: string | null = "";

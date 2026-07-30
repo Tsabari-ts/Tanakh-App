@@ -1,15 +1,15 @@
 import { Component, Input, Renderer2 } from '@angular/core';
 
 @Component({
-  selector: 'app-scroll-to-top-button',
-  template: `
+    selector: 'app-scroll-to-top-button',
+    template: `
   <button class="scroll-to-top-button" (click)="scrollToTop()">
   <mat-icon>keyboard_arrow_up</mat-icon>
   <div>קפוץ</div>
   <div class="up-text">למעלה</div>
   </button>
 `,
-  styles: [`
+    styles: [`
   .scroll-to-top-button {
     position: fixed;
     top: 300px;
@@ -42,7 +42,8 @@ import { Component, Input, Renderer2 } from '@angular/core';
         color: #fdfdfd; 
       }
     }
-`]
+`],
+    standalone: false
 })
 export class ScrollToTopButtonComponent {
   constructor(private renderer: Renderer2) {}

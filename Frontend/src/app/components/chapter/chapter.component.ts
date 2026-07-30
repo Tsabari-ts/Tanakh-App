@@ -5,9 +5,10 @@ import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
 
 @Component({
-  selector: 'app-chapter',
-  templateUrl: './chapter.component.html',
-  styleUrl: './chapter.component.css'
+    selector: 'app-chapter',
+    templateUrl: './chapter.component.html',
+    styleUrl: './chapter.component.css',
+    standalone: false
 })
 
 export class ChapterComponent implements OnInit {

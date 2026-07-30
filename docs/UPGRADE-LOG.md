@@ -99,4 +99,15 @@ Preparation: `git status` clean, `npm ci` clean install, baseline `ng build --co
 - `npm audit --omit=dev`: not yet re-checked at this intermediate step; will check after the full 17→22 sequence completes, since intermediate versions are stepping stones, not a shipped state.
 - Committed as a single `chore(F-01): upgrade Angular to v18` (core/cli and material updates squashed together, since `ng update` required a clean tree between the two commands but they represent one logical version step per the spec).
 
+### 18 → 19 (2026-07-31)
+
+- `npx ng update @angular/core@19 @angular/cli@19`: core/cli/etc → 19.2.25/19.2.27, `zone.js` → 0.15.1.
+  - As documented in the spec: automated migration added `standalone: false` to all 11 non-standalone declarations (`app.component.ts` and 10 components). **Expected and correct** — F-02 reverses this.
+  - `@angular/ssr` import-path migration and workspace-config-deprecation migration both ran with "No changes made" (app doesn't use SSR yet, no deprecated angular.json options present).
+  - Declined the two *optional* migrations offered (`use-application-builder` — already on it; `provide-initializer` for `APP_INITIALIZER`/etc — app doesn't use those tokens, nothing to migrate).
+- `npx ng update @angular/material@19`: material/cdk → 19.2.19. No manual changes (same reason as v18 — no custom theme SCSS).
+- `ng build --configuration production`: succeeds, 663.21 kB raw / 148.71 kB transfer, same warning set.
+- `ng test --watch=false --browsers=ChromeHeadless`: 12 FAILED / 5 SUCCESS, unchanged.
+- Committed as a single `chore(F-01): upgrade Angular to v19`.
+
 ---

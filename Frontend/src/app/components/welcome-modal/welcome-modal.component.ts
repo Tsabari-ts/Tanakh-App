@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-welcome-modal',
-  templateUrl: './welcome-modal.component.html',
-  styleUrl: './welcome-modal.component.css'
+    selector: 'app-welcome-modal',
+    templateUrl: './welcome-modal.component.html',
+    styleUrl: './welcome-modal.component.css',
+    standalone: false
 })
 export class WelcomeModalComponent {
   constructor(public dialogRef: MatDialogRef<WelcomeModalComponent>,

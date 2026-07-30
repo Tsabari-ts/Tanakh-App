@@ -4,9 +4,10 @@ import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css'
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    styleUrl: './settings.component.css',
+    standalone: false
 })
 
 export class SettingsComponent implements OnInit {
