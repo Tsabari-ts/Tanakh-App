@@ -1,4 +1,4 @@
-namespace Tanakh.Options
+namespace Tanakh.Infrastructure.Options
 {
     public class EmailOptions
     {

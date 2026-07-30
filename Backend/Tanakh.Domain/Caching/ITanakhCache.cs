@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Tanakh.Caching
+namespace Tanakh.Domain.Caching
 {
     public interface ITanakhCache
     {

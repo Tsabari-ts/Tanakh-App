@@ -2,8 +2,9 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Tanakh.Domain.Caching;
 
-namespace Tanakh.Caching
+namespace Tanakh.Infrastructure.Caching
 {
     public class MemoryTanakhCache : ITanakhCache
     {

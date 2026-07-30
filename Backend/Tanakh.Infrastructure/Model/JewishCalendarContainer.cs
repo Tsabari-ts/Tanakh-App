@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Tanakh.Model
+namespace Tanakh.Infrastructure.Model
 {
     // Mirrors hebcal.com's calendar API response shape. Every property is
     // nullable to reflect what the deserializer can actually produce.

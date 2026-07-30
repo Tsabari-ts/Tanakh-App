@@ -1,4 +1,4 @@
-namespace Tanakh.Model
+namespace Tanakh.Api.Model
 {
     public class TanakhContext
     {

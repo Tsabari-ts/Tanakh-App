@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Tanakh
+namespace Tanakh.Api
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {

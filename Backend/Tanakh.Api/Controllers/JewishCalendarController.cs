@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Tanakh.Model;
+using Tanakh.Infrastructure.Model;
 
-namespace Tanakh.Controllers
+namespace Tanakh.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]

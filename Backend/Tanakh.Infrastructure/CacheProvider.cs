@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Tanakh.Caching;
-using Tanakh.Model;
+using Tanakh.Domain.Caching;
+using Tanakh.Infrastructure.Model;
 
-namespace Tanakh.Controllers
+namespace Tanakh.Infrastructure
 {
     public class CacheProvider
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Tanakh.Model
+namespace Tanakh.Infrastructure.Model
 {
     // Every property is nullable to reflect what the deserializer can
     // actually produce from the source JSON. `section`, `title`, and `book`

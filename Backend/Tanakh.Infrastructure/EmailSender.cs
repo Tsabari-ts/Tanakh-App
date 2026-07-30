@@ -2,12 +2,12 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Net;
 using System.Net.Mail;
-using Tanakh.Model;
-using Tanakh.Options;
+using Tanakh.Domain;
+using Tanakh.Infrastructure.Options;
 
-namespace Tanakh
+namespace Tanakh.Infrastructure
 {
-    public class EmailSender
+    public class EmailSender : IEmailSender
     {
         private readonly EmailOptions emailOptions;
 

@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Tanakh.Model;
+using Tanakh.Api.Model;
+using Tanakh.Infrastructure;
+using Tanakh.Infrastructure.Model;
 
-namespace Tanakh.Controllers
+namespace Tanakh.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]

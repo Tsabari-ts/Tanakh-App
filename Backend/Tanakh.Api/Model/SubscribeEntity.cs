@@ -1,4 +1,4 @@
-namespace Tanakh.Model
+namespace Tanakh.Api.Model
 {
     public class SubscribeEntity
     {
@@ -10,11 +10,5 @@ namespace Tanakh.Model
     public class UnSubscribe
     {
         public required string PhoneNumber { get; set; }
-    }
-
-    public class EmailMessage
-    {
-        public required string Subject { get; set; }
-        public required string Body { get; set; }
     }
 }

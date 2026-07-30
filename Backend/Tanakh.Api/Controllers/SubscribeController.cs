@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Tanakh.Model;
+using Tanakh.Api.Model;
+using Tanakh.Domain;
 
-namespace Tanakh.Controllers
+namespace Tanakh.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
     public class SubscribeController : ControllerBase
     {
-        private readonly EmailSender emailSender;
+        private readonly IEmailSender emailSender;
 
-        public SubscribeController(EmailSender emailSender) 
+        public SubscribeController(IEmailSender emailSender)
         {
             this.emailSender = emailSender;
         }
