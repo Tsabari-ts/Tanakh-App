@@ -25,6 +25,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<EmailEvent> EmailEvents => Set<EmailEvent>();
 
+        public DbSet<SuppressionEntry> SuppressionEntries => Set<SuppressionEntry>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

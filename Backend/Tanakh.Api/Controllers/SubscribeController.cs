@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using Tanakh.Api.Model;
 using Tanakh.Domain;
+using Tanakh.Infrastructure.Options;
 
 namespace Tanakh.Api.Controllers
 {
@@ -11,10 +13,12 @@ namespace Tanakh.Api.Controllers
     public class SubscribeController : ControllerBase
     {
         private readonly IEmailSender emailSender;
+        private readonly EmailOptions emailOptions;
 
-        public SubscribeController(IEmailSender emailSender)
+        public SubscribeController(IEmailSender emailSender, IOptions<EmailOptions> emailOptions)
         {
             this.emailSender = emailSender;
+            this.emailOptions = emailOptions.Value;
         }
 
         // No CancellationToken parameter on these actions, deliberately: the only
@@ -29,6 +33,7 @@ namespace Tanakh.Api.Controllers
         {
             EmailMessage emailMessage = new EmailMessage
             {
+                To = emailOptions.RecipientAddress,
                 Subject = "הוספת משתמש חדש",
                 Body = $"משתמש חדש מעוניין להצטרף לרשימה, הנה הפרטים שלו:\nשם המשתמש: {subscribeEntity.UserName}\nמספר הפלאפון: {subscribeEntity.PhoneNumber}\nשעת התזכורת: {subscribeEntity.SelectedTime}"
             };
@@ -58,6 +63,7 @@ namespace Tanakh.Api.Controllers
         {
             EmailMessage emailMessage = new EmailMessage
             {
+                To = emailOptions.RecipientAddress,
                 Subject = "הסרת משתמש קיים",
                 Body = $"משתמש קיים מעוניין לצאת מהרשימה, הנה מספר הפלאפון שלו: {unSubscribe.PhoneNumber}"
             };

@@ -49,10 +49,14 @@ builder.Services.AddScoped<ITanakhStructureService, TanakhStructureService>();
 builder.Services.AddScoped<ITanakhTextService, TanakhTextService>();
 builder.Services.AddScoped<IJewishCalendarService, JewishCalendarService>();
 builder.Services.AddScoped<IReadingProgressService, ReadingProgressService>();
+builder.Services.AddSingleton<IHashingService, HashingService>();
+builder.Services.AddScoped<ISuppressionService, SuppressionService>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
 builder.Services.AddOptions<EmailOptions>()
     .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
+builder.Services.AddOptions<HashingOptions>()
+    .Bind(builder.Configuration.GetSection(HashingOptions.SectionName));
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddHealthChecks()
     .AddCheck<TanakhDataHealthCheck>("tanakh-data", tags: new[] { "ready" });
