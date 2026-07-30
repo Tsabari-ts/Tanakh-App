@@ -219,3 +219,18 @@ All 5 version-step commits (`angular-v18` … `angular-v22`) are tagged on `chor
 - Final DoD sweep: `grep -rn "*ngIf\|*ngFor\|*ngSwitch"` → empty. ✅ Every `@for` uses a stable identifier except the one documented `$index` exception. ✅ Every API-backed list has `@empty`. ✅ No `CommonModule` left to remove. ✅
 
 ---
+
+## F-09 · Set up lazy loading for routes (2026-07-31)
+
+**Branch:** `feat/f-09-lazy-routes`
+
+**⚠️ VERIFY correction:** the spec's example route table includes a `reminders` feature (`loadChildren: () => import('./features/reminders/reminders.routes')`). This frontend has **no reminders UI at all** — the Backend has reminder/subscription infrastructure (per git history: preference center, UTM tracking, admin dashboard for delivery/subscriber ops) but nothing in `Frontend/src/app` references it. Did not invent a route or a `reminders.routes.ts` file for a feature that doesn't exist in this codebase; converted only the 6 routes that actually exist (`entrance`, `home`, `settings`, `books/:section`, `books/:section/:book`, `books/:section/:book/:chapterNumber/:keepReading`).
+
+- Converted every route in `app.routes.ts` from eager `component:` to `loadComponent: () => import(...).then(m => m.XComponent)`, added a Hebrew `title` to each (per spec note, matters for F-11/SEO later).
+- Added `withPreloading(PreloadAllModules)` to `provideRouter(...)` in `app.config.ts`, per the spec's explicit recommendation for an app that's also used offline (small initial bundle, everything preloaded and cached shortly after).
+- Route paths and parameter names are byte-for-byte unchanged — no redirects needed, nothing to break for any bookmarked/shared URL.
+- `ng build --configuration production`: succeeds. **Initial bundle dropped from 669.29 kB to 363.84 kB raw / 71.47 kB transfer** — a ~46% reduction, and the initial-bundle budget warning (which had been present since before F-01) is now gone entirely, under the 500kB threshold for the first time in this log. Each route now emits its own named lazy chunk (`chapter-component`, `entrance-component`, `chapterlist-component`, `settings-component`, `home-component`, `booklist-component`, plus 2 shared vendor-ish chunks) — 8 chunk files total, confirmed via `ls dist/tanakh/browser/chunk-*.js`.
+- `ng test --watch=false --browsers=ChromeHeadless`: 10 FAILED / 7 SUCCESS, unchanged.
+- DoD sweep: every route uses `loadComponent`. ✅ Chunk-per-route confirmed. ✅ Initial bundle smaller (recorded both numbers above). ✅ All existing URLs unchanged (no redirects needed since nothing moved). ✅ Every route has a `title`. ✅
+
+---

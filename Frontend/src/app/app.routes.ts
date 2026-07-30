@@ -1,18 +1,36 @@
 import { Routes } from '@angular/router';
-import { EntranceComponent } from './components/entrance/entrance.component';
-import { HomeComponent } from './components/home/home.component';
-import { SettingsComponent } from './components/settings/settings.component';
-import { BooklistComponent } from './components/booklist/booklist.component';
-import { ChapterlistComponent } from './components/chapterlist/chapterlist.component';
-import { ChapterComponent } from './components/chapter/chapter.component';
 
 export const routes: Routes = [
   { path: "", redirectTo: "entrance", pathMatch: "full" },
-  { path: "entrance", component: EntranceComponent },
-  { path: "home", component: HomeComponent },
-  { path: "settings", component: SettingsComponent },
-  { path: "books/:section", component: BooklistComponent },
-  { path: "books/:section/:book", component: ChapterlistComponent },
-  { path: "books/:section/:book/:chapterNumber/:keepReading", component: ChapterComponent },
+  {
+    path: "entrance",
+    loadComponent: () => import('./components/entrance/entrance.component').then(m => m.EntranceComponent),
+    title: 'תנ"ך'
+  },
+  {
+    path: "home",
+    loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent),
+    title: 'תנ"ך'
+  },
+  {
+    path: "settings",
+    loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent),
+    title: 'הגדרות'
+  },
+  {
+    path: "books/:section",
+    loadComponent: () => import('./components/booklist/booklist.component').then(m => m.BooklistComponent),
+    title: 'ספרי התנ"ך'
+  },
+  {
+    path: "books/:section/:book",
+    loadComponent: () => import('./components/chapterlist/chapterlist.component').then(m => m.ChapterlistComponent),
+    title: 'פרקים'
+  },
+  {
+    path: "books/:section/:book/:chapterNumber/:keepReading",
+    loadComponent: () => import('./components/chapter/chapter.component').then(m => m.ChapterComponent),
+    title: 'תנ"ך'
+  },
   { path: "*", redirectTo: "home" }
 ];
