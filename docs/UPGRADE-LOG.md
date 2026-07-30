@@ -410,3 +410,21 @@ Started only after F-03 was fully complete and merged, per the spec's hard depen
 - **Not performed, same category of gap as every task since F-03:** the spec's actual DoD items here are almost entirely live-device checks — a full Lighthouse PWA audit, an Android Chrome install-prompt test via `chrome://inspect` port forwarding, verifying maskable icons aren't cropped on [maskable.app](https://maskable.app), and iOS device testing (which the spec itself already defers to `LAUNCH-CHECKLIST.md` item L-03 for lack of a secure-context LAN setup). None of these are possible in this headless, browser-less environment. The code paths (signal state, computed label, conditional iOS hint, manifest fields) are implemented and build correctly; seeing them actually work on a phone is still owed.
 
 ---
+
+## F-08 · Add `@defer` for heavy components (2026-07-31) — no code changes, closed as not-applicable
+
+**Branch:** `feat/f-08-defer`
+
+**⚠️ VERIFY finding:** the spec's own candidate table (advanced search, settings/preferences opened lazily, a reminders dialog, commentary/footnotes, an audio player, charts/statistics) is a list of *illustrative examples for a generic app*, not this one — none of those features exist in this codebase. Checked every actual component selector declared in `src/app/components/`:
+
+| Component | Why it's not a `@defer` candidate |
+|---|---|
+| `EntranceComponent`, `HomeComponent`, `BooklistComponent`, `ChapterlistComponent`, `ChapterComponent`, `SettingsComponent` | Each is already its own route, already lazy-loaded via `loadComponent` since F-09 — that's the code-splitting boundary that matters for these, and `@defer` inside a route-level component would only split *within* an already-small (2.7–10 kB) chunk. |
+| `ScrollToTopButtonComponent` | The only inline (non-route, non-dialog) child component in the app, used inside `ChapterComponent`'s template. It's small (a handful of CSS rules and one click handler) and is part of the immediate reading UI, not below-the-fold or non-critical content — deferring it would go against the spec's own explicit rule to never defer first-paint-adjacent content. |
+| `WelcomeModalComponent`, `SubscribeComponent`, `ReadPermissionComponent` | Opened programmatically via `MatDialog.open(ComponentType)` from `DialogService`, never declared inline in any template with a `<app-x>` tag — there is nothing in a template for `@defer` (a template control-flow block) to wrap. `@defer` structurally cannot apply to dynamically-opened dialog content. |
+
+**Related but genuinely different observation, not implemented here:** those three dialog components are listed directly in `app.config.ts`'s `providers` array (`WelcomeModalComponent, SubscribeComponent, ReadPermissionComponent`), which means they're eagerly bundled into the main initial chunk rather than split out, even though they're only ever needed when a dialog actually opens. The idiomatic fix for *that* is dynamic `import()` immediately before each `dialog.open(...)` call in `dialog.service.ts` — a legitimate, related code-splitting idea, but it is not `@defer` (a template syntax), and touching it would reopen the exact `app.config.ts` providers question F-02's log already flagged and deliberately left alone (those three components being listed as top-level providers looks like vestigial pre-Ivy `entryComponents` boilerplate, unrelated to F-08's scope). Noted here for whoever eventually does a bundle-size pass, not actioned.
+
+**No code changes made.** Per rule 7 ("if a task turns out ... different [from the plan], stop and ask" was already exercised for F-14's premise mismatch; here the honest outcome is simpler — there is nothing to build, and forcing a `@defer` block around something that doesn't warrant one would be exactly the kind of change the ground rules warn against). Every DoD item is vacuously satisfied by having deferred nothing: no SEO-critical content is inside a `@defer` block (none exists), no layout shift from lazy content (none exists), bundle size is unaffected (confirmed no build changes were needed).
+
+---
