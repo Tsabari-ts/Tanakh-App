@@ -36,6 +36,10 @@ namespace Tanakh.Domain
 
         Task<ConfirmationOutcome> ConfirmAsync(string rawToken, CancellationToken cancellationToken = default);
 
+        // No-op if the subscriber doesn't exist or isn't in
+        // pending_confirmation - a resend only makes sense there.
+        Task ResendConfirmationAsync(Guid subscriberId, CancellationToken cancellationToken = default);
+
         // Idempotent - unsubscribe tokens carry no expiry and may be replayed
         // (e.g. RFC 8058 one-click retries), so calling this twice for the
         // same subscriber must be harmless.

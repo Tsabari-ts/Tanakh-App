@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -9,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using Tanakh.Api;
+using Tanakh.Api.Auth;
 using Tanakh.Api.Services;
 using Tanakh.Domain;
 using Tanakh.Domain.Caching;
@@ -58,6 +60,7 @@ builder.Services.AddScoped<ISubscriberAnonymizationService, SubscriberAnonymizat
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddSingleton<IUnsubscribeTokenService, UnsubscribeTokenService>();
 builder.Services.AddScoped<INextChapterResolver, NextChapterResolver>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
@@ -69,6 +72,12 @@ builder.Services.AddOptions<RetentionOptions>()
     .Bind(builder.Configuration.GetSection(RetentionOptions.SectionName));
 builder.Services.AddOptions<RemindersOptions>()
     .Bind(builder.Configuration.GetSection(RemindersOptions.SectionName));
+builder.Services.AddOptions<AdminOptions>()
+    .Bind(builder.Configuration.GetSection(AdminOptions.SectionName));
+builder.Services.AddAuthentication()
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
+        BasicAuthenticationHandler.SchemeName, null);
+builder.Services.AddAuthorization();
 builder.Services.AddHostedService<RetentionHostedService>();
 builder.Services.AddHostedService<ReminderPlannerService>();
 builder.Services.AddHostedService<ReminderDispatcherService>();
@@ -131,6 +140,7 @@ app.UseRouting();
 
 app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

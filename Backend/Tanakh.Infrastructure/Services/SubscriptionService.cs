@@ -84,7 +84,26 @@ namespace Tanakh.Infrastructure.Services
             subscriber.SkipShabbatHolidays = skipShabbatHolidays;
 
             await RecordConsentAsync(subscriber.Id, ipAddress, userAgent, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
 
+            await IssueAndSendConfirmationAsync(subscriber, cancellationToken);
+        }
+
+        public async Task ResendConfirmationAsync(Guid subscriberId, CancellationToken cancellationToken = default)
+        {
+            Subscriber? subscriber = await dbContext.Subscribers
+                .FirstOrDefaultAsync(s => s.Id == subscriberId, cancellationToken);
+
+            if (subscriber is null || subscriber.Status != SubscriberStatus.PendingConfirmation)
+            {
+                return;
+            }
+
+            await IssueAndSendConfirmationAsync(subscriber, cancellationToken);
+        }
+
+        private async Task IssueAndSendConfirmationAsync(Subscriber subscriber, CancellationToken cancellationToken)
+        {
             string rawToken = GenerateRawToken();
             await dbContext.ConfirmationTokens.AddAsync(new ConfirmationToken
             {
@@ -101,7 +120,7 @@ namespace Tanakh.Infrastructure.Services
             {
                 To = subscriber.Email,
                 Subject = "אישור הרשמה לתזכורת יומית",
-                Body = $"שלום{(string.IsNullOrWhiteSpace(displayName) ? "" : " " + displayName)},\n\n" +
+                Body = $"שלום{(string.IsNullOrWhiteSpace(subscriber.DisplayName) ? "" : " " + subscriber.DisplayName)},\n\n" +
                        "כדי להשלים את ההרשמה לתזכורת היומית, יש ללחוץ על הקישור הבא:\n" +
                        $"{confirmUrl}\n\n" +
                        "אם לא ביקשת להירשם, אפשר להתעלם מהודעה זו."
