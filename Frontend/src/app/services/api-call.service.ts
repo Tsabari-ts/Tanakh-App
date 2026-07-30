@@ -27,4 +27,8 @@ export class ApiCallService {
   subscribe(subscriptionRequest: any) {
     return this.http.post(`https://localhost:44308/api/v1/subscriptions`, subscriptionRequest, { responseType: 'text' });
   }
+
+  updateReadingProgress(readingProgress: any) {
+    return this.http.post(`https://localhost:44308/api/v1/reading-progress`, readingProgress, { responseType: 'text' });
+  }
 }

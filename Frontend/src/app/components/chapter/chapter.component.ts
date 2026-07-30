@@ -134,6 +134,13 @@ export class ChapterComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe(q => {
+      const subscriberToken = q['sid'];
+      if (subscriberToken) {
+        localStorage.setItem('subscriberToken', subscriberToken);
+      }
+    });
+
     this.activatedRoute.params.subscribe(p => {
       this.section = p['section'];
       this.book = p['book'];
@@ -150,6 +157,7 @@ export class ChapterComponent implements OnInit {
           this.title = data.bookData.hebrewSectionRef;
           this.nextChapter = data.bookData.nextChapter;
           console.log(this.data);
+          this.reportReadingProgress();
         }, (error) => {
           console.log(error)
         })
@@ -157,6 +165,21 @@ export class ChapterComponent implements OnInit {
     })
 
     this.createTitle(this.title);
+  }
+
+  reportReadingProgress(): void {
+    const subscriberToken = localStorage.getItem('subscriberToken');
+    const chapterNumber = parseInt(this.chapter, 10);
+
+    if (!subscriberToken || !this.book || isNaN(chapterNumber)) {
+      return;
+    }
+
+    this.apiService.updateReadingProgress({
+      token: subscriberToken,
+      book: this.book,
+      chapter: chapterNumber
+    }).subscribe({ error: (error) => console.log(error) });
   }
 
   createTitle(title: any) {
@@ -188,6 +211,7 @@ export class ChapterComponent implements OnInit {
 
     console.log('Book:', book);
     console.log('Chapter:', chapter);
+    this.book = book;
     this.chapter = chapter;
 
 
@@ -201,6 +225,7 @@ export class ChapterComponent implements OnInit {
       this.nextChapter = data.bookData.nextChapter;
       console.log(this.data);
       this.contentContainer.nativeElement.scrollTop = 0;
+      this.reportReadingProgress();
 
     }, (error) => {
       console.log(error)

@@ -56,6 +56,7 @@ builder.Services.AddScoped<ISuppressionService, SuppressionService>();
 builder.Services.AddScoped<ISubscriberAnonymizationService, SubscriberAnonymizationService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddSingleton<IUnsubscribeTokenService, UnsubscribeTokenService>();
+builder.Services.AddScoped<INextChapterResolver, NextChapterResolver>();
 builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
