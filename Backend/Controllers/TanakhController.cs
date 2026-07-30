@@ -17,6 +17,8 @@ namespace Tanakh.Controllers
             this.cacheProvider = cacheProvider;
         }
 
+        /// <summary>Lists the books belonging to a Tanakh section (e.g. "torah", "neviim", "ketuvim").</summary>
+        /// <param name="section">The section name, case-insensitive.</param>
         [HttpGet("books/{section}")]
         public IActionResult GetBookList(string section)
         {
@@ -36,6 +38,8 @@ namespace Tanakh.Controllers
         }
 
 
+        /// <summary>Looks up structure entries for a single book by title.</summary>
+        /// <param name="book">The book title (e.g. "Genesis").</param>
         [HttpGet("books/main/{book}")]
         public IActionResult getBookChapter(string book)
         {
@@ -54,6 +58,9 @@ namespace Tanakh.Controllers
             }
         }
 
+        /// <summary>Returns the Hebrew text and navigation data for a single chapter.</summary>
+        /// <param name="book">The book title (e.g. "Genesis").</param>
+        /// <param name="chapter">The chapter number, as a string.</param>
         [HttpGet("books/{book}/{chapter}")]
         public IActionResult GetChapter(string book, string chapter)
         {

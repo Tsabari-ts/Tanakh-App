@@ -3,11 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <UserSecretsId>b54476fa-a2b7-4e0a-a3fe-83715f7795c0</UserSecretsId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
+    <PackageReference Include="Microsoft.OpenApi" Version="2.11.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.16" />
   </ItemGroup>
 
   <ItemGroup>

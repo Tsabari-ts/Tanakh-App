@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 using System.Diagnostics;
 using Tanakh;
 using Tanakh.Caching;
@@ -21,10 +21,7 @@ builder.Services.AddOptions<EmailOptions>()
     .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
 builder.Services.AddTransient<EmailSender>();
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Tanakh", Version = "v1" });
-});
+builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>
@@ -40,8 +37,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tanakh v1"));
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 else
 {

@@ -14,6 +14,7 @@ namespace Tanakh.Controllers
             this.emailSender = emailSender;
         }
 
+        /// <summary>Notifies the site owner by email that a new user wants to subscribe to reminders.</summary>
         [HttpPost("RegisterUser")]
         public IActionResult RegisterNewUser([FromBody] SubscribeEntity subscribeEntity)
         {
@@ -29,6 +30,7 @@ namespace Tanakh.Controllers
             return Ok(isSuccessful);
         }
 
+        /// <summary>Notifies the site owner by email that an existing user wants to unsubscribe.</summary>
         [HttpPost("DeleteUser")]
         public IActionResult DeleteUser([FromBody] UnSubscribe unSubscribe)
         {

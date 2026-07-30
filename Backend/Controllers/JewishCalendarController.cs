@@ -12,6 +12,7 @@ namespace Tanakh.Controllers
     [ApiController]
     public class JewishCalendarController : ControllerBase
     {
+        /// <summary>Returns whether today falls between candle lighting and Havdalah, per hebcal.com.</summary>
         [HttpGet]
         [Route("getJewishCalendar")]
         public IActionResult GetJewishCalendar()
