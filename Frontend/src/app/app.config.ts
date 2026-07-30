@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withXhr, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -10,10 +10,13 @@ import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { retryInterceptor } from './core/interceptors/retry.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { GlobalErrorHandler } from './core/global-error-handler';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
+    provideBrowserGlobalErrorListeners(),
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
     provideAnimations(),
     provideHttpClient(withXhr(), withInterceptors([retryInterceptor, errorInterceptor])),

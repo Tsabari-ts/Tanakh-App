@@ -23,4 +23,8 @@
   </div>
 
   <div class="img-background"></div>
-  <router-outlet></router-outlet>
+  @if (errorState.state().kind === 'none') {
+    <router-outlet></router-outlet>
+  } @else {
+    <app-error-screen></app-error-screen>
+  }
