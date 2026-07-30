@@ -13,6 +13,7 @@ import { AppComponent } from '../../app.component';
 export class BooklistComponent implements OnInit {
   section: string | null = "";
   data: any;
+  loadError = false;
 
     constructor(private activatedRoute: ActivatedRoute,
                 private apiService: ApiCallService,
@@ -29,11 +30,13 @@ export class BooklistComponent implements OnInit {
         this.apiService.getBookList(this.section).subscribe(data => {
           if (data.error) {
             console.log(data.error);
+            this.loadError = true;
             return;
           }
           this.data = data;
         }, (error) => {
-          console.log(error)
+          console.log(error);
+          this.loadError = true;
         })
       }
     })

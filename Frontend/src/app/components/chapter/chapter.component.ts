@@ -22,6 +22,7 @@ export class ChapterComponent implements OnInit {
   keepReading: string | null = "";
   data: any;
   nextChapter: any;
+  loadError = false;
 
   isScrolling = false;
   isScrollingDown = false;
@@ -134,7 +135,7 @@ export class ChapterComponent implements OnInit {
 
 
   returnToHomePage() {
-    this.router.navigate(['/homepage']);
+    this.router.navigate(['/home']);
   }
 
   ngOnInit(): void {
@@ -155,6 +156,7 @@ export class ChapterComponent implements OnInit {
         this.apiService.getVerses(this.book, this.chapter).subscribe(data => {
           if (data.error) {
             console.log(data.error);
+            this.loadError = true;
             return;
           }
           this.data = data.bookData.verses;
@@ -162,7 +164,8 @@ export class ChapterComponent implements OnInit {
           this.nextChapter = data.bookData.nextChapter;
           this.reportReadingProgress();
         }, (error) => {
-          console.log(error)
+          console.log(error);
+          this.loadError = true;
         })
       }
     })
@@ -214,6 +217,7 @@ export class ChapterComponent implements OnInit {
     this.apiService.getVerses(book, chapter).subscribe(data => {
       if (data.error) {
         console.log(data.error);
+        this.loadError = true;
         return;
       }
       this.data = data.bookData.verses;
@@ -223,7 +227,8 @@ export class ChapterComponent implements OnInit {
       this.reportReadingProgress();
 
     }, (error) => {
-      console.log(error)
+      console.log(error);
+      this.loadError = true;
     })
   }
 
