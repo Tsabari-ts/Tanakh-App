@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace Tanakh.Model
 {
-    // Deserialized with Newtonsoft.Json, which does not enforce `required`,
-    // so every property is nullable. `section`, `title`, and `book` (the
-    // fields this app reads) are validated non-null at the point of
+    // Every property is nullable to reflect what the deserializer can
+    // actually produce from the source JSON. `section`, `title`, and `book`
+    // (the fields this app reads) are validated non-null at the point of
     // deserialization in CacheProvider.GetTanakhStructureFromCache.
     public class TanakhStructure
     {
-        public List<BaseStructure>? Structures { get; set; }
+        public List<BaseStructure>? structures { get; set; }
     }
 
     public class BaseStructure

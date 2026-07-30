@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Tanakh.Caching;
 using Tanakh.Model;
 
@@ -34,7 +34,7 @@ namespace Tanakh.Controllers
             using (StreamReader reader = new StreamReader(tanakhDataPath))
             {
                 string jsonData = reader.ReadToEnd();
-                TanakhContainer? tanakhContainer = JsonConvert.DeserializeObject<TanakhContainer>(jsonData);
+                TanakhContainer? tanakhContainer = JsonSerializer.Deserialize<TanakhContainer>(jsonData);
 
                 if (tanakhContainer?.structures is null)
                 {
@@ -71,12 +71,12 @@ namespace Tanakh.Controllers
             using (StreamReader reader = new StreamReader(tanakhStructurePath))
             {
                 string jsonStructfure = reader.ReadToEnd();
-                List<BaseStructure>? books = JsonConvert.DeserializeObject<TanakhStructure>(jsonStructfure)?.Structures;
+                List<BaseStructure>? books = JsonSerializer.Deserialize<TanakhStructure>(jsonStructfure)?.structures;
 
                 if (books is null)
                 {
                     throw new InvalidOperationException(
-                        $"Failed to parse Tanakh structure file at '{tanakhStructurePath}': missing or empty 'Structures'.");
+                        $"Failed to parse Tanakh structure file at '{tanakhStructurePath}': missing or empty 'structures'.");
                 }
 
                 foreach (BaseStructure item in books)

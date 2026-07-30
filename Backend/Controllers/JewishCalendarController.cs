@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Tanakh.Model;
 
@@ -69,7 +69,7 @@ namespace Tanakh.Controllers
             HttpClient httpClient = new HttpClient();
             HttpResponseMessage jsonResult = await httpClient.GetAsync("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&geo=geoname&geonameid=293397&M=on&s=on");
             string json = await jsonResult.Content.ReadAsStringAsync();
-            JewishCalendarContainer? calendarContainer = JsonConvert.DeserializeObject<JewishCalendarContainer>(json);
+            JewishCalendarContainer? calendarContainer = JsonSerializer.Deserialize<JewishCalendarContainer>(json);
 
             if (calendarContainer?.items is null)
             {

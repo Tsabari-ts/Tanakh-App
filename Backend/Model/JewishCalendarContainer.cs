@@ -3,11 +3,10 @@ using System.Collections.Generic;
 
 namespace Tanakh.Model
 {
-    // Mirrors hebcal.com's calendar API response shape. Deserialized with
-    // Newtonsoft.Json, which does not enforce the `required` modifier, so
-    // every property is nullable to reflect what the deserializer can
-    // actually produce. `items` and `Item.category` (the only fields this
-    // app reads) are validated non-null at the point of deserialization in
+    // Mirrors hebcal.com's calendar API response shape. Every property is
+    // nullable to reflect what the deserializer can actually produce.
+    // `items` and `Item.category` (the only fields this app reads) are
+    // validated non-null at the point of deserialization in
     // JewishCalendarController.FillJewishCalendar.
     public class JewishCalendarContainer
     {

@@ -10,11 +10,10 @@ namespace Tanakh.Model
         public List<Structure>? structures { get; set; }
     }
 
-    // Mirrors Sefaria's /api/texts/{ref} response shape. Deserialized with
-    // Newtonsoft.Json, which does not enforce the `required` modifier - a
-    // missing JSON field silently leaves a property null regardless of its
-    // declared type, so every property here is nullable to reflect what the
-    // deserializer can actually produce. The handful of fields this app reads
+    // Mirrors Sefaria's /api/texts/{ref} response shape. A missing JSON field
+    // silently leaves a property null regardless of its declared type, so
+    // every property here is nullable to reflect what the deserializer can
+    // actually produce. The handful of fields this app reads
     // (book, sectionRef, heTitle, heSectionRef, he) are validated non-null at
     // the point of deserialization in CacheProvider before being cached or
     // returned - see GetFullTanakhFromCache.
