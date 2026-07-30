@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Tanakh.Api.Model;
-using Tanakh.Infrastructure;
-using Tanakh.Infrastructure.Model;
+using Tanakh.Api.Services;
+using Tanakh.Infrastructure.Services;
 
 namespace Tanakh.Api.Controllers
 {
@@ -12,11 +9,13 @@ namespace Tanakh.Api.Controllers
     [ApiController]
     public class TanakhController : ControllerBase
     {
-        private readonly CacheProvider cacheProvider;
+        private readonly ITanakhStructureService structureService;
+        private readonly ITanakhTextService textService;
 
-        public TanakhController(CacheProvider cacheProvider)
+        public TanakhController(ITanakhStructureService structureService, ITanakhTextService textService)
         {
-            this.cacheProvider = cacheProvider;
+            this.structureService = structureService;
+            this.textService = textService;
         }
 
         /// <summary>Lists the books belonging to a Tanakh section (e.g. "torah", "neviim", "ketuvim").</summary>
@@ -24,12 +23,7 @@ namespace Tanakh.Api.Controllers
         [HttpGet("books/{section}")]
         public IActionResult GetBookList(string section)
         {
-            string cacheKey = "tanakhStructure";
-            List<BaseStructure> books = cacheProvider.GetTanakhStructureFromCache(cacheKey);
-
-            List<BaseStructure> relevantSections = books.Where(x => x.section?.ToLower() == section).ToList();
-
-            return Ok(relevantSections);
+            return Ok(structureService.GetBySection(section));
         }
 
         /// <summary>Looks up structure entries for a single book by title.</summary>
@@ -37,12 +31,7 @@ namespace Tanakh.Api.Controllers
         [HttpGet("books/main/{book}")]
         public IActionResult getBookChapter(string book)
         {
-            string cacheKey = "tanakhStructure";
-            List<BaseStructure> books = cacheProvider.GetTanakhStructureFromCache(cacheKey);
-
-            List<BaseStructure> relevantSections = books.Where(x => x.title == book).ToList();
-
-            return Ok(relevantSections);
+            return Ok(structureService.GetByTitle(book));
         }
 
         /// <summary>Returns the Hebrew text and navigation data for a single chapter.</summary>
@@ -51,85 +40,14 @@ namespace Tanakh.Api.Controllers
         [HttpGet("books/{book}/{chapter}")]
         public IActionResult GetChapter(string book, string chapter)
         {
-            Dictionary<string, Book> dataDictionary = Get();
-            string chosenSection = book + " " + chapter;
+            TanakhContext? context = textService.GetChapter(book, chapter);
 
-            if (!dataDictionary.TryGetValue(chosenSection, out Book? bookData))
+            if (context is null)
             {
                 return NotFound();
             }
 
-            TanakhContext context = new TanakhContext
-            {
-                ChosenSection = chosenSection,
-                BookData = bookData
-            };
-
             return Ok(context);
-        }
-
-        private Dictionary<string, Book> Get()
-        {
-            string cacheKey = "fullTanakh";
-            TanakhContainer tanakhContainer = cacheProvider.GetFullTanakhFromCache(cacheKey);
-            Dictionary<string, Book> dataDictionary = new Dictionary<string, Book>();
-
-            int currentBookIndex = 1;
-
-            // structures validated non-null in CacheProvider.GetFullTanakhFromCache
-            foreach (Structure item in tanakhContainer.structures!)
-            {
-                string? nextSection = item.next;
-
-                if (string.IsNullOrEmpty(nextSection))
-                {
-                    string nextBook = GetNextSection(currentBookIndex);
-                    currentBookIndex++;
-
-                    if (!string.IsNullOrEmpty(nextBook))
-                    {
-                        nextSection = nextBook + " " + "1";
-                    }
-                }
-
-                // book/sectionRef/heTitle/heSectionRef/he validated non-null in CacheProvider.GetFullTanakhFromCache
-                string chosenSection = item.sectionRef!;
-                string episodeData = string.Join(" ", item.he!);
-                string verses = Regex.Replace(episodeData, @"<[^>]+>", "");
-
-                Book testy = new Book
-                {
-                    BookName = item.book!,
-                    HebrewTitle = item.heTitle!,
-                    HebrewSectionRef = item.heSectionRef!,
-                    length = item.length,
-                    NextChapter = nextSection,
-                    PrevChapter = item.prev,
-                    SectionRef = item.sectionRef!,
-                    Verses = verses
-                };
-
-                dataDictionary.Add(chosenSection, testy);
-
-            }
-
-            return dataDictionary;
-        }
-
-        private string GetNextSection(int currentBookIndex)
-        {
-            string cacheKey = "tanakhStructure";
-            List<BaseStructure> books = cacheProvider.GetTanakhStructureFromCache(cacheKey);
-
-            string book = string.Empty;
-
-            if (currentBookIndex < books.Count)
-            {
-                BaseStructure nextBook = books[currentBookIndex];
-                book = nextBook.book ?? string.Empty;
-            }
-
-            return book;
         }
     }
 }

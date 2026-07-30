@@ -5,11 +5,13 @@ using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
 using System.Diagnostics;
 using Tanakh.Api;
+using Tanakh.Api.Services;
 using Tanakh.Domain;
 using Tanakh.Domain.Caching;
 using Tanakh.Infrastructure;
 using Tanakh.Infrastructure.Caching;
 using Tanakh.Infrastructure.Options;
+using Tanakh.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,9 @@ builder.Services.AddMemoryCache(options =>
 });
 builder.Services.AddSingleton<ITanakhCache, MemoryTanakhCache>();
 builder.Services.AddScoped<CacheProvider>();
+builder.Services.AddScoped<ITanakhStructureService, TanakhStructureService>();
+builder.Services.AddScoped<ITanakhTextService, TanakhTextService>();
+builder.Services.AddScoped<IJewishCalendarService, JewishCalendarService>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
 builder.Services.AddOptions<EmailOptions>()
