@@ -40,8 +40,7 @@ export class BooklistComponent implements OnInit {
             return;
           }
           this.data.set(data);
-        }, (error) => {
-          console.log(error);
+        }, () => {
           this.loadError.set(true);
         })
       }

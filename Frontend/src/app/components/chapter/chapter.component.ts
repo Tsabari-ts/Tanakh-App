@@ -171,8 +171,7 @@ export class ChapterComponent implements OnInit {
           this.title.set(data.bookData.hebrewSectionRef);
           this.nextChapter = data.bookData.nextChapter;
           this.reportReadingProgress();
-        }, (error) => {
-          console.log(error);
+        }, () => {
           this.loadError.set(true);
         })
       }
@@ -195,7 +194,7 @@ export class ChapterComponent implements OnInit {
       chapter: chapterNumber
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ error: (error) => console.log(error) });
+      .subscribe();
   }
 
   createTitle(title: any) {
@@ -238,8 +237,7 @@ export class ChapterComponent implements OnInit {
       this.contentContainer.nativeElement.scrollTop = 0;
       this.reportReadingProgress();
 
-    }, (error) => {
-      console.log(error);
+    }, () => {
       this.loadError.set(true);
     })
   }

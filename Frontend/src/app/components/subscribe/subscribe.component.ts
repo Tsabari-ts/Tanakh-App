@@ -80,8 +80,7 @@ export class SubscribeComponent {
       .subscribe(() => {
       this.subscribeSuccessful = true;
       this.markSubscribe();
-    }, (error) => {
-      console.log(error);
+    }, () => {
       this.subscribeSuccessful = false;
     },
     () => {

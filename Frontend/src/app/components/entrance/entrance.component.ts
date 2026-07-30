@@ -38,8 +38,7 @@ export class EntranceComponent implements OnInit {
            this.showNextWord();
          }
       },
-      (error) => {
-        console.error('Error loading data', error);
+      () => {
         this.isLoading.set(true);
       }
     );

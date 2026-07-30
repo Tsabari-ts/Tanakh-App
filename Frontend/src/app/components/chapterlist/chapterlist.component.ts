@@ -43,8 +43,7 @@ export class ChapterlistComponent implements OnInit {
             this.bookService.setBookData(bookData);
             this.chapters.set(this.bookService.getBookChapter());
           }
-        }, (error) => {
-          console.log(error);
+        }, () => {
           this.loadError.set(true);
         });
       }
