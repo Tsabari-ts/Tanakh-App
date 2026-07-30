@@ -53,9 +53,5 @@ export class SettingsComponent implements OnInit {
 
   downloadApp(){
     this.pwaInstall.installPWA();
-
-    if(this.isPwaInstalled){
-      console.log("you already installed the app");
-    }
   }
 }

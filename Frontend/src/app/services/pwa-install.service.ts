@@ -25,9 +25,6 @@ export class PwaInstallService {
         if (choiceResult.outcome === 'accepted') {
           localStorage.setItem('pwaInstalled', 'true');
           this.isPwaInstalled = true;
-          console.log('User accepted the install prompt');
-        } else {
-          console.log('User dismissed the install prompt');
         }
         this.deferredPrompt = null;
       });

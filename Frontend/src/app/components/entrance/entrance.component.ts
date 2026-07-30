@@ -28,7 +28,6 @@ export class EntranceComponent implements OnInit {
 
         if(this.isHolidayOrShabat){
           this.isLoading = false;
-          console.log('is shabes');
         }
         else{
           this.isLoading = false;

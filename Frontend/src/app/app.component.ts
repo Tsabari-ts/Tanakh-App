@@ -14,7 +14,6 @@ export class AppComponent {
   constructor(private location: Location) { }
 
   goBack(): void {
-    console.log("return");
     this.location.back();
   }
 }
