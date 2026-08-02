@@ -9,6 +9,35 @@
     line-height: var(--line-height-heading);
 }
 
+.verse--active {
+    background-color: color-mix(in srgb, var(--color-focus) 20%, transparent);
+    border-radius: 4px;
+    box-shadow: 0 0 0 2px var(--color-focus);
+}
+
+.verse-play-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--tap-target-min);
+    block-size: var(--tap-target-min);
+    vertical-align: middle;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-muted);
+    opacity: 0.35;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.verse-play-btn:hover,
+.verse-play-btn:focus-visible {
+    opacity: 1;
+    color: var(--color-link);
+    background: color-mix(in srgb, var(--color-link) 12%, transparent);
+}
+
 .sentences{
     margin: auto;
     margin-bottom: 150px;

@@ -12,10 +12,16 @@
       {{title()}}
     </h1>
     @if (data(); as verses) {
+      <app-tts-player></app-tts-player>
       <div>
         <p class="sentences">
           @for (verse of verses; track $index) {
-            <span class="verse" [id]="'verse-' + $index">{{ verse }}</span>{{ ' ' }}
+            <button type="button" class="verse-play-btn"
+                    (click)="readFromVerse($index)"
+                    [attr.aria-label]="'הקראה מפסוק ' + ($index + 1)">▶</button>
+            <span class="verse" [id]="'verse-' + $index"
+                  [class.verse--active]="tts.activeVerseIndex() === $index"
+                  [attr.aria-current]="tts.activeVerseIndex() === $index ? 'true' : null">{{ verse }}</span>{{ ' ' }}
           }
           <br>
             <button class="end-button" type="button" (click)="finishedReading()" i18n="@@chapter.finishedReading">סיימתי לקרוא</button>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, DestroyRef, inject, effect, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
@@ -6,13 +6,15 @@ import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
 import { NgClass } from '@angular/common';
 import { ScrollToTopButtonComponent } from '../scroll-to-top-button/scroll-to-top-button.component';
+import { TtsService } from '../../core/tts/tts.service';
+import { TtsPlayerComponent } from '../../shared/tts/tts-player/tts-player.component';
 
 @Component({
     selector: 'app-chapter',
     templateUrl: './chapter.component.html',
     styleUrl: './chapter.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, ScrollToTopButtonComponent]
+    imports: [NgClass, ScrollToTopButtonComponent, TtsPlayerComponent]
 })
 
 export class ChapterComponent implements OnInit {
@@ -41,6 +43,25 @@ export class ChapterComponent implements OnInit {
   stopIcon: string = 'stop-icon';
   upIcon: string = 'up-icon';
   nextIcon: string = 'next-icon';
+
+  readonly tts = inject(TtsService);
+
+  private scrollToActiveVerse = effect(() => {
+    const index = this.tts.activeVerseIndex();
+    if (index === null) {
+      return;
+    }
+    const el = document.getElementById(`verse-${index}`);
+    // scrollIntoView never moves keyboard focus (only .focus() does), so
+    // this can't steal focus away from wherever the user was tabbing.
+    const reducedMotion = document.documentElement.classList.contains('a11y-no-motion')
+      || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'center' });
+  });
+
+  readFromVerse(index: number): void {
+    this.tts.playFromVerse(index);
+  }
 
   scrollDown() {
     if (this.isScrollingUp) {
@@ -123,6 +144,9 @@ export class ChapterComponent implements OnInit {
 
   ngOnDestroy() {
     this.stopScrolling();
+    // speechSynthesis keeps talking in the background after navigating away
+    // otherwise (V-10).
+    this.tts.cancelForNavigation();
   }
 
   constructor(private activatedRoute: ActivatedRoute,
@@ -168,6 +192,7 @@ export class ChapterComponent implements OnInit {
             return;
           }
           this.data.set(data.bookData.verses);
+          this.tts.loadChapter(data.bookData.verses);
           this.title.set(data.bookData.hebrewSectionRef);
           this.nextChapter = data.bookData.nextChapter;
           this.reportReadingProgress();
@@ -232,6 +257,7 @@ export class ChapterComponent implements OnInit {
         return;
       }
       this.data.set(data.bookData.verses);
+      this.tts.loadChapter(data.bookData.verses);
       this.title.set(data.bookData.hebrewSectionRef);
       this.nextChapter = data.bookData.nextChapter;
       this.contentContainer.nativeElement.scrollTop = 0;

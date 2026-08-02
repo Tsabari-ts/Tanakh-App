@@ -36,6 +36,39 @@ async function seedWelcomeSeen(page: Page, path: string, seen: boolean): Promise
   }
 }
 
+const MOCK_VERSES = [
+  'בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ',
+  'וְהָאָרֶץ הָיְתָה תֹהוּ וָבֹהוּ וְחֹשֶׁךְ עַל פְּנֵי תְהוֹם',
+  'וַיֹּאמֶר אֱלֹהִים יְהִי אוֹר וַיְהִי אוֹר',
+];
+
+async function mockChapterApi(page: Page): Promise<void> {
+  await page.route('**/Tanakh/books/**', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      bookData: {
+        verses: MOCK_VERSES,
+        hebrewSectionRef: 'בראשית א׳',
+        nextChapter: 'Genesis 2',
+      },
+    }),
+  }));
+}
+
+/** Fakes a Hebrew voice so the full player UI (not just the "no voice"
+ *  fallback message) renders - CI runners typically have zero TTS voices. */
+async function mockHebrewVoice(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const fakeVoice = {
+      voiceURI: 'fake-he-voice', name: 'Fake Hebrew Voice', lang: 'he-IL',
+      default: true, localService: true,
+    } as unknown as SpeechSynthesisVoice;
+    Object.defineProperty(window.speechSynthesis, 'getVoices', {
+      value: () => [fakeVoice],
+    });
+  });
+}
+
 async function applyMode(page: Page, mode: (typeof MODES)[number]): Promise<void> {
   await page.evaluate(([classes, scale]) => {
     document.documentElement.classList.add(...(classes as string[]));
@@ -79,6 +112,40 @@ test('נגישות · דיאלוג הצהרת הנגישות (deep link)', async
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
     .analyze();
   expect(results.violations).toEqual([]);
+});
+
+test('נגישות · פרק עם תוכן אמיתי', async ({ page }) => {
+  await mockChapterApi(page);
+  await seedWelcomeSeen(page, '/books/Torah/Genesis/1/false', true);
+  await expect(page.locator('.verse').first()).toBeVisible();
+  // Whether this machine's speechSynthesis.getVoices() happens to report a
+  // Hebrew voice varies by OS/browser (Chrome lists some "network" voices
+  // even offline) - either way the player must render *something* usable,
+  // not a dead button (V-02), which the dedicated mocked-voice test below
+  // checks more specifically.
+  await expect(page.locator('.tts-player')).toBeVisible();
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  expect(results.violations).toEqual([]);
+});
+
+test("נגישות · נגן ההקראה (עם קול עברי מדומה)", async ({ page }) => {
+  await mockHebrewVoice(page);
+  await mockChapterApi(page);
+  await seedWelcomeSeen(page, '/books/Torah/Genesis/1/false', true);
+  await expect(page.locator('.tts-player__controls')).toBeVisible();
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  expect(results.violations).toEqual([]);
+
+  const playButton = page.getByRole('button', { name: 'הפעלת הקראה' });
+  await playButton.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'השהיית הקראה' })).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('נגישות · דילוג לתוכן הראשי עובד במקלדת', async ({ page }) => {

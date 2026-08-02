@@ -1,0 +1,63 @@
+<div class="tts-player" role="group" i18n-aria-label="@@tts.player.groupLabel" aria-label="נגן הקראת הפרק" (keydown)="onPlayerKeydown($event)">
+  @if (tts.unavailableReason(); as reason) {
+    <p class="tts-player__unavailable" role="status">{{ reason }}</p>
+  } @else {
+    <div class="tts-player__controls">
+      <button type="button"
+              class="tts-player__btn tts-player__btn--primary"
+              [attr.aria-pressed]="isPlaying()"
+              [attr.aria-label]="isPlaying() ? playPauseLabelPlaying : playPauseLabelPaused"
+              (click)="togglePlayPause()">
+        @if (isPlaying()) {
+          <span aria-hidden="true">⏸</span>
+        } @else {
+          <span aria-hidden="true">▶</span>
+        }
+      </button>
+
+      <button type="button" class="tts-player__btn" i18n-aria-label="@@tts.player.stop" aria-label="עצירת הקראה"
+              [disabled]="tts.state() === 'idle'" (click)="stop()">
+        <span aria-hidden="true">⏹</span>
+      </button>
+
+      <button type="button" class="tts-player__btn" i18n-aria-label="@@tts.player.previous" aria-label="פסוק קודם"
+              [disabled]="tts.activeVerseIndex() === null" (click)="previous()">
+        <span aria-hidden="true">›</span>
+      </button>
+
+      <button type="button" class="tts-player__btn" i18n-aria-label="@@tts.player.next" aria-label="פסוק הבא"
+              [disabled]="tts.activeVerseIndex() === null" (click)="next()">
+        <span aria-hidden="true">‹</span>
+      </button>
+
+      <label class="tts-player__field">
+        <span i18n="@@tts.player.rateLabel">מהירות</span>
+        <input type="range" min="0.5" max="2" step="0.25"
+               [value]="tts.settings().rate"
+               [attr.aria-valuetext]="rateLabel()"
+               (input)="onRateChange($event)">
+        <span class="tts-player__value">{{ rateLabel() }}</span>
+      </label>
+
+      @if (tts.voices().length > 1) {
+        <label class="tts-player__field">
+          <span i18n="@@tts.player.voiceLabel">קול</span>
+          <select (change)="onVoiceChange($event)">
+            @for (voice of tts.voices(); track voice.voiceURI) {
+              <option [value]="voice.voiceURI" [selected]="tts.settings().voiceURI === voice.voiceURI">{{ voice.name }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      <label class="tts-player__field">
+        <span i18n="@@tts.player.divineNameLabel">קריאת שם ה'</span>
+        <select (change)="onDivineNameChange($event)">
+          <option value="adonai" [selected]="tts.settings().divineNameReading === 'adonai'" i18n="@@tts.player.divineNameAdonai">אֲדֹנָי</option>
+          <option value="hashem" [selected]="tts.settings().divineNameReading === 'hashem'" i18n="@@tts.player.divineNameHashem">הַשֵּׁם</option>
+          <option value="asWritten" [selected]="tts.settings().divineNameReading === 'asWritten'" i18n="@@tts.player.divineNameAsWritten">כפי שכתוב</option>
+        </select>
+      </label>
+    </div>
+  }
+</div>
