@@ -21,7 +21,7 @@ body {
   }
   
   .title {
-    background: #333333e6;
+    background: var(--color-panel-bg);
     padding: 5px;
     width: 100%;
     position: absolute;
@@ -29,15 +29,16 @@ body {
     inset-inline-start: 0;
     z-index: 1;
   }
-  
+
   .title h1 {
     text-align: center;
-    color: #aaa;
-    font-family: 'Roboto', sans-serif;
+    color: var(--color-panel-text);
+    font-family: var(--font-family-ui);
     font-weight: 200;
+    font-size: var(--font-size-h2);
     animation: neon 5s infinite;
   }
-  
+
   @keyframes neon {
     0%, 39%, 41%, 59%, 61%, 100% {
       text-shadow:
@@ -46,9 +47,9 @@ body {
         #3a3aff 0 0 36px;
     }
   }
-  
+
   .main-footer {
-    background: #333333e6;
+    background: var(--color-panel-bg);
     padding: 5px;
     width: 100%;
     position: absolute;
@@ -56,31 +57,33 @@ body {
     inset-inline-start: 0;
     z-index: 1;
   }
-  
+
   .main-footer h4 {
     text-align: center;
-    color: #aaa;
-    font-family: 'Roboto', sans-serif;
+    color: var(--color-panel-text);
+    font-family: var(--font-family-ui);
     font-weight: 200;
+    font-size: var(--font-size-base);
   }
 
   .return-button{
     position: fixed;
-    border: none; 
-    color: #aaa; 
+    border: none;
+    color: var(--color-panel-text);
     top: 4%;
     inset-inline-end: 1%;
     width: 10%;
+    min-block-size: var(--tap-target-min);
     background: transparent;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    cursor: pointer; 
-    font-size: 25px;
+    cursor: pointer;
+    font-size: calc(25rem / 16);
   }
 
   .return-button:hover {
-    color: #fdfdfd; 
+    color: var(--color-panel-text-hover);
   }
 
   .return-button div.icon {
@@ -97,7 +100,7 @@ body {
 
   @media only screen and (max-width: 1400px) {
     .return-button {
-        color: #fdfdfd;
+        color: var(--color-panel-text-hover);
         width: 500px;
         height: 60px;
     }
@@ -116,38 +119,41 @@ body {
     position: fixed;
     top: 16px;
     inset-inline: 16px;
-    z-index: 1000;
+    z-index: var(--z-dialog);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     padding: 12px 16px;
     border-radius: 8px;
-    background: #333333e6;
-    color: #fdfdfd;
-    font-family: 'Roboto', sans-serif;
+    background: var(--color-panel-bg);
+    color: var(--color-panel-text-hover);
+    font-family: var(--font-family-ui);
+    font-size: var(--font-size-base);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .app-toast--error {
-    background: #7a1f1fe6;
+    background: var(--color-error-bg);
   }
 
   .app-toast__dismiss {
     background: transparent;
     border: none;
     color: inherit;
-    font-size: 20px;
+    font-size: var(--font-size-lg);
     line-height: 1;
     cursor: pointer;
     padding: 0 4px;
+    min-inline-size: var(--tap-target-min);
+    min-block-size: var(--tap-target-min);
   }
 
   .update-banner {
     position: fixed;
     bottom: 16px;
     inset-inline: 16px;
-    z-index: 1000;
+    z-index: var(--z-dialog);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -155,8 +161,9 @@ body {
     padding: 12px 16px;
     border-radius: 8px;
     background: #1f4d3ae6;
-    color: #fdfdfd;
-    font-family: 'Roboto', sans-serif;
+    color: var(--color-panel-text-hover);
+    font-family: var(--font-family-ui);
+    font-size: var(--font-size-base);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
@@ -164,8 +171,10 @@ body {
     padding: 6px 14px;
     border: none;
     border-radius: 6px;
-    background: #fdfdfd;
+    background: var(--color-panel-text-hover);
     color: #1f4d3a;
     cursor: pointer;
     font-weight: 500;
+    min-block-size: var(--tap-target-min);
+    font-size: var(--font-size-base);
   }

@@ -18,19 +18,20 @@
     display: inline-flex;
     align-items: center;
     padding: 35px;
-    background-color: #333333e6; 
-    color: #aaa; 
+    background-color: var(--color-panel-bg);
+    color: var(--color-panel-text);
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 30px;
-    margin: 8px; 
+    font-size: var(--font-size-xl);
+    margin: 8px;
+    min-block-size: var(--tap-target-min);
     max-width: 450px;
     width: 500px;
 }
 
 .svg-button:hover {
-  color: #fdfdfd; 
+  color: var(--color-panel-text-hover);
 }
 
     .svg-button svg {
@@ -63,8 +64,8 @@
     }
 
     .svg-button {
-      color: #fdfdfd; 
-      font-size: 25px;
+      color: var(--color-panel-text-hover);
+      font-size: var(--font-size-lg);
       width: 300px;
       height: 50px;
   }
@@ -98,10 +99,13 @@
   .ios-install-hint {
     max-width: 450px;
     margin-block-start: 8px;
-    padding-inline: 16px;
+    margin-inline: auto;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: var(--color-panel-bg);
     text-align: center;
-    color: #666;
-    font-size: 14px;
+    color: var(--color-panel-text-hover);
+    font-size: var(--font-size-sm);
   }
 
 

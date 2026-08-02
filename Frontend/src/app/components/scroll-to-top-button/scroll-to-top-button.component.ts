@@ -15,19 +15,21 @@ import { MatIcon } from '@angular/material/icon';
     position: fixed;
     top: 300px;
     inset-inline-start: 7%;
-    width: 45px;
+    width: var(--tap-target-min);
     contain: content;
-    display: none; 
+    display: none;
     height: 100px;
-    background-color: #333333e6; 
-    color: #aaa;
+    background-color: var(--color-panel-bg);
+    color: var(--color-panel-text);
     border: none;
     border-radius: 20px;
     cursor: pointer;
+    z-index: var(--z-scroll-top);
+    font-size: var(--font-size-base);
   }
 
   .scroll-to-top-button:hover {
-  color: #fdfdfd; 
+  color: var(--color-panel-text-hover);
 }
 
 
@@ -40,7 +42,7 @@ import { MatIcon } from '@angular/material/icon';
         top: 300px;
         inset-inline-start: 1%;
         width: 40px;
-        color: #fdfdfd; 
+        color: var(--color-panel-text-hover);
       }
     }
 `],

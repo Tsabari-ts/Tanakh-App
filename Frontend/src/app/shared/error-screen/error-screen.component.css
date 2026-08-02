@@ -10,23 +10,26 @@
   padding: 24px;
   text-align: center;
   background: #1a1a1ae6;
-  color: #fdfdfd;
-  font-family: 'Roboto', sans-serif;
+  color: var(--color-panel-text-hover);
+  font-family: var(--font-family-ui);
 }
 
 .error-screen h1 {
   margin: 0;
   font-weight: 300;
+  font-size: var(--font-size-h2);
 }
 
 .error-screen p {
   max-width: 480px;
   margin: 0;
-  color: #ccc;
+  color: #dddddd;
+  font-size: var(--font-size-base);
 }
 
 .error-screen__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
@@ -34,10 +37,11 @@
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
-  background: #333333e6;
-  color: #fdfdfd;
+  background: var(--color-panel-bg);
+  color: var(--color-panel-text-hover);
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--font-size-base);
+  min-block-size: var(--tap-target-min);
 }
 
 .error-screen__actions button:hover {

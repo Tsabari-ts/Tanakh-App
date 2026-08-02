@@ -2,18 +2,24 @@
 .tittle{
     text-align: start;
     width: 75%;
+    max-width: 100%;
     text-decoration: underline;
     text-align: justify;
-    font-size: 35px;
+    font-size: var(--font-size-h2);
+    line-height: var(--line-height-heading);
 }
 
 .sentences{
     margin: auto;
     margin-bottom: 150px;
     width: 75%;
+    max-width: 100%;
     padding: 10px;
     text-align: justify;
-    font-size: 35px;
+    font-size: var(--font-size-h2);
+    line-height: var(--line-height-body);
+    letter-spacing: var(--letter-spacing);
+    word-spacing: var(--word-spacing);
     padding-bottom: 100px;
 }
 
@@ -21,8 +27,8 @@
     position: fixed;
     bottom: 20px;
     inset-inline-start: 50%;
-    background: #333333e6;
-    padding: 5px;    
+    background: var(--color-panel-bg);
+    padding: 5px;
 }
 
 .scroll-to-top-button {
@@ -65,55 +71,58 @@ body {
   bottom: 13%;
   inset-inline-start: 10%;
   width: 80%;
-  background-color: #333333e6; 
+  background-color: var(--color-panel-bg);
   padding: 10px;
-  box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-around;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .svg-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: 15px;
-  background-color: #333333e6; 
-  color: #aaa; 
+  background-color: var(--color-panel-bg);
+  color: var(--color-panel-text);
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 30px;
-  margin: 8px; 
+  font-size: var(--font-size-xl);
+  margin: 8px;
+  min-block-size: var(--tap-target-min);
   max-width: 450px;
   width: 200px;
 }
 
 .svg-button:hover {
-  color: #fdfdfd; 
+  color: var(--color-panel-text-hover);
 }
 
 .svg-button div.icon {
   width: 40px;
-  height: 40px; 
-  background-size: cover; 
-  margin-inline-start: 20px; 
+  height: 40px;
+  background-size: cover;
+  margin-inline-start: 20px;
 }
 
 .end-button{
   margin-inline-start: 20%;
   width: 60%;
-  height: 40px;
-  background-color: #333333e6; 
-  color: #aaa; 
+  min-height: var(--tap-target-min);
+  background-color: var(--color-panel-bg);
+  color: var(--color-panel-text);
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: var(--font-size-lg);
   margin-top: 50px;
 }
 
 .end-button:hover {
-  color: #fdfdfd; 
+  color: var(--color-panel-text-hover);
 }
 
 .down-icon {
@@ -136,7 +145,7 @@ body {
 
 @media only screen and (max-width: 1024px) {
   .end-button {
-      color: #fdfdfd; 
+      color: var(--color-panel-text-hover);
       width: 100%;
       margin-inline-start: 0;
   }

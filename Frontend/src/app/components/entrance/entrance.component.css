@@ -175,7 +175,7 @@ background-position: center;
 }
 
 .loader-background {
-  background-color: #333333e6;
+  background-color: var(--color-panel-bg);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

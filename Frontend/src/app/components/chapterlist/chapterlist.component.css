@@ -24,32 +24,34 @@
     display: inline-flex;
     align-items: center;
     padding: 35px;
-    background-color: #333333e6; 
-    color: #aaa; 
+    background-color: var(--color-panel-bg);
+    color: var(--color-panel-text);
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 30px;
-    margin: 15px; 
+    font-size: var(--font-size-xl);
+    margin: 15px;
+    min-block-size: var(--tap-target-min);
     max-width: 450px;
     width: 500px;
     padding-inline-start: 180px;
-    margin-top: 10px; 
+    margin-top: 10px;
 }
 
-.button:hover {
-  color: #fdfdfd; 
+.chapter-button:hover {
+  color: var(--color-panel-text-hover);
 }
 
 .goBackButton{
     display: inline-flex;
     align-items: center;
-    background-color: #333333e6; 
-    color: #aaa; 
+    background-color: var(--color-panel-bg);
+    color: var(--color-panel-text);
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    font-size: 30px;
+    font-size: var(--font-size-xl);
+    min-block-size: var(--tap-target-min);
     max-width: 155px;
     width: 500px;
     position: relative;
@@ -58,7 +60,7 @@
     margin-inline-start: 850px;
 }
 .goBackButton:hover {
-    color: #fdfdfd; 
+    color: var(--color-panel-text-hover);
   }
 
 .return{
