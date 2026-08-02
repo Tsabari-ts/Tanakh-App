@@ -81,6 +81,14 @@
     width: 100%;
   }
 
+  .input-container input[type="checkbox"] {
+    width: 1.5rem;
+    height: 1.5rem;
+    min-block-size: 1.5rem;
+    vertical-align: middle;
+    margin-inline-end: 8px;
+  }
+
   label {
     position: absolute;
     top: 0;

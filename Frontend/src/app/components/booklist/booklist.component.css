@@ -33,7 +33,7 @@ box-sizing: border-box;
     font-size: var(--font-size-xl);
     margin: 8px;
     min-block-size: var(--tap-target-min);
-    max-width: 450px;
+    max-width: min(450px, 92vw);
     width: 500px;
     padding-inline-start: 180px;
 }
