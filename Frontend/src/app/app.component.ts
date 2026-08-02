@@ -7,6 +7,7 @@ import { ErrorStateService } from './services/error-state.service';
 import { ErrorScreenComponent } from './shared/error-screen/error-screen.component';
 import { AppUpdateService } from './core/app-update.service';
 import { SkipLinkComponent } from './shared/a11y/skip-link/skip-link.component';
+import { RouteFocusService } from './core/a11y/route-focus.service';
 
 @Component({
     selector: 'app-root',
@@ -23,7 +24,9 @@ export class AppComponent {
   readonly errorState = inject(ErrorStateService);
   readonly appUpdate = inject(AppUpdateService);
 
-  constructor(private location: Location) { }
+  constructor(private location: Location, routeFocus: RouteFocusService) {
+    routeFocus.init();
+  }
 
   goBack(): void {
     this.location.back();
