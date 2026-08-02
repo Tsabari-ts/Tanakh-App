@@ -1,0 +1,77 @@
+<button #fab
+        type="button"
+        class="a11y-fab"
+        [attr.aria-expanded]="open()"
+        aria-controls="a11y-panel"
+        i18n-aria-label="@@a11y.widget.open"
+        aria-label="פתיחת תפריט נגישות"
+        (click)="toggle()">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" width="28" height="28">
+    <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="12" cy="6.2" r="1.7" fill="currentColor"/>
+    <path d="M5.5 9h13M12 9v5m0 0-3 5.5M12 14l3 5.5"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </svg>
+</button>
+
+@if (open()) {
+  <div class="a11y-panel"
+       id="a11y-panel"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="a11y-panel-title"
+       cdkTrapFocus
+       [cdkTrapFocusAutoCapture]="true"
+       (keydown.escape)="close()">
+
+    <div class="a11y-panel__head">
+      <h2 id="a11y-panel-title" i18n="@@a11y.widget.title">הגדרות נגישות</h2>
+      <button type="button" i18n-aria-label="@@a11y.widget.closePanel" aria-label="סגירת תפריט הנגישות" (click)="close()">✕</button>
+    </div>
+
+    <fieldset class="a11y-group">
+      <legend i18n="@@a11y.widget.fontSize">גודל הטקסט</legend>
+      <div #fontRadioGroup role="radiogroup" i18n-aria-label="@@a11y.widget.fontSize" aria-label="גודל הטקסט" class="a11y-scale" (keydown)="onRadioKeydown($event, fontRadioGroup)">
+        @for (opt of scales; track opt.value) {
+          <button type="button"
+                  role="radio"
+                  [attr.aria-checked]="s().fontScale === opt.value"
+                  [tabindex]="s().fontScale === opt.value ? 0 : -1"
+                  (click)="setScale(opt.value)">{{ opt.label }}</button>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="a11y-group">
+      <legend i18n="@@a11y.widget.contrast">ניגודיות</legend>
+      <div #contrastRadioGroup role="radiogroup" i18n-aria-label="@@a11y.widget.contrast" aria-label="ניגודיות" (keydown)="onRadioKeydown($event, contrastRadioGroup)">
+        <button type="button" role="radio" [attr.aria-checked]="s().contrast === 'default'"
+                [tabindex]="s().contrast === 'default' ? 0 : -1"
+                (click)="setContrast('default')" i18n="@@a11y.contrast.default">רגילה</button>
+        <button type="button" role="radio" [attr.aria-checked]="s().contrast === 'high'"
+                [tabindex]="s().contrast === 'high' ? 0 : -1"
+                (click)="setContrast('high')" i18n="@@a11y.contrast.high">גבוהה</button>
+        <button type="button" role="radio" [attr.aria-checked]="s().contrast === 'inverted'"
+                [tabindex]="s().contrast === 'inverted' ? 0 : -1"
+                (click)="setContrast('inverted')" i18n="@@a11y.contrast.inverted">הפוכה</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="a11y-group">
+      <legend i18n="@@a11y.widget.displayAdjustments">התאמות תצוגה</legend>
+      <button type="button" [attr.aria-pressed]="s().grayscale" (click)="flip('grayscale')" i18n="@@a11y.toggle.grayscale">גווני אפור</button>
+      <button type="button" [attr.aria-pressed]="s().highlightLinks" (click)="flip('highlightLinks')" i18n="@@a11y.toggle.highlightLinks">הדגשת קישורים</button>
+      <button type="button" [attr.aria-pressed]="s().readableFont" (click)="flip('readableFont')" i18n="@@a11y.toggle.readableFont">גופן קריא</button>
+      <button type="button" [attr.aria-pressed]="s().textSpacing" (click)="flip('textSpacing')" i18n="@@a11y.toggle.textSpacing">ריווח טקסט מוגבר</button>
+      <button type="button" [attr.aria-pressed]="s().noMotion" (click)="flip('noMotion')" i18n="@@a11y.toggle.noMotion">עצירת אנימציות</button>
+      <button type="button" [attr.aria-pressed]="s().bigCursor" (click)="flip('bigCursor')" i18n="@@a11y.toggle.bigCursor">סמן עכבר מוגדל</button>
+      <button type="button" [attr.aria-pressed]="s().readingRuler" (click)="flip('readingRuler')" i18n="@@a11y.toggle.readingRuler">סרגל קריאה</button>
+    </fieldset>
+
+    <div class="a11y-panel__foot">
+      <button type="button" class="link-like" (click)="openStatement()" i18n="@@a11y.widget.statementLink">הצהרת הנגישות</button>
+      <a href="mailto:Tanakhdev@gmail.com" i18n="@@a11y.widget.contactLink">פנייה לרכז הנגישות</a>
+      <button type="button" class="danger" (click)="reset()" i18n="@@a11y.widget.reset">איפוס כל ההגדרות</button>
+    </div>
+  </div>
+}

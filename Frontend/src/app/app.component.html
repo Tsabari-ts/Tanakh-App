@@ -29,6 +29,7 @@
 
   <footer class="main-footer" role="contentinfo">
     <h4 i18n="@@app.footer">בשם ה' נעשה ונצליח</h4>
+    <button type="button" class="accessibility-statement-link" (click)="openStatement()" i18n="@@a11yStatement.footerLink">הצהרת נגישות</button>
   </footer>
 
   <div class="img-background" aria-hidden="true"></div>
@@ -41,3 +42,5 @@
     }
   </main>
 </div>
+
+<app-accessibility-widget></app-accessibility-widget>

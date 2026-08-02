@@ -65,6 +65,23 @@ body {
     font-family: var(--font-family-ui);
     font-weight: 200;
     font-size: var(--font-size-base);
+    margin-block-end: 0;
+  }
+
+  .accessibility-statement-link {
+    display: block;
+    margin: 0 auto 4px;
+    background: transparent;
+    border: none;
+    color: var(--color-panel-text);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    min-block-size: var(--tap-target-min);
+  }
+
+  .accessibility-statement-link:hover {
+    color: var(--color-panel-text-hover);
   }
 
   .return-button{

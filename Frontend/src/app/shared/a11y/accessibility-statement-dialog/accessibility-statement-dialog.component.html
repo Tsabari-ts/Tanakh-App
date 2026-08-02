@@ -1,0 +1,66 @@
+<div class="stmt"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="stmt-title"
+     cdkTrapFocus
+     [cdkTrapFocusAutoCapture]="true"
+     (keydown.escape)="close()">
+
+  <header class="stmt__head">
+    <h2 mat-dialog-title id="stmt-title" i18n="@@a11yStatement.title">הצהרת נגישות</h2>
+    <button type="button" i18n-aria-label="@@a11yStatement.close" aria-label="סגירת הצהרת הנגישות" (click)="close()">✕</button>
+  </header>
+
+  <div class="stmt__body" mat-dialog-content tabindex="0" role="region" i18n-aria-label="@@a11yStatement.bodyRegion" aria-label="תוכן הצהרת הנגישות">
+    <p i18n="@@a11yStatement.intro">
+      אנו רואים חשיבות רבה במתן שירות שוויוני לכלל המשתמשים, ופועלים להנגשת האפליקציה לאנשים עם מוגבלות.
+    </p>
+
+    <h3 i18n="@@a11yStatement.levelHeading">רמת הנגישות</h3>
+    <p i18n="@@a11yStatement.levelBody">
+      האפליקציה הונגשה בהתאם לתקן הישראלי ת"י 5568, ברמת התאמה AA, ובהתבסס על הנחיות WCAG 2.2 ברמה AA.
+    </p>
+
+    <h3 i18n="@@a11yStatement.featuresHeading">אמצעי הנגישות באפליקציה</h3>
+    <ul>
+      <li i18n="@@a11yStatement.feature1">ניווט מלא באמצעות מקלדת</li>
+      <li i18n="@@a11yStatement.feature2">תמיכה בתוכנות הקראת מסך (NVDA, VoiceOver)</li>
+      <li i18n="@@a11yStatement.feature3">מבנה סמנטי ותגיות ARIA</li>
+      <li i18n="@@a11yStatement.feature4">ניגודיות צבעים תקנית, ומצבי ניגודיות גבוהה והפוכה</li>
+      <li i18n="@@a11yStatement.feature5">אפשרות להגדלת טקסט עד 200% ללא אובדן תוכן</li>
+      <li i18n="@@a11yStatement.feature6">התאמה לגלישה ממכשירים ניידים</li>
+      <li i18n="@@a11yStatement.feature7">תפריט נגישות ייעודי (הכפתור הצף בפינה השמאלית התחתונה)</li>
+    </ul>
+
+    <h3 i18n="@@a11yStatement.dateHeading">תאריך ההנגשה</h3>
+    <p i18n="@@a11yStatement.dateBody">האפליקציה הונגשה בתאריך 02/08/2026.</p>
+
+    <h3 i18n="@@a11yStatement.lastTestHeading">מועד הבדיקה האחרון</h3>
+    <p i18n="@@a11yStatement.lastTestBody">02/08/2026</p>
+
+    <h3 i18n="@@a11yStatement.testedByHeading">הבדיקה בוצעה על ידי</h3>
+    <p i18n="@@a11yStatement.testedByBody">בדיקה פנימית (בדיקות אוטומטיות axe-core ו-Lighthouse; בדיקת מקלדת ומבנה סמנטי ידנית).</p>
+
+    <h3 i18n="@@a11yStatement.knownIssuesHeading">חלקים שאינם נגישים במלואם</h3>
+    <p i18n="@@a11yStatement.knownIssuesBody">
+      חלונות "ברוכים הבאים", אישור קריאת פרק והרשמה לתזכורת נסגרים רק באמצעות כפתור הסגירה הייעודי
+      ואינם נסגרים במקש Escape - זוהי החלטת עיצוב מכוונת שנועדה למנוע סגירה בשוגג, וכפתור הסגירה נגיש
+      במלואו למקלדת. טרם בוצעה בדיקה ידנית מלאה עם משתמשי תוכנת הקראת מסך אמיתיים; אם נתקלתם בבעיה, נשמח שתדווחו לנו.
+    </p>
+
+    <h3 i18n="@@a11yStatement.contactHeading">הסדרי נגישות ופרטי רכז הנגישות</h3>
+    <p i18n="@@a11yStatement.contactIntro">נתקלתם בבעיית נגישות? נשמח לשמוע ולתקן.</p>
+    <p>
+      <span i18n="@@a11yStatement.coordinatorName">שם רכז הנגישות: טומר טס</span><br>
+      <span i18n="@@a11yStatement.coordinatorEmail">דוא"ל: </span><a href="mailto:Tanakhdev@gmail.com">Tanakhdev&#64;gmail.com</a>
+    </p>
+    <p i18n="@@a11yStatement.responseTime">נשתדל להשיב לפנייתכם בהקדם.</p>
+
+    <p class="stmt__updated" i18n="@@a11yStatement.updated">עדכון אחרון: 02/08/2026</p>
+  </div>
+
+  <footer class="stmt__foot" mat-dialog-actions>
+    <button type="button" (click)="print()" i18n="@@a11yStatement.print">הדפסה</button>
+    <button type="button" (click)="close()" i18n="@@a11yStatement.closeButton">סגירה</button>
+  </footer>
+</div>
