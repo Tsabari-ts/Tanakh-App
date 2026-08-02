@@ -15,6 +15,27 @@
   <meta name="apple-mobile-web-app-title" content="תנ&quot;ך">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script>
+    // Apply saved a11y settings before first paint so users in high-contrast /
+    // inverted-contrast / larger-text modes don't see a flash of the default
+    // styling on every load. Mirrors A11yService's class/property names -
+    // see core/a11y/a11y.model.ts and a11y.service.ts.
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem('tanach.a11y.v1') || '{}');
+        var h = document.documentElement;
+        if (s.fontScale) { h.style.setProperty('--a11y-font-scale', s.fontScale); }
+        if (s.contrast === 'high') { h.classList.add('a11y-high-contrast'); }
+        if (s.contrast === 'inverted') { h.classList.add('a11y-inverted-contrast'); }
+        ['grayscale', 'highlightLinks', 'readableFont', 'textSpacing', 'noMotion', 'bigCursor', 'readingRuler']
+          .forEach(function (key) {
+            if (s[key]) {
+              h.classList.add('a11y-' + key.replace(/[A-Z]/g, function (m) { return '-' + m.toLowerCase(); }));
+            }
+          });
+      } catch (e) { /* localStorage unavailable (private mode) - fall back to defaults */ }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

@@ -1,0 +1,5 @@
+// Entry point registered in angular.json "styles" - pulls in the partials
+// so their top-level CSS rules end up in the global stylesheet.
+@use 'tokens';
+@use 'a11y-modes';
+@use 'a11y-utils';

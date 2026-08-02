@@ -1,0 +1,62 @@
+// Design tokens for the whole app. Values below preserve the app's existing
+// dark-panel / tan-dialog visual identity (see _333333e6 panels, #aaa/#fdfdfd
+// text, rgb(196,172,143) dialog body) - they are not a redesign, just the
+// same colors expressed as variables so a11y modes can swap them on <html>.
+:root {
+  /* ---- Typography scale (rem, driven by --a11y-font-scale) ---- */
+  --a11y-font-scale: 1; /* the widget sets: 1 / 1.15 / 1.3 / 1.5 */
+  --font-size-sm: calc(0.875rem * var(--a11y-font-scale));
+  --font-size-base: calc(1rem * var(--a11y-font-scale));
+  --font-size-md: calc(1.125rem * var(--a11y-font-scale));
+  --font-size-lg: calc(1.25rem * var(--a11y-font-scale));
+  --font-size-xl: calc(1.5rem * var(--a11y-font-scale));
+  --font-size-h1: calc(2rem * var(--a11y-font-scale));
+  --font-size-h2: calc(1.5rem * var(--a11y-font-scale));
+
+  --line-height-body: 1.5;
+  --line-height-heading: 1.3;
+  --letter-spacing: normal;
+  --word-spacing: normal;
+  --paragraph-spacing: 1em;
+
+  --font-family-body: Roboto, "Helvetica Neue", sans-serif;
+  --font-family-ui: Roboto, "Helvetica Neue", sans-serif;
+
+  /* ---- Color: panels (header/footer/buttons) ---- */
+  --color-panel-bg: #333333e6;
+  --color-panel-text: #aaaaaa;      /* ~5.45:1 on #333333 */
+  --color-panel-text-hover: #fdfdfd;
+
+  /* ---- Color: dialogs ---- */
+  --color-dialog-bg: rgb(196, 172, 143);
+  --color-dialog-title-bg: #333333e6;
+  --color-dialog-title-text: aliceblue;
+
+  /* ---- Color: page ---- */
+  --color-bg: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #55524d;      /* 7.6:1 on white */
+  --color-link: #0b4f9c;
+  --color-link-visited: #6b2a86;
+  --color-border: #767676;          /* 4.5:1, safe for UI-component borders */
+  --color-error: #7a1f1f;           /* >=4.5:1 on white and on the tan dialog bg */
+  --color-error-bg: #7a1f1fe6;      /* existing app-toast--error background */
+  --color-success: #1f4d3a;         /* existing update-banner background family */
+  --color-focus: #0b4f9c;
+  --color-focus-offset: #ffffff;
+
+  /* ---- Focus ring ---- */
+  --focus-width: 3px;
+  --focus-offset: 2px;
+
+  /* ---- Motion ---- */
+  --motion-duration: 200ms;
+  --motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Layout ---- */
+  --tap-target-min: 2.75rem; /* 44px */
+  --z-scroll-top: 900;
+  --z-a11y-widget: 950;
+  --z-a11y-ruler: 940;
+  --z-dialog: 1000;
+}

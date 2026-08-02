@@ -1,0 +1,137 @@
+// Accessibility mode classes toggled on <html> by A11yService.
+// Nothing here should be applied by any other mechanism - see a11y.service.ts.
+
+/* --- High contrast --- */
+html.a11y-high-contrast {
+  --color-bg: #ffffff;
+  --color-text: #000000;
+  --color-text-muted: #000000;
+  --color-link: #0000cc;
+  --color-link-visited: #551a8b;
+  --color-border: #000000;
+  --color-error: #8b0000;
+  --color-focus: #000000;
+  --color-focus-offset: #ffffff;
+
+  --color-panel-bg: #000000;
+  --color-panel-text: #ffffff;
+  --color-panel-text-hover: #ffff00;
+  --color-dialog-bg: #ffffff;
+  --color-dialog-title-bg: #000000;
+  --color-dialog-title-text: #ffffff;
+
+  * {
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* --- Inverted (dark) contrast --- */
+html.a11y-inverted-contrast {
+  --color-bg: #000000;
+  --color-text: #ffffff;
+  --color-text-muted: #e0e0e0;
+  --color-link: #7fc4ff;
+  --color-link-visited: #dab6ff;
+  --color-border: #ffffff;
+  --color-error: #ff9a9a;
+  --color-focus: #ffd479;
+  --color-focus-offset: #000000;
+
+  --color-panel-bg: #1a1a1ae6;
+  --color-panel-text: #ffffff;
+  --color-panel-text-hover: #ffd479;
+  --color-dialog-bg: #121212;
+  --color-dialog-title-bg: #000000;
+  --color-dialog-title-text: #ffffff;
+}
+
+/* --- Grayscale ---
+   filter on an ancestor creates a new containing block and breaks
+   position:fixed children, so this is applied to .app-shell only
+   (app.component.html), never to <html> or <body>. The floating a11y
+   widget and scroll-to-top button live outside .app-shell so they stay
+   unaffected and remain usable while grayscale is on. */
+html.a11y-grayscale .app-shell {
+  filter: grayscale(100%);
+}
+
+/* --- Highlighted links --- */
+html.a11y-highlight-links {
+  a,
+  a:visited {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 0.12em;
+    outline: 1px solid var(--color-link);
+    outline-offset: 1px;
+  }
+}
+
+/* --- Readable font --- */
+html.a11y-readable-font {
+  --font-family-body: Arial, Helvetica, sans-serif;
+  --font-family-ui: Arial, Helvetica, sans-serif;
+  --letter-spacing: 0.04em;
+  --word-spacing: 0.1em;
+  --line-height-body: 1.7;
+}
+
+/* --- Increased text spacing (WCAG 1.4.12) --- */
+html.a11y-text-spacing {
+  --line-height-body: 1.8;
+  --letter-spacing: 0.12em;
+  --word-spacing: 0.16em;
+  --paragraph-spacing: 2em;
+}
+
+/* --- Stop animations --- */
+html.a11y-no-motion,
+html.a11y-no-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* --- Enlarged cursor (self-contained data-uri, no extra asset files) --- */
+html.a11y-big-cursor,
+html.a11y-big-cursor * {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M4 2 L4 34 L13 26 L19 37 L24 34 L18 23 L30 23 Z" fill="black" stroke="white" stroke-width="2"/></svg>') 4 4, auto;
+}
+html.a11y-big-cursor a,
+html.a11y-big-cursor button,
+html.a11y-big-cursor [role='button'] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><path d="M4 2 L4 34 L13 26 L19 37 L24 34 L18 23 L30 23 Z" fill="black" stroke="white" stroke-width="2"/></svg>') 4 4, pointer;
+}
+
+/* --- Reading ruler (see reading-ruler.directive.ts) --- */
+.a11y-ruler {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-a11y-ruler);
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 55%) 0,
+    rgb(0 0 0 / 55%) calc(var(--ruler-y, 50vh) - 2.5rem),
+    transparent calc(var(--ruler-y, 50vh) - 2.5rem),
+    transparent calc(var(--ruler-y, 50vh) + 2.5rem),
+    rgb(0 0 0 / 55%) calc(var(--ruler-y, 50vh) + 2.5rem)
+  );
+}
+
+/* --- Dark mode (system preference; P2, off in high-contrast modes) --- */
+@media (prefers-color-scheme: dark) {
+  html:not(.a11y-high-contrast):not(.a11y-inverted-contrast) {
+    --color-bg: #14110d;
+    --color-text: #f0ece5;
+    --color-text-muted: #b9b2a6;
+    --color-link: #7fc4ff;
+    --color-link-visited: #c9a6f0;
+    --color-border: #6e675d;
+    --color-error: #ff9a9a;
+    --color-focus: #7fc4ff;
+    --color-focus-offset: #14110d;
+  }
+}
