@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,8 +65,9 @@ namespace Tanakh.Api.Services
 
                 // book/sectionRef/heTitle/heSectionRef/he validated non-null in CacheProvider.GetFullTanakhFromCacheAsync
                 string chosenSection = item.sectionRef!;
-                string episodeData = string.Join(" ", item.he!);
-                string verses = Regex.Replace(episodeData, @"<[^>]+>", "");
+                List<string> verses = item.he!
+                    .Select(verse => Regex.Replace(verse, @"<[^>]+>", ""))
+                    .ToList();
 
                 Book bookEntry = new Book
                 {

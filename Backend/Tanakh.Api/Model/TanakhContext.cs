@@ -15,7 +15,7 @@ namespace Tanakh.Api.Model
         // (no NextChapter) chapter.
         public string? NextChapter { get; set; }
         public string? PrevChapter { get; set; }
-        public required string Verses { get; set; }
+        public required IReadOnlyList<string> Verses { get; set; }
         public required string SectionRef { get; set; }
         public required string HebrewSectionRef { get; set; }
     }
