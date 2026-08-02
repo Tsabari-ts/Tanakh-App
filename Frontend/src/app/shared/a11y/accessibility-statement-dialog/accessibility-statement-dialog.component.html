@@ -1,11 +1,9 @@
-<div class="stmt"
-     role="dialog"
-     aria-modal="true"
-     aria-labelledby="stmt-title"
-     cdkTrapFocus
-     [cdkTrapFocusAutoCapture]="true"
-     (keydown.escape)="close()">
-
+<div class="stmt">
+  <!-- No role="dialog"/aria-modal/cdkTrapFocus here: MatDialogContainer
+       (from accessibility-statement.service.ts's dialog.open call) already
+       provides the dialog role, aria-modal, focus trap, and Escape-to-close
+       for the whole component - adding them again here nested a second
+       "dialog" landmark inside the first one. -->
   <header class="stmt__head">
     <h2 mat-dialog-title id="stmt-title" i18n="@@a11yStatement.title">הצהרת נגישות</h2>
     <button type="button" i18n-aria-label="@@a11yStatement.close" aria-label="סגירת הצהרת הנגישות" (click)="close()">✕</button>

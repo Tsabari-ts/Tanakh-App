@@ -3,6 +3,7 @@
 
   @if (loadError()) {
     <div class="empty-state">
+      <h1 class="visually-hidden" i18n="@@chapter.loadErrorHeading">שגיאה בטעינת הפרק</h1>
       <p i18n="@@chapter.loadError">אירעה שגיאה בטעינת הפרק. ייתכן שהפרק אינו קיים.</p>
       <button class="end-button" type="button" (click)="returnToHomePage()" i18n="@@chapter.backToHome">חזרה לדף הבית</button>
     </div>

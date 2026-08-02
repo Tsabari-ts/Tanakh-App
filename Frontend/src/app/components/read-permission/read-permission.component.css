@@ -2,6 +2,13 @@
     background-color: var(--color-dialog-bg);
 }
 
+/* Material's mat-dialog-content sets a translucent default text color that,
+   blended over --color-dialog-bg, falls below AA contrast (~3.66:1) -
+   pin it to an opaque, verified color instead. */
+.welcome-body [mat-dialog-content] {
+    color: var(--color-text);
+}
+
 .custom-dialog-title {
     display: flex;
     justify-content: space-between;
