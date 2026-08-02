@@ -31,7 +31,7 @@
     {
       "name": "tanakh-content",
       "urls": [
-        "https://localhost:44308/Tanakh/books/**"
+        "https://localhost:5001/Tanakh/books/**"
       ],
       "cacheConfig": {
         "strategy": "performance",
@@ -43,7 +43,7 @@
     {
       "name": "dynamic-api",
       "urls": [
-        "https://localhost:44308/JewishCalendar/**"
+        "https://localhost:5001/JewishCalendar/**"
       ],
       "cacheConfig": {
         "strategy": "freshness",

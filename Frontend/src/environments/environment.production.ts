@@ -4,7 +4,7 @@
 // See docs/LAUNCH-CHECKLIST.md, item L-01.
 export const environment = {
   production: true,
-  apiUrl: 'https://localhost:44308',
+  apiUrl: 'https://localhost:5001',
   enableServiceWorker: true,
   logLevel: 'error' as const,
 };
