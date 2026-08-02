@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Stylelint (outline:none, !important, px-on-font-size guard)
+        run: npm run lint:css
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
