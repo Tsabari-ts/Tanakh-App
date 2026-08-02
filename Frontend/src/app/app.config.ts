@@ -13,12 +13,16 @@ import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { AppUpdateService } from './core/app-update.service';
 import { PwaInstallService } from './services/pwa-install.service';
+import { TtsProvider } from './core/tts/tts-provider';
+import { WebSpeechProvider } from './core/tts/web-speech-provider.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideBrowserGlobalErrorListeners(),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    // Swap to a CloudTtsProvider here in the future - see docs/adr for V-12.
+    { provide: TtsProvider, useClass: WebSpeechProvider },
     provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
     provideAnimations(),
     provideHttpClient(withXhr(), withInterceptors([retryInterceptor, errorInterceptor])),
