@@ -1,0 +1,19 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "npx ng serve --configuration development",
+      "startServerReadyPattern": "Application bundle generation complete",
+      "startServerReadyTimeout": 120000,
+      "url": ["http://localhost:4200/home", "http://localhost:4200/settings"],
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "assertions": {
+        "categories:accessibility": ["error", { "minScore": 0.95 }]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
