@@ -32,7 +32,9 @@ async function seedWelcomeSeen(page: Page, path: string, seen: boolean): Promise
   // is behind it. Give the enter animation time to finish first.
   if (await page.locator('mat-dialog-container').count()) {
     await page.locator('mat-dialog-container').first().waitFor({ state: 'visible' });
-    await page.waitForTimeout(300);
+    // Under parallel-worker CPU contention the enter animation can still be
+    // mid-fade at 300ms, making every color look falsely low-contrast.
+    await page.waitForTimeout(600);
   }
 }
 

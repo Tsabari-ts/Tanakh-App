@@ -7,6 +7,13 @@ import {
   DivineNameReading,
 } from './tts.model';
 
+const RESUME_STORAGE_KEY = 'tanach.tts.resume.v1';
+
+interface StoredResumePosition {
+  chapterKey: string;
+  verseIndex: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TtsService {
   private provider = inject(TtsProvider);
@@ -31,17 +38,41 @@ export class TtsService {
   readonly settings = signal<TtsSettings>(this.loadSettings());
   readonly state = signal<TtsPlaybackState>('idle');
   readonly activeVerseIndex = signal<number | null>(null);
+  /** Verse to offer resuming from for the *currently loaded* chapter, or
+   *  null if there's nothing to resume (V-09). */
+  readonly resumeVerseIndex = signal<number | null>(null);
 
   private verses: string[] = [];
+  private chapterKey: string | null = null;
   /** Bumped on every stop()/loadChapter() so a stale speak() promise from a
    *  superseded run can't advance playback after the fact. */
   private runToken = 0;
 
-  loadChapter(verses: string[]): void {
+  constructor() {
+    // V-11: stop the "ghost" narration a user isn't looking at anymore when
+    // they switch tabs/apps, if they've opted into that (default on).
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this.settings().stopOnTabHidden && this.state() === 'playing') {
+        this.pause();
+      }
+    });
+  }
+
+  loadChapter(verses: string[], chapterKey: string): void {
     this.cancelInternal();
     this.verses = verses;
+    this.chapterKey = chapterKey;
     this.activeVerseIndex.set(null);
     this.state.set('idle');
+    this.resumeVerseIndex.set(this.loadResumePosition(chapterKey));
+  }
+
+  /** V-09: continue from where the user left off in this chapter. */
+  playFromResumePoint(): void {
+    const index = this.resumeVerseIndex();
+    if (index !== null) {
+      this.playFromVerse(index);
+    }
   }
 
   playChapter(): void {
@@ -67,6 +98,8 @@ export class TtsService {
     if (index >= this.verses.length) {
       this.state.set('idle');
       this.activeVerseIndex.set(null);
+      // Finished the chapter naturally - nothing left to resume.
+      this.clearResumePosition();
       return;
     }
 
@@ -106,6 +139,7 @@ export class TtsService {
   }
 
   stop(): void {
+    this.saveCurrentAsResumePosition();
     this.cancelInternal();
     this.state.set('idle');
     this.activeVerseIndex.set(null);
@@ -144,6 +178,7 @@ export class TtsService {
   /** Called on route leave / component destroy (V-10) - speechSynthesis
    *  keeps talking in the background otherwise. */
   cancelForNavigation(): void {
+    this.saveCurrentAsResumePosition();
     this.cancelInternal();
     this.state.set('idle');
     this.activeVerseIndex.set(null);
@@ -183,6 +218,39 @@ export class TtsService {
       localStorage.setItem(TTS_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
     } catch {
       /* localStorage unavailable (private browsing) - setting stays session-only */
+    }
+  }
+
+  private saveCurrentAsResumePosition(): void {
+    if (!this.chapterKey) { return; }
+    const index = this.activeVerseIndex();
+    if (index === null) { return; }
+    try {
+      const position: StoredResumePosition = { chapterKey: this.chapterKey, verseIndex: index };
+      localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify(position));
+      this.resumeVerseIndex.set(index);
+    } catch {
+      /* localStorage unavailable - resume just won't be offered next time */
+    }
+  }
+
+  private loadResumePosition(chapterKey: string): number | null {
+    try {
+      const raw = localStorage.getItem(RESUME_STORAGE_KEY);
+      if (!raw) { return null; }
+      const stored: StoredResumePosition = JSON.parse(raw);
+      return stored.chapterKey === chapterKey ? stored.verseIndex : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private clearResumePosition(): void {
+    this.resumeVerseIndex.set(null);
+    try {
+      localStorage.removeItem(RESUME_STORAGE_KEY);
+    } catch {
+      /* localStorage unavailable - nothing to clear */
     }
   }
 }

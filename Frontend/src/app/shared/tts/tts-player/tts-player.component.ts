@@ -14,6 +14,9 @@ export class TtsPlayerComponent {
 
   readonly isPlaying = computed(() => this.tts.state() === 'playing');
   readonly rateLabel = computed(() => `${this.tts.settings().rate}x`);
+  readonly showResumePrompt = computed(() =>
+    this.tts.state() === 'idle' && this.tts.resumeVerseIndex() !== null);
+  readonly resumeVerseNumber = computed(() => (this.tts.resumeVerseIndex() ?? 0) + 1);
 
   readonly playPauseLabelPlaying = $localize`:@@tts.player.pause:השהיית הקראה`;
   readonly playPauseLabelPaused = $localize`:@@tts.player.play:הפעלת הקראה`;
@@ -31,6 +34,10 @@ export class TtsPlayerComponent {
 
   stop(): void {
     this.tts.stop();
+  }
+
+  playFromResumePoint(): void {
+    this.tts.playFromResumePoint();
   }
 
   previous(): void {

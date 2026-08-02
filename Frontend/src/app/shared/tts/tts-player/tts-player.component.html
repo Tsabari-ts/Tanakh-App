@@ -2,6 +2,12 @@
   @if (tts.unavailableReason(); as reason) {
     <p class="tts-player__unavailable" role="status">{{ reason }}</p>
   } @else {
+    @if (showResumePrompt()) {
+      <p class="tts-player__resume" role="status">
+        <span i18n="@@tts.player.resumePrompt">נעצר בפסוק {{ resumeVerseNumber() }}.</span>
+        <button type="button" (click)="playFromResumePoint()" i18n="@@tts.player.resumeButton">המשך מכאן</button>
+      </p>
+    }
     <div class="tts-player__controls">
       <button type="button"
               class="tts-player__btn tts-player__btn--primary"

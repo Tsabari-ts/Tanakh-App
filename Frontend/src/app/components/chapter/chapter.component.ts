@@ -192,7 +192,7 @@ export class ChapterComponent implements OnInit {
             return;
           }
           this.data.set(data.bookData.verses);
-          this.tts.loadChapter(data.bookData.verses);
+          this.tts.loadChapter(data.bookData.verses, `${this.book}/${this.chapter}`);
           this.title.set(data.bookData.hebrewSectionRef);
           this.nextChapter = data.bookData.nextChapter;
           this.reportReadingProgress();
@@ -257,7 +257,7 @@ export class ChapterComponent implements OnInit {
         return;
       }
       this.data.set(data.bookData.verses);
-      this.tts.loadChapter(data.bookData.verses);
+      this.tts.loadChapter(data.bookData.verses, `${book}/${chapter}`);
       this.title.set(data.bookData.hebrewSectionRef);
       this.nextChapter = data.bookData.nextChapter;
       this.contentContainer.nativeElement.scrollTop = 0;
