@@ -21,7 +21,7 @@ export class ChapterComponent implements OnInit {
   book: string = "";
   readonly title = signal<string | null>("");
   keepReading: string | null = "";
-  readonly data = signal<any>(undefined);
+  readonly data = signal<string[] | undefined>(undefined);
   nextChapter: any;
   readonly loadError = signal(false);
 

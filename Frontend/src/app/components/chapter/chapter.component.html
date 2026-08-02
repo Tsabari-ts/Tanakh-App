@@ -11,10 +11,12 @@
     <h1 class="tittle">
       {{title()}}
     </h1>
-    @if (data()) {
+    @if (data(); as verses) {
       <div>
         <p class="sentences">
-          {{ data() }}
+          @for (verse of verses; track $index) {
+            <span class="verse" [id]="'verse-' + $index">{{ verse }}</span>{{ ' ' }}
+          }
           <br>
             <button class="end-button" type="button" (click)="finishedReading()" i18n="@@chapter.finishedReading">סיימתי לקרוא</button>
           </p>
