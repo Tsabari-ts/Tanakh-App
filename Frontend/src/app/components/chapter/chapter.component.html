@@ -7,35 +7,35 @@
       <button class="end-button" type="button" (click)="returnToHomePage()" i18n="@@chapter.backToHome">חזרה לדף הבית</button>
     </div>
   } @else {
-    <p class="tittle">
+    <h1 class="tittle">
       {{title()}}
-    </p>
+    </h1>
     @if (data()) {
       <div>
         <p class="sentences">
           {{ data() }}
           <br>
-            <button class="end-button" (click)="finishedReading()" i18n="@@chapter.finishedReading">סיימתי לקרוא</button>
+            <button class="end-button" type="button" (click)="finishedReading()" i18n="@@chapter.finishedReading">סיימתי לקרוא</button>
           </p>
         </div>
       }
 
       <div id="floatingDiv">
         <button class="svg-button" type="button" (click)="scrollDown()">
-          <span id="hide-text" i18n="@@chapter.scrollDown">למטה</span>
-          <div class="icon" [ngClass]="downIcon"></div>
+          <span class="hide-text" i18n="@@chapter.scrollDown">למטה</span>
+          <div class="icon" [ngClass]="downIcon" aria-hidden="true"></div>
         </button>
         <button class="svg-button" type="button" (click)="stopScrolling()">
-          <span id="hide-text" i18n="@@chapter.stop">עצור</span>
-          <div class="icon" [ngClass]="stopIcon"></div>
+          <span class="hide-text" i18n="@@chapter.stop">עצור</span>
+          <div class="icon" [ngClass]="stopIcon" aria-hidden="true"></div>
         </button>
         <button class="svg-button" type="button" (click)="scrollUp()">
-          <span id="hide-text" i18n="@@chapter.scrollUp">למעלה</span>
-          <div class="icon" [ngClass]="upIcon"></div>
+          <span class="hide-text" i18n="@@chapter.scrollUp">למעלה</span>
+          <div class="icon" [ngClass]="upIcon" aria-hidden="true"></div>
         </button>
         <button class="svg-button" type="button" (click)="GetNextChapter()">
-          <span id="hide-text" i18n="@@chapter.nextChapter">פרק הבא</span>
-          <div class="icon" [ngClass]="nextIcon"></div>
+          <span class="hide-text" i18n="@@chapter.nextChapter">פרק הבא</span>
+          <div class="icon" [ngClass]="nextIcon" aria-hidden="true"></div>
         </button>
       </div>
   }

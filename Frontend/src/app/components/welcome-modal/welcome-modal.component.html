@@ -1,9 +1,9 @@
 <div class="welcome-body">
   <div class="custom-dialog-title">
-    <span class="header"
-          mat-dialog-title i18n="@@welcomeModal.title">ברוכים הבאים</span>
-    <button mat-icon-button (click)="closeDialog()">
-      <mat-icon class="header" i18n-aria-label="@@dialog.close" aria-label="סגירה">close</mat-icon>
+    <h2 class="header"
+          mat-dialog-title i18n="@@welcomeModal.title">ברוכים הבאים</h2>
+    <button mat-icon-button type="button" (click)="closeDialog()" i18n-aria-label="@@dialog.close" aria-label="סגירה">
+      <mat-icon class="header" aria-hidden="true">close</mat-icon>
     </button>
   </div>
 
@@ -17,6 +17,6 @@
   </div>
 
   <div mat-dialog-actions>
-    <button class="go-setting-button" (click)="closeAndGoSetting()" i18n="@@welcomeModal.goToSettings">עבור להגדרות</button>
+    <button class="go-setting-button" type="button" (click)="closeAndGoSetting()" i18n="@@welcomeModal.goToSettings">עבור להגדרות</button>
   </div>
 </div>

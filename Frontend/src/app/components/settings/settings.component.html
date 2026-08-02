@@ -1,16 +1,17 @@
 
   <div class="centered-container">
+    <h1 class="visually-hidden" i18n="@@settings.heading">הגדרות</h1>
     <div class="button-row">
-          <button class="svg-button" (click)="contactUs()">
-            <div class="icon" [ngClass]="contactUsIcon"></div> 
-            {{ contactUsButton }} 
+          <button class="svg-button" type="button" (click)="contactUs()">
+            <div class="icon" [ngClass]="contactUsIcon" aria-hidden="true"></div>
+            {{ contactUsButton }}
           </button>
-          <button class="svg-button" (click)="downloadApp()" [disabled]="pwaInstall.isStandalone()">
-            <div class="icon" [ngClass]="downloadAppIcon"></div>
+          <button class="svg-button" type="button" (click)="downloadApp()" [disabled]="pwaInstall.isStandalone()">
+            <div class="icon" [ngClass]="downloadAppIcon" aria-hidden="true"></div>
             {{ downloadAppButton() }}
           </button>
-          <button class="svg-button" (click)="openSubscribe()">
-            <div class="icon" [ngClass]="subscribeIcon"></div>
+          <button class="svg-button" type="button" (click)="openSubscribe()">
+            <div class="icon" [ngClass]="subscribeIcon" aria-hidden="true"></div>
             {{ subscribeButton() }}
           </button>
       </div>

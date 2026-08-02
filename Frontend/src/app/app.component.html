@@ -1,5 +1,7 @@
 <div dir="auto"></div>
 
+<app-skip-link></app-skip-link>
+
 @if (notifications.current(); as notification) {
   <div class="app-toast" [class.app-toast--error]="notification.type === 'error'" role="alert" aria-live="assertive">
     <span>{{ notification.text }}</span>
@@ -14,24 +16,28 @@
   </div>
 }
 
-<div class="container">
-  <div class="title">
-    <h1 i18n="@@app.title">פרק תנ"ך ביום</h1>
+<div class="container app-shell">
+  <header class="title" role="banner">
+    <p class="site-name" i18n="@@app.title">פרק תנ"ך ביום</p>
     @if (showButton()) {
-      <button class="return-button" (click)="goBack()">
-        <span id="hide-text" i18n="@@app.back">חזרה</span>
-        <div class="icon" [ngClass]="returnIcon"></div>
+      <button class="return-button" type="button" (click)="goBack()" i18n-aria-label="@@app.back" aria-label="חזרה">
+        <span class="hide-text-app" i18n="@@app.back">חזרה</span>
+        <div class="icon" [ngClass]="returnIcon" aria-hidden="true"></div>
       </button>
     }
-  </div>
+  </header>
 
-  <div class="main-footer">
+  <footer class="main-footer" role="contentinfo">
     <h4 i18n="@@app.footer">בשם ה' נעשה ונצליח</h4>
-  </div>
+  </footer>
 
-  <div class="img-background"></div>
-  @if (errorState.state().kind === 'none') {
-    <router-outlet></router-outlet>
-  } @else {
-    <app-error-screen></app-error-screen>
-  }
+  <div class="img-background" aria-hidden="true"></div>
+
+  <main id="main-content" tabindex="-1">
+    @if (errorState.state().kind === 'none') {
+      <router-outlet></router-outlet>
+    } @else {
+      <app-error-screen></app-error-screen>
+    }
+  </main>
+</div>

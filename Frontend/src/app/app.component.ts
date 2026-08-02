@@ -6,13 +6,14 @@ import { NotificationService } from './services/notification.service';
 import { ErrorStateService } from './services/error-state.service';
 import { ErrorScreenComponent } from './shared/error-screen/error-screen.component';
 import { AppUpdateService } from './core/app-update.service';
+import { SkipLinkComponent } from './shared/a11y/skip-link/skip-link.component';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrl: './app.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [Dir, NgClass, RouterOutlet, ErrorScreenComponent]
+    imports: [Dir, NgClass, RouterOutlet, ErrorScreenComponent, SkipLinkComponent]
 })
 export class AppComponent {
   title = 'Tanakh';

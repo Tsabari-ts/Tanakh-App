@@ -30,8 +30,9 @@ body {
     z-index: 1;
   }
 
-  .title h1 {
+  .title .site-name {
     text-align: center;
+    margin: 0;
     color: var(--color-panel-text);
     font-family: var(--font-family-ui);
     font-weight: 200;
@@ -105,7 +106,7 @@ body {
         height: 60px;
     }
 
-    #hide-text {
+    .hide-text-app {
       display: none;
     }
 

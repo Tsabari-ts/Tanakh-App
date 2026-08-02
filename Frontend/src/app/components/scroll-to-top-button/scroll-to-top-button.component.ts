@@ -4,8 +4,8 @@ import { MatIcon } from '@angular/material/icon';
 @Component({
     selector: 'app-scroll-to-top-button',
     template: `
-  <button class="scroll-to-top-button" (click)="scrollToTop()">
-  <mat-icon>keyboard_arrow_up</mat-icon>
+  <button class="scroll-to-top-button" type="button" (click)="scrollToTop()">
+  <mat-icon aria-hidden="true">keyboard_arrow_up</mat-icon>
   <div i18n="@@scrollToTop.jump">קפוץ</div>
   <div class="up-text" i18n="@@scrollToTop.up">למעלה</div>
   </button>

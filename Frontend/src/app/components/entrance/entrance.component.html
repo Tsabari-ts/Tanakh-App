@@ -1,5 +1,6 @@
 @if (isLoading()) {
-  <div class="loading-container loader-background" >
+  <div class="loading-container loader-background" role="status">
+    <h1 class="visually-hidden" i18n="@@entrance.loading">טוען את האפליקציה</h1>
     <div class="frame">
       <div class="circle"></div>
       <svg width="400px" height="65px" viewBox="0 0 400 65" class="line svg-1">
@@ -20,16 +21,17 @@
   @if (isHolidayOrShabat()) {
     <div class="loader-background">
       <div class="shabat-text">
-        <p i18n="@@entrance.shabbatNotice">אתר זה שומר שבתות וחגים</p>
+        <h1 i18n="@@entrance.shabbatNotice">אתר זה שומר שבתות וחגים</h1>
         <p i18n="@@entrance.shabbatReturn">נחזור לפעילות מיד אחרי ההבדלה</p>
       </div>
       <div>
-        <div class="israel-flag"></div>
+        <div class="israel-flag" aria-hidden="true"></div>
       </div>
     </div>
   } @else {
-    <div class="loader-background">
-      <div id="contentDiv" class="body">
+    <div class="loader-background" role="status">
+      <h1 class="visually-hidden" i18n="@@entrance.loading">טוען את האפליקציה</h1>
+      <div id="contentDiv" class="body" aria-hidden="true">
         <div class="img-background">
           <div class="container">
             <div class="row">
@@ -45,7 +47,7 @@
           </div>
         </div>
       </div>
-      <div id="mobileDiv" class="body">
+      <div id="mobileDiv" class="body" aria-hidden="true">
         <div class="img-background">
           <div class="container">
             <div class="row">

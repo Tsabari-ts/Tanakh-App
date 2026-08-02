@@ -150,8 +150,8 @@ body {
       margin-inline-start: 0;
   }
 
-  #hide-text {
-    display: none; 
+  .hide-text {
+    display: none;
   }
 
   .svg-button {

@@ -4,17 +4,23 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { AppComponent } from '../../app.component';
 
+const SECTION_LABELS: Record<string, string> = {
+  torah: $localize`:@@booklist.section.torah:תורה`,
+  prophets: $localize`:@@booklist.section.prophets:נביאים`,
+  writings: $localize`:@@booklist.section.writings:כתובים`,
+};
+
 @Component({
     selector: 'app-booklist',
     templateUrl: './booklist.component.html',
     styleUrl: './booklist.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-
 export class BooklistComponent implements OnInit {
   section: string | null = "";
   readonly data = signal<any>(undefined);
   readonly loadError = signal(false);
+  readonly heading = signal<string>($localize`:@@booklist.heading:ספרי התנ"ך`);
 
     constructor(private activatedRoute: ActivatedRoute,
                 private apiService: ApiCallService,
@@ -29,6 +35,10 @@ export class BooklistComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(p => {
       this.section = p['section'];
+      const label = this.section != null ? SECTION_LABELS[this.section.toLowerCase()] : undefined;
+      if (label) {
+        this.heading.set(label);
+      }
 
       if (this.section != null) {
         this.apiService.getBookList(this.section)

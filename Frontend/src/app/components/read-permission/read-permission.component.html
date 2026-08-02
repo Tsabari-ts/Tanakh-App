@@ -3,17 +3,19 @@
     <div class="loader-background">
       <div class="welcome-body">
         <div class="custom-dialog-title">
-          <span class="header"
-          mat-dialog-title i18n="@@readPermission.title">אישור קריאת הפרק</span>
-          <button mat-icon-button (click)="closeDialog()">
-            <mat-icon class="header" i18n-aria-label="@@dialog.close" aria-label="סגירה">close</mat-icon>
+          <h2 class="header"
+          mat-dialog-title i18n="@@readPermission.title">אישור קריאת הפרק</h2>
+          <button mat-icon-button type="button" (click)="closeDialog()" i18n-aria-label="@@dialog.close" aria-label="סגירה">
+            <mat-icon class="header" aria-hidden="true">close</mat-icon>
           </button>
         </div>
         <div mat-dialog-content>
           <b i18n="@@readPermission.congrats">כל הכבוד זכית בעוד פרק</b>
-          <p i18n="@@readPermission.saving">מתבצעת שמירה...</p>
+          <p id="read-permission-saving" i18n="@@readPermission.saving">מתבצעת שמירה...</p>
           <br>
-            <div class="progress-container">
+            <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                 [attr.aria-valuenow]="progressValue() > 100 ? 100 : progressValue()"
+                 aria-describedby="read-permission-saving">
               <div class="progress-bar" [style.width.%]="progressValue()"></div>
             </div>
           </div>
@@ -22,10 +24,10 @@
     } @else {
       <div class="welcome-body">
         <div class="custom-dialog-title">
-          <span class="header"
-          mat-dialog-title i18n="@@readPermission.title">אישור קריאת הפרק</span>
-          <button mat-icon-button (click)="closeDialog()">
-            <mat-icon class="header" i18n-aria-label="@@dialog.close" aria-label="סגירה">close</mat-icon>
+          <h2 class="header"
+          mat-dialog-title i18n="@@readPermission.title">אישור קריאת הפרק</h2>
+          <button mat-icon-button type="button" (click)="closeDialog()" i18n-aria-label="@@dialog.close" aria-label="סגירה">
+            <mat-icon class="header" aria-hidden="true">close</mat-icon>
           </button>
         </div>
         <div mat-dialog-content>
@@ -34,15 +36,17 @@
             <b i18n="@@readPermission.confirmPrompt2">האם לשמור את הפרק?</b>
             <br><br>
             <div mat-dialog-actions>
-              <button class="save-button" (click)="saveAndClose()" [disabled]="isButtonDisabled()" i18n="@@readPermission.save">שמירת הפרק</button>
+              <button class="save-button" type="button" (click)="saveAndClose()" [disabled]="isButtonDisabled()" i18n="@@readPermission.save">שמירת הפרק</button>
             </div>
             @if (isSavedInProgress()) {
-              <div class="progress-container">
+              <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                   [attr.aria-valuenow]="progressValue() > 100 ? 100 : progressValue()"
+                   i18n-aria-label="@@readPermission.saving" aria-label="מתבצעת שמירה">
                 <div class="progress-bar" [style.width.%]="progressValue()"></div>
               </div>
             }
             @if (isSavedSuccessful()) {
-              <div>
+              <div role="status">
                 <span class="serverResponse" i18n="@@readPermission.saved">הפרק נשמר בהצלחה</span>
               </div>
             }

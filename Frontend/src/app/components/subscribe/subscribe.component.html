@@ -3,10 +3,10 @@
     <div class="loader-background">
       <div class="welcome-body">
         <div class="custom-dialog-title">
-          <span class="header"
-          mat-dialog-title i18n="@@subscribe.title">הרשמה לתזכורת יומית</span>
-          <button mat-icon-button (click)="closeDialog()">
-            <mat-icon class="header" i18n-aria-label="@@dialog.close" aria-label="סגירה">close</mat-icon>
+          <h2 class="header"
+          mat-dialog-title i18n="@@subscribe.title">הרשמה לתזכורת יומית</h2>
+          <button mat-icon-button type="button" (click)="closeDialog()" i18n-aria-label="@@dialog.close" aria-label="סגירה">
+            <mat-icon class="header" aria-hidden="true">close</mat-icon>
           </button>
         </div>
         <div mat-dialog-content>
@@ -16,32 +16,37 @@
             <br>
               <b i18n="@@subscribe.intro3">ניתן לבטל את הרישום בכל עת דרך הקישור שבתחתית כל הודעת תזכורת.</b>
               <br><br>
-              <form #myForm="ngForm" (ngSubmit)="submitForm(myForm)">
+              <form #myForm="ngForm" (ngSubmit)="submitForm(myForm)" novalidate>
                 <div class="input-container" [class.error]="myForm.submitted && emailInput.invalid">
                   <label for="emailInput" [ngClass]="{'active': emailValue !== ''}" i18n="@@subscribe.emailLabel">אימייל</label>
                   <input type="email" id="emailInput" [(ngModel)]="emailValue" name="emailInput" required email
+                    autocomplete="email"
+                    [attr.aria-invalid]="myForm.submitted && emailInput.invalid ? 'true' : null"
+                    [attr.aria-describedby]="myForm.submitted && emailInput.invalid ? 'emailInput-error' : null"
                     #emailInput="ngModel">
                   <div class="underline"></div>
                   @if (myForm.submitted && emailInput.invalid) {
-                    <div
-                    class="error-message" i18n="@@subscribe.emailInvalid">כתובת אימייל לא תקינה.</div>
+                    <div id="emailInput-error"
+                    class="error-message" role="alert" i18n="@@subscribe.emailInvalid">כתובת אימייל לא תקינה.</div>
                   }
                 </div>
                 <div class="input-container">
                   <label for="displayNameInput" [ngClass]="{'active': displayNameValue !== ''}" i18n="@@subscribe.nameLabel">שם (לא חובה)</label>
-                  <input type="text" id="displayNameInput" [(ngModel)]="displayNameValue" name="displayNameInput" maxlength="50">
+                  <input type="text" id="displayNameInput" [(ngModel)]="displayNameValue" name="displayNameInput" maxlength="50" autocomplete="name">
                   <div class="underline"></div>
                 </div>
                 <div class="input-container custom-select" [class.error]="myForm.submitted && !timeInput.valid">
                   <label for="timeInput" [ngClass]="{'active': timeValue !== ''}" i18n="@@subscribe.timeLabel">בחירת שעה</label>
-                  <select id="timeInput" [(ngModel)]="timeValue" name="timeInput" required #timeInput="ngModel">
+                  <select id="timeInput" [(ngModel)]="timeValue" name="timeInput" required #timeInput="ngModel"
+                    [attr.aria-invalid]="myForm.submitted && !timeInput.valid ? 'true' : null"
+                    [attr.aria-describedby]="myForm.submitted && !timeInput.valid ? 'timeInput-error' : null">
                     @for (time of timeOptions; track time) {
                       <option class="custom-option" [value]="time">{{ time }}</option>
                     }
                   </select>
                   <div class="underline"></div>
                   @if (myForm.submitted && !timeInput.valid) {
-                    <div class="error-message" i18n="@@subscribe.timeRequired">חייב לבחור שעה.</div>
+                    <div id="timeInput-error" class="error-message" role="alert" i18n="@@subscribe.timeRequired">חייב לבחור שעה.</div>
                   }
                 </div>
                 <div class="input-container">
@@ -52,23 +57,27 @@
                 </div>
                 <div class="input-container" [class.error]="myForm.submitted && !consentGiven">
                   <label>
-                    <input type="checkbox" [(ngModel)]="consentGiven" name="consentInput" required>
+                    <input type="checkbox" [(ngModel)]="consentGiven" name="consentInput" required
+                      [attr.aria-invalid]="myForm.submitted && !consentGiven ? 'true' : null"
+                      [attr.aria-describedby]="myForm.submitted && !consentGiven ? 'consentInput-error' : null">
                     <ng-container i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת במייל</ng-container>
                   </label>
                   @if (myForm.submitted && !consentGiven) {
-                    <div class="error-message" i18n="@@subscribe.consentRequired">יש לאשר קבלת הודעות כדי להירשם.</div>
+                    <div id="consentInput-error" class="error-message" role="alert" i18n="@@subscribe.consentRequired">יש לאשר קבלת הודעות כדי להירשם.</div>
                   }
                 </div>
                 <br>
                   <button class="go-setting-button" type="submit" [disabled]="isButtonDisabled()" i18n="@@subscribe.submit">הירשם</button>
                 </form><br>
                 @if (isRequestInProgress()) {
-                  <div class="progress-container">
+                  <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                       [attr.aria-valuenow]="progressValue() > 100 ? 100 : progressValue()"
+                       i18n-aria-label="@@subscribe.submitting" aria-label="שולח את ההרשמה">
                     <div class="progress-bar" [style.width.%]="progressValue()"></div>
                   </div>
                 }
                 @if (isRequestSuccessful()) {
-                  <div>
+                  <div role="status">
                     <span class="serverResponse">{{serverResponse()}}</span>
                   </div>
                 }
@@ -78,10 +87,10 @@
         } @else {
           <div class="welcome-body">
             <div class="custom-dialog-title">
-              <span class="header"
-              mat-dialog-title i18n="@@subscribe.alreadySubscribedTitle">תזכורת יומית</span>
-              <button mat-icon-button (click)="closeDialog()">
-                <mat-icon class="header" i18n-aria-label="@@dialog.close" aria-label="סגירה">close</mat-icon>
+              <h2 class="header"
+              mat-dialog-title i18n="@@subscribe.alreadySubscribedTitle">תזכורת יומית</h2>
+              <button mat-icon-button type="button" (click)="closeDialog()" i18n-aria-label="@@dialog.close" aria-label="סגירה">
+                <mat-icon class="header" aria-hidden="true">close</mat-icon>
               </button>
             </div>
             <div mat-dialog-content>

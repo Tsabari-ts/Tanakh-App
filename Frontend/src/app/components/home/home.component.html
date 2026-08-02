@@ -1,16 +1,17 @@
 <div class="centered-container">
+  <h1 class="visually-hidden" i18n="@@home.heading">תפריט ראשי</h1>
   <div class="button-row">
     @for (button of tanakhButtons; track button.value) {
-      <button class="svg-button" (click)="goTo(button)">
-        <div class="icon" [ngClass]="button.iconClass"></div>
+      <button class="svg-button" type="button" (click)="goTo(button)">
+        <div class="icon" [ngClass]="button.iconClass" aria-hidden="true"></div>
         {{ button.text }}
       </button>
     }
   </div>
   <div class="button-row">
     @for (button of buttons; track button.value) {
-      <button class="svg-button" (click)="goTo(button)">
-        <div class="icon" [ngClass]="button.iconClass"></div>
+      <button class="svg-button" type="button" (click)="goTo(button)">
+        <div class="icon" [ngClass]="button.iconClass" aria-hidden="true"></div>
         {{ button.text }}
       </button>
     }

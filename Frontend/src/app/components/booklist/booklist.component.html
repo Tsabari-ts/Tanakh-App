@@ -1,10 +1,11 @@
 <div class="centered-container">
+  <h1 class="visually-hidden">{{ heading() }}</h1>
   @if (loadError()) {
     <p class="empty-state" i18n="@@booklist.loadError">אירעה שגיאה בטעינת רשימת הספרים. נסה שוב מאוחר יותר.</p>
   } @else {
     <div class="button-row">
       @for (item of data(); track item.title) {
-        <button class="books-button" (click)="goTo(item)">
+        <button class="books-button" type="button" (click)="goTo(item)">
           {{ item.heTitle }}
         </button>
       } @empty {
