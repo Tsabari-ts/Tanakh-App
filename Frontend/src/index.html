@@ -27,7 +27,9 @@
         if (s.fontScale) { h.style.setProperty('--a11y-font-scale', s.fontScale); }
         if (s.contrast === 'high') { h.classList.add('a11y-high-contrast'); }
         if (s.contrast === 'inverted') { h.classList.add('a11y-inverted-contrast'); }
-        ['grayscale', 'highlightLinks', 'readableFont', 'textSpacing', 'noMotion', 'bigCursor', 'readingRuler']
+        // readingRuler is intentionally excluded: A11yService renders it as a
+        // DOM element it manages itself, not an html class.
+        ['grayscale', 'highlightLinks', 'readableFont', 'textSpacing', 'noMotion', 'bigCursor']
           .forEach(function (key) {
             if (s[key]) {
               h.classList.add('a11y-' + key.replace(/[A-Z]/g, function (m) { return '-' + m.toLowerCase(); }));
