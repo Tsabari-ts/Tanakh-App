@@ -1,0 +1,25 @@
+{
+  "customSyntax": "postcss-scss",
+  "rules": {
+    "declaration-property-value-disallowed-list": {
+      "outline": ["none", "0", "0px"]
+    },
+    "declaration-property-unit-disallowed-list": {
+      "font-size": ["px"]
+    },
+    "declaration-no-important": [
+      true,
+      {
+        "message": "!important blocks a11y modes from overriding this later - if this is one of the reduced-motion/high-contrast overrides in src/styles, add a file override to .stylelintrc.json instead of suppressing here."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/styles/_a11y-modes.scss", "src/styles/_a11y-utils.scss"],
+      "rules": {
+        "declaration-no-important": null
+      }
+    }
+  ]
+}
