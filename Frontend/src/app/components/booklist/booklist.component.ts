@@ -13,7 +13,7 @@ const SECTION_LABELS: Record<string, string> = {
 @Component({
     selector: 'app-booklist',
     templateUrl: './booklist.component.html',
-    styleUrl: './booklist.component.css',
+    styleUrl: './booklist.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooklistComponent implements OnInit {

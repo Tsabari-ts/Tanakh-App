@@ -8,7 +8,7 @@ import { NgClass } from '@angular/common';
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
-    styleUrl: './settings.component.css',
+    styleUrl: './settings.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass]
 })

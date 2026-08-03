@@ -12,7 +12,7 @@ import { TtsPlayerComponent } from '../../shared/tts/tts-player/tts-player.compo
 @Component({
     selector: 'app-chapter',
     templateUrl: './chapter.component.html',
-    styleUrl: './chapter.component.css',
+    styleUrl: './chapter.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgClass, ScrollToTopButtonComponent, TtsPlayerComponent]
 })

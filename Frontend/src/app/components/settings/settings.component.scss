@@ -1,7 +1,11 @@
+@use '../../../styles/breakpoints' as bp;
+
+// Mobile-first: compact hero spacing/buttons are the default; from-xl
+// restores the wide-desktop layout (was a max-width:1450px override).
 .centered-container {
     position: fixed;
     width: 100%;
-    margin-top: 300px;
+    margin-top: 150px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -10,8 +14,8 @@
 
 .button-row {
     display: flex;
-    flex-wrap: wrap; 
-    justify-content: center; 
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .svg-button {
@@ -19,19 +23,16 @@
     align-items: center;
     padding: 35px;
     background-color: var(--color-panel-bg);
-    color: var(--color-panel-text);
+    color: var(--color-panel-text-hover);
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     margin: 8px;
     min-block-size: var(--tap-target-min);
     max-width: min(450px, 92vw);
-    width: 500px;
-}
-
-.svg-button:hover {
-  color: var(--color-panel-text-hover);
+    width: 300px;
+    height: 50px;
 }
 
     .svg-button svg {
@@ -45,46 +46,40 @@
 }
 
 .svg-button div.icon {
-  width: 40px;
-  height: 40px; 
-  background-size: cover; 
-  margin-inline-start: 20px; 
-  margin-inline-end: 50px;
+  width: 23px;
+  height: 20px;
+  background-size: cover;
+  margin-inline-start: 5px;
+  margin-inline-end: 20px;
 }
 
-@media only screen and (max-width: 1450px) {
-
+@include bp.from-xl {
   .centered-container {
-    margin-top: 150px;
-}
+    margin-top: 300px;
+  }
 
-
-    .button-row {
-        margin-top: 0;
-    }
-
-    .svg-button {
-      color: var(--color-panel-text-hover);
-      font-size: var(--font-size-lg);
-      width: 300px;
-      height: 50px;
+  .svg-button {
+    color: var(--color-panel-text);
+    font-size: var(--font-size-xl);
+    width: 500px;
+    height: auto;
   }
 
   .svg-button div.icon {
-    width: 23px; 
-    height: 20px;
-    margin-inline-start: 5px;
-    margin-inline-end: 20px; 
+    width: 40px;
+    height: 40px;
+    margin-inline-start: 20px;
+    margin-inline-end: 50px;
   }
 }
 
 
 .calendar-icon {
-  background-image: url('/assets/calendar.png'); 
+  background-image: url('/assets/calendar.png');
 }
 
 .email-icon {
-    background-image: url('/assets/email.png'); 
+    background-image: url('/assets/email.png');
   }
 
   .download-icon {
@@ -107,5 +102,3 @@
     color: var(--color-panel-text-hover);
     font-size: var(--font-size-sm);
   }
-
-

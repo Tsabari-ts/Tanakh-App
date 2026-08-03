@@ -9,7 +9,7 @@ import { AppComponent } from '../../app.component';
 @Component({
     selector: 'app-chapterlist',
     templateUrl: './chapterlist.component.html',
-    styleUrl: './chapterlist.component.css',
+    styleUrl: './chapterlist.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChapterlistComponent implements OnInit {

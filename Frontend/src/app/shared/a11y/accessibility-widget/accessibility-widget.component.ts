@@ -14,7 +14,7 @@ interface ScaleOption {
   standalone: true,
   imports: [A11yModule],
   templateUrl: './accessibility-widget.component.html',
-  styleUrl: './accessibility-widget.component.css',
+  styleUrl: './accessibility-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AccessibilityWidgetComponent {

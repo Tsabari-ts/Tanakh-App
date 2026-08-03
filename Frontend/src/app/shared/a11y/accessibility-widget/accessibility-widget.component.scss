@@ -1,7 +1,10 @@
+@use '../../../../styles/breakpoints' as bp;
+
+// App is dir="rtl" only (see index.html): inline-start = physical right.
 .a11y-fab {
   position: fixed;
-  inset-block-end: 1rem;
-  inset-inline-start: 1rem; /* opposite corner from the scroll-to-top button */
+  inset-block-end: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  inset-inline-start: calc(0.75rem + env(safe-area-inset-right, 0px)); /* opposite corner from the scroll-to-top button */
   z-index: var(--z-a11y-widget);
 
   inline-size: 3.25rem;
@@ -23,17 +26,17 @@
   color: var(--color-panel-bg);
 }
 
-@media (max-width: 480px) {
+@include bp.from-sm {
   .a11y-fab {
-    inset-block-end: 0.75rem;
-    inset-inline-start: 0.75rem;
+    inset-block-end: calc(1rem + env(safe-area-inset-bottom, 0px));
+    inset-inline-start: calc(1rem + env(safe-area-inset-right, 0px));
   }
 }
 
 .a11y-panel {
   position: fixed;
-  inset-block-end: calc(1rem + 3.75rem);
-  inset-inline-start: 1rem;
+  inset-block-end: calc(1rem + 3.75rem + env(safe-area-inset-bottom, 0px));
+  inset-inline-start: calc(1rem + env(safe-area-inset-right, 0px));
   z-index: var(--z-a11y-widget);
 
   width: 320px;

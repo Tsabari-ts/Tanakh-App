@@ -1,28 +1,34 @@
+@use '../../../styles/breakpoints' as bp;
 
-    #mobileDiv {
-        display: none; 
-      }
-    
-    .img-background {
-        background-image: url('/assets/tora.png');
+// Mobile-first: the app already shows a dedicated mobile illustration/copy
+// below `lg`; from-lg swaps in the desktop content div and imagery.
+#mobileDiv {
+    display: block;
+}
 
+#contentDiv {
+    display: none;
+}
 
-        cursor: not-allowed;
-background-size: contain; 
-background-repeat: no-repeat; 
-background-position: center; 
+.img-background {
+    background-image: url('/assets/pngwing.png');
+    cursor: not-allowed;
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
   position:absolute;
   min-height: 150px;
+  height: 82vh;
   width: 100%;
   margin-top: 50px;
-      } 
-    
+      }
+
       .word {
-        font-size: calc(60rem / 16);
+        font-size: calc(25rem / 16);
         font-weight: bold;
-        margin: 30px;
+        margin: 15px;
         opacity: 0;
-        animation: fadeIn 1s ease-in-out forwards;
+        animation: fadeIn 1s ease-out forwards;
       }
 
       @keyframes fadeIn {
@@ -33,84 +39,62 @@ background-position: center;
           opacity: 1;
         }
       }
-    
-    
+
+
       .row {
         display: flex;
         justify-content: space-between;
       }
-    
+
       .container {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 82vh; 
+        height: 82vh;
+        min-height: 82vh;
       }
 
-      @media (min-width: 1024px) {
+      @include bp.from-lg {
+        #mobileDiv {
+          display: none;
+        }
+
+        #contentDiv {
+          display: block;
+        }
+
+        .img-background {
+          background-image: url('/assets/tora.png');
+          height: auto;
+        }
+
+        .container {
+          min-height: 0;
+        }
+
         .word {
           font-size: calc(40rem / 16);
-          font-weight: bold; 
+          font-weight: bold;
           margin: 13px;
-          opacity: 0;
-          animation: fadeIn  1s ease-out forwards;
         }
       }
 
-      @media (min-width: 1400px) {
+      @include bp.from-xl {
         .word {
           font-size: calc(55rem / 16);
-          font-weight: bold; 
+          font-weight: bold;
           margin: 15px;
-          opacity: 0;
-          animation: fadeIn  1s ease-out forwards;
         }
       }
-    
-    @media (max-width: 1024px) {
-        #mobileDiv {
-          display: block; 
-        }
-    
-        #contentDiv {
-            display: none; 
-          }
-    
-          .img-background {
-            background-image: url('/assets/pngwing.png'); 
-            height: 82vh;
-          }
-    
-          .container {
-            min-height: 82vh; 
-          }
-      
-          .word {
-              font-size: calc(25rem / 16);
-              font-weight: bold; 
-              margin: 15px;
-              opacity: 0;
-              animation: fadeIn  1s ease-out forwards;
-            }
 
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-              }
-              to {
-                opacity: 1;
-              }
-            }
-    }
-    
     .loading-container {
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100vh;
     }
-  
+
 .frame {
   position: absolute;
   top: 50%;
@@ -146,7 +130,7 @@ background-position: center;
     stroke-width: 2px;
     stroke-linecap: round;
     animation:line 2.5s linear infinite;
-} 
+}
 .svg-1{transform: rotate(90deg);
 }
 .svg-2{transform: rotate(-90deg); }
@@ -196,11 +180,11 @@ background-position: center;
 }
 
 .israel-flag{
-  background-image: url('/assets/IsraelFlag.jpg'); 
+  background-image: url('/assets/IsraelFlag.jpg');
 cursor: not-allowed;
-background-size: contain; 
-background-repeat: no-repeat; 
-background-position: center; 
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
   position:absolute;
   min-height: 150px;
   width: 100%;

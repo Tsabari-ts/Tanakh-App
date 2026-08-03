@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 @Component({
     selector: 'app-entrance',
     templateUrl: './entrance.component.html',
-    styleUrl: './entrance.component.css',
+    styleUrl: './entrance.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntranceComponent implements OnInit {

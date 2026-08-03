@@ -7,7 +7,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 @Component({
     selector: 'app-welcome-modal',
     templateUrl: './welcome-modal.component.html',
-    styleUrl: './welcome-modal.component.css',
+    styleUrl: './welcome-modal.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatDialogActions]
 })

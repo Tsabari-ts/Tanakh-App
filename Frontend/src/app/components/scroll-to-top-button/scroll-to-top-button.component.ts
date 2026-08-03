@@ -10,42 +10,7 @@ import { MatIcon } from '@angular/material/icon';
   <div class="up-text" i18n="@@scrollToTop.up">למעלה</div>
   </button>
 `,
-    styles: [`
-  .scroll-to-top-button {
-    position: fixed;
-    top: 300px;
-    inset-inline-start: 7%;
-    width: var(--tap-target-min);
-    contain: content;
-    display: none;
-    height: 100px;
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    z-index: var(--z-scroll-top);
-    font-size: var(--font-size-base);
-  }
-
-  .scroll-to-top-button:hover {
-  color: var(--color-panel-text-hover);
-}
-
-
-  .up-text{
-    margin-inline-start: -5px;
-  }
-
-  @media screen and (max-width: 1024px) {
-      .scroll-to-top-button{
-        top: 300px;
-        inset-inline-start: 1%;
-        width: 40px;
-        color: var(--color-panel-text-hover);
-      }
-    }
-`],
+    styleUrl: './scroll-to-top-button.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatIcon]
 })

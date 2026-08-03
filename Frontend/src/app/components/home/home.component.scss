@@ -1,7 +1,11 @@
+@use '../../../styles/breakpoints' as bp;
+
+// Mobile-first: compact hero spacing/buttons are the default; from-xl
+// restores the wide-desktop layout (was a max-width:1450px override).
 .centered-container {
   position: fixed;
   width: 100%;
-  margin-top: 300px;
+  margin-top: 170px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -16,21 +20,17 @@
 .svg-button {
     display: inline-flex;
     align-items: center;
-    padding: 35px;
+    padding: 20px;
     background-color: var(--color-panel-bg);
     color: var(--color-panel-text);
     border: none;
     border-radius: 20px;
     cursor: pointer;
-    font-size: var(--font-size-xl);
+    font-size: calc(25rem / 16);
     margin: 8px;
     min-block-size: var(--tap-target-min);
     max-width: min(450px, 92vw);
-    width: 500px;
-}
-
-.svg-button:hover {
-  color: var(--color-panel-text-hover);
+    width: 300px;
 }
 
     .svg-button svg {
@@ -44,38 +44,42 @@
 }
 
 .svg-button div.icon {
-  width: 40px;
-  height: 40px; 
-  background-size: cover; 
-  margin-inline-start: 20px; 
-  margin-inline-end: 50px;
+  width: 20px;
+  height: 20px;
+  background-size: cover;
+  margin-inline-start: 5px;
+  margin-inline-end: 20px;
 }
 
-@media screen and (max-width: 1450px) {
+@include bp.from-xl {
   .centered-container {
-    margin-top: 170px;
+    margin-top: 300px;
   }
-  
+
   .svg-button {
-    padding: 20px; 
-    font-size: calc(25rem / 16);
-    width: 300px;
+    padding: 35px;
+    font-size: var(--font-size-xl);
+    width: 500px;
   }
 
   .svg-button div.icon {
-    width: 20px; 
-    height: 20px;
-    margin-inline-start: 5px;
-    margin-inline-end: 20px; 
+    width: 40px;
+    height: 40px;
+    margin-inline-start: 20px;
+    margin-inline-end: 50px;
   }
 }
 
+.svg-button:hover {
+  color: var(--color-panel-text-hover);
+}
+
 .torah-icon {
-  background-image: url('/assets/book.svg'); 
+  background-image: url('/assets/book.svg');
 }
 
 .BookWithBookmark-icon {
-  background-image: url('/assets/openBookWithBookmark.svg'); 
+  background-image: url('/assets/openBookWithBookmark.svg');
 }
 .stteing-icon {
   background-image: url('/assets/setting.svg');

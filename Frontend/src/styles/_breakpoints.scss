@@ -1,0 +1,35 @@
+// Shared responsive breakpoints (W-02). Single source of truth - do not
+// hardcode px breakpoint values in component styles, @use this file instead.
+//
+// Mobile-first: every mixin here is a min-width query. Author base rules for
+// the smallest viewport, then layer on @include bp.from-*() to expand up.
+$bp-xs: 320px;
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+$bp-xxl: 1536px;
+
+@mixin from-xs {
+  @media (min-width: $bp-xs) { @content; }
+}
+
+@mixin from-sm {
+  @media (min-width: $bp-sm) { @content; }
+}
+
+@mixin from-md {
+  @media (min-width: $bp-md) { @content; }
+}
+
+@mixin from-lg {
+  @media (min-width: $bp-lg) { @content; }
+}
+
+@mixin from-xl {
+  @media (min-width: $bp-xl) { @content; }
+}
+
+@mixin from-xxl {
+  @media (min-width: $bp-xxl) { @content; }
+}

@@ -3,24 +3,32 @@
 // text, rgb(196,172,143) dialog body) - they are not a redesign, just the
 // same colors expressed as variables so a11y modes can swap them on <html>.
 :root {
-  /* ---- Typography scale (rem, driven by --a11y-font-scale) ---- */
+  /* ---- Typography scale (fluid rem/vw, driven by --a11y-font-scale) ----
+     Each clamp(min, preferred, max) is wrapped in calc(... * scale) so the
+     a11y font-scale widget (1 / 1.15 / 1.3 / 1.5) still multiplies the
+     whole fluid range uniformly - clamp(a,b,c)*k == clamp(a*k,b*k,c*k). */
   --a11y-font-scale: 1; /* the widget sets: 1 / 1.15 / 1.3 / 1.5 */
-  --font-size-sm: calc(0.875rem * var(--a11y-font-scale));
-  --font-size-base: calc(1rem * var(--a11y-font-scale));
-  --font-size-md: calc(1.125rem * var(--a11y-font-scale));
-  --font-size-lg: calc(1.25rem * var(--a11y-font-scale));
-  --font-size-xl: calc(1.5rem * var(--a11y-font-scale));
-  --font-size-h1: calc(2rem * var(--a11y-font-scale));
-  --font-size-h2: calc(1.5rem * var(--a11y-font-scale));
+  --font-size-sm: calc(clamp(0.8rem, 0.75rem + 0.2vw, 0.875rem) * var(--a11y-font-scale));
+  --font-size-base: calc(clamp(0.95rem, 0.85rem + 0.3vw, 1rem) * var(--a11y-font-scale));
+  --font-size-md: calc(clamp(1.05rem, 0.95rem + 0.35vw, 1.125rem) * var(--a11y-font-scale));
+  --font-size-lg: calc(clamp(1.15rem, 1rem + 0.5vw, 1.25rem) * var(--a11y-font-scale));
+  --font-size-xl: calc(clamp(1.35rem, 1.15rem + 0.6vw, 1.5rem) * var(--a11y-font-scale));
+  --font-size-h1: calc(clamp(1.6rem, 1.3rem + 1.2vw, 2rem) * var(--a11y-font-scale));
+  --font-size-h2: calc(clamp(1.3rem, 1.1rem + 0.8vw, 1.5rem) * var(--a11y-font-scale));
 
   --line-height-body: 1.5;
   --line-height-heading: 1.3;
+  /* Generous line-height for long-form scripture reading (niqqud/cantillation
+     marks need more vertical room than plain prose) - see chapter .sentences. */
+  --line-height-scripture: 1.75;
   --letter-spacing: normal;
   --word-spacing: normal;
   --paragraph-spacing: 1em;
 
   --font-family-body: Roboto, "Helvetica Neue", sans-serif;
   --font-family-ui: Roboto, "Helvetica Neue", sans-serif;
+  /* Biblical text only (chapter reading view) - see _fonts.scss */
+  --font-family-scripture: "Noto Serif Hebrew", "Times New Roman", serif;
 
   /* ---- Color: panels (header/footer/buttons) ---- */
   --color-panel-bg: #333333e6;

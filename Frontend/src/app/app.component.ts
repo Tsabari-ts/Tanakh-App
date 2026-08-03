@@ -14,7 +14,7 @@ import { AccessibilityStatementService } from './shared/a11y/accessibility-state
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrl: './app.component.css',
+    styleUrl: './app.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [Dir, NgClass, RouterOutlet, ErrorScreenComponent, SkipLinkComponent, AccessibilityWidgetComponent]
 })

@@ -6,7 +6,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 @Component({
     selector: 'app-read-permission',
     templateUrl: './read-permission.component.html',
-    styleUrl: './read-permission.component.css',
+    styleUrl: './read-permission.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatDialogActions]
 })

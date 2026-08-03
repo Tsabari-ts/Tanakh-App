@@ -1,3 +1,4 @@
+@use '../../../styles/breakpoints' as bp;
 
 .tittle{
     text-align: start;
@@ -5,6 +6,7 @@
     max-width: 100%;
     text-decoration: underline;
     text-align: justify;
+    font-family: var(--font-family-scripture);
     font-size: var(--font-size-h2);
     line-height: var(--line-height-heading);
 }
@@ -42,11 +44,14 @@
     margin: auto;
     margin-bottom: 150px;
     width: 75%;
-    max-width: 100%;
+    max-width: 65ch;
     padding: 10px;
     text-align: justify;
+    font-family: var(--font-family-scripture);
     font-size: var(--font-size-h2);
-    line-height: var(--line-height-body);
+    /* generous default for niqqud/cantillation, but still grows further
+       under the a11y "increased text spacing" mode (--line-height-body) */
+    line-height: max(var(--line-height-body), var(--line-height-scripture));
     letter-spacing: var(--letter-spacing);
     word-spacing: var(--word-spacing);
     padding-bottom: 100px;
@@ -54,7 +59,7 @@
 
 .scrollBar{
     position: fixed;
-    bottom: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     inset-inline-start: 50%;
     background: var(--color-panel-bg);
     padding: 5px;
@@ -62,7 +67,7 @@
 
 .scroll-to-top-button {
     position: fixed;
-    bottom: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     inset-inline-start: 20px;
     display: none;
   }
@@ -77,15 +82,15 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  height: 100%; 
+  height: 100%;
   align-items: flex-start;
   scroll-behavior: smooth;
 overflow-y: auto;
  margin-top: 100px;
-max-height: calc(100vh - 200px); 
-margin-bottom: 100px; 
+max-height: calc(100vh - 200px);
+margin-bottom: 100px;
 box-sizing: border-box;
-  
+
 }
 
 body {
@@ -97,7 +102,7 @@ body {
 
 #floatingDiv {
   position: fixed;
-  bottom: 13%;
+  bottom: calc(13% + env(safe-area-inset-bottom, 0px));
   inset-inline-start: 10%;
   width: 80%;
   background-color: var(--color-panel-bg);
@@ -109,6 +114,8 @@ body {
   flex-wrap: wrap;
 }
 
+// Mobile-first: icon-only compact button is the default; from-lg restores
+// the wider desktop button with its label (was a max-width:1024px override).
 .svg-button {
   display: inline-flex;
   align-items: center;
@@ -123,26 +130,46 @@ body {
   margin: 8px;
   min-block-size: var(--tap-target-min);
   max-width: min(450px, 92vw);
-  width: 200px;
+  width: 60px;
+}
+
+.hide-text {
+  display: none;
+}
+
+.svg-button div.icon {
+  width: 30px;
+  height: 30px;
+  background-size: cover;
+  margin-inline-start: 0px;
+}
+
+@include bp.from-lg {
+  .svg-button {
+    width: 200px;
+  }
+
+  .hide-text {
+    display: inline;
+  }
+
+  .svg-button div.icon {
+    margin-inline-start: 20px;
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .svg-button:hover {
   color: var(--color-panel-text-hover);
 }
 
-.svg-button div.icon {
-  width: 40px;
-  height: 40px;
-  background-size: cover;
-  margin-inline-start: 20px;
-}
-
 .end-button{
-  margin-inline-start: 20%;
-  width: 60%;
+  margin-inline-start: 0;
+  width: 100%;
   min-height: var(--tap-target-min);
   background-color: var(--color-panel-bg);
-  color: var(--color-panel-text);
+  color: var(--color-panel-text-hover);
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -150,47 +177,30 @@ body {
   margin-top: 50px;
 }
 
+@include bp.from-lg {
+  .end-button {
+    color: var(--color-panel-text);
+    width: 60%;
+    margin-inline-start: 20%;
+  }
+}
+
 .end-button:hover {
   color: var(--color-panel-text-hover);
 }
 
 .down-icon {
-  background-image: url('/assets/arrowDown.png'); 
+  background-image: url('/assets/arrowDown.png');
 }
 
 .stop-icon {
-  background-image: url('/assets/stopIcon.png'); 
+  background-image: url('/assets/stopIcon.png');
 }
 
 .up-icon {
-  background-image: url('/assets/arrowUp.png'); 
+  background-image: url('/assets/arrowUp.png');
 }
 
 .next-icon {
-  background-image: url('/assets/arrowNext.png'); 
+  background-image: url('/assets/arrowNext.png');
 }
-
-
-
-@media only screen and (max-width: 1024px) {
-  .end-button {
-      color: var(--color-panel-text-hover);
-      width: 100%;
-      margin-inline-start: 0;
-  }
-
-  .hide-text {
-    display: none;
-  }
-
-  .svg-button {
-    width: 60px;
-  } 
-
-  .svg-button div.icon {
-    margin-inline-start: 0px; 
-    width: 30px;
-    height: 30px;
-  }
-}
-

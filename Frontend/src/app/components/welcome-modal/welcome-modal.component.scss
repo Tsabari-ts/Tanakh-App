@@ -1,3 +1,5 @@
+@use '../../../styles/breakpoints' as bp;
+
 .welcome-body{
     background-color: var(--color-dialog-bg);
 }
@@ -40,11 +42,17 @@
     width: 50%;
     min-height: var(--tap-target-min);
     background-color: var(--color-panel-bg);
-    color: var(--color-panel-text);
+    color: var(--color-panel-text-hover);
     border: none;
     border-radius: 20px;
     cursor: pointer;
     font-size: var(--font-size-lg);
+  }
+
+  @include bp.from-lg {
+    .go-setting-button {
+      color: var(--color-panel-text);
+    }
   }
 
   .go-setting-button:hover {
@@ -55,11 +63,3 @@
     color: var(--color-dialog-title-text);
     font-size: var(--font-size-xl);
   }
-
-
-  @media only screen and (max-width: 1024px) {
-    .go-setting-button {
-        color: var(--color-panel-text-hover);
-    }
-}
-

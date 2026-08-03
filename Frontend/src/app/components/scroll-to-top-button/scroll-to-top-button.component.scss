@@ -1,0 +1,37 @@
+@use '../../../styles/breakpoints' as bp;
+
+// Mobile-first: compact icon-only button is the default; from-lg restores
+// the wider desktop button (was a max-width:1024px override).
+// App is dir="rtl" only (see index.html): inline-start = physical right.
+.scroll-to-top-button {
+  position: fixed;
+  top: 300px;
+  inset-inline-start: calc(1% + env(safe-area-inset-right, 0px));
+  width: 40px;
+  contain: content;
+  display: none;
+  height: 100px;
+  background-color: var(--color-panel-bg);
+  color: var(--color-panel-text-hover);
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: var(--z-scroll-top);
+  font-size: var(--font-size-base);
+}
+
+@include bp.from-lg {
+  .scroll-to-top-button {
+    inset-inline-start: calc(7% + env(safe-area-inset-right, 0px));
+    width: var(--tap-target-min);
+    color: var(--color-panel-text);
+  }
+}
+
+.scroll-to-top-button:hover {
+  color: var(--color-panel-text-hover);
+}
+
+.up-text{
+  margin-inline-start: -5px;
+}

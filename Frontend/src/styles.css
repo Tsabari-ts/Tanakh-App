@@ -10,3 +10,9 @@ body {
   background: var(--color-bg);
 }
 p { margin-block-end: var(--paragraph-spacing); }
+
+/* Skip the double-tap-to-zoom delay on tappable controls (W-10); scrolling
+   and pinch-zoom elsewhere in the app are unaffected. */
+button, [role="button"], a, input, select, summary {
+  touch-action: manipulation;
+}

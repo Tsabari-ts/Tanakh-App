@@ -1,13 +1,15 @@
+@use '../styles/breakpoints' as bp;
+
 body {
     margin: 0;
     padding: 0;
   }
-  
+
   .container {
     position: relative;
     min-height: 100vh;
   }
-  
+
   .img-background {
     background-image: url('/assets/tanakhBackground.jpg');
     background-size: cover;
@@ -19,10 +21,12 @@ body {
     bottom: 0;
     inset-inline: 0;
   }
-  
+
+  // App is dir="rtl" only (see index.html), so physical env(safe-area-inset-*)
+  // sides are hardcoded here: inline-start = right, inline-end = left.
   .title {
     background: var(--color-panel-bg);
-    padding: 5px;
+    padding: calc(5px + env(safe-area-inset-top, 0px)) calc(5px + env(safe-area-inset-left, 0px)) 5px calc(5px + env(safe-area-inset-right, 0px));
     width: 100%;
     position: absolute;
     top: 0;
@@ -51,7 +55,7 @@ body {
 
   .main-footer {
     background: var(--color-panel-bg);
-    padding: 5px;
+    padding: 5px calc(5px + env(safe-area-inset-left, 0px)) calc(5px + env(safe-area-inset-bottom, 0px)) calc(5px + env(safe-area-inset-right, 0px));
     width: 100%;
     position: absolute;
     bottom: 0;
@@ -84,13 +88,16 @@ body {
     color: var(--color-panel-text-hover);
   }
 
+  // Mobile-first: small-screen values are the default; from-xl restores the
+  // wide-desktop layout (was a max-width:1400px override before W-01/W-02).
   .return-button{
     position: fixed;
     border: none;
-    color: var(--color-panel-text);
-    top: 4%;
-    inset-inline-end: 1%;
-    width: 10%;
+    color: var(--color-panel-text-hover);
+    top: calc(4% + env(safe-area-inset-top, 0px));
+    inset-inline-end: calc(1% + env(safe-area-inset-left, 0px));
+    width: 500px;
+    height: 60px;
     min-block-size: var(--tap-target-min);
     background: transparent;
     display: flex;
@@ -100,43 +107,50 @@ body {
     font-size: calc(25rem / 16);
   }
 
+  .hide-text-app {
+    display: none;
+  }
+
+  @include bp.from-xl {
+    .return-button {
+      color: var(--color-panel-text);
+      width: 10%;
+      height: auto;
+    }
+
+    .hide-text-app {
+      display: inline;
+    }
+  }
+
   .return-button:hover {
     color: var(--color-panel-text-hover);
   }
 
   .return-button div.icon {
     width: 40px;
-    height: 40px; 
+    height: 30px;
     background-size: cover;
     margin-inline-end: 20px;
+    margin-inline-start: 90%;
+  }
+
+  @include bp.from-xl {
+    .return-button div.icon {
+      height: 40px;
+      margin-inline-start: 0;
+    }
   }
 
   .return-icon {
-    background-image: url('/assets/returnIcon.png'); 
-  }
-
-
-  @media only screen and (max-width: 1400px) {
-    .return-button {
-        color: var(--color-panel-text-hover);
-        width: 500px;
-        height: 60px;
-    }
-
-    .hide-text-app {
-      display: none;
-    }
-
-    .return-button div.icon {
-      height: 30px;
-      margin-inline-start: 90%;
-    }
+    background-image: url('/assets/returnIcon.png');
   }
 
   .app-toast {
     position: fixed;
-    top: 16px;
-    inset-inline: 16px;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    inset-inline-start: calc(16px + env(safe-area-inset-right, 0px));
+    inset-inline-end: calc(16px + env(safe-area-inset-left, 0px));
     z-index: var(--z-dialog);
     display: flex;
     align-items: center;
@@ -169,8 +183,9 @@ body {
 
   .update-banner {
     position: fixed;
-    bottom: 16px;
-    inset-inline: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    inset-inline-start: calc(16px + env(safe-area-inset-right, 0px));
+    inset-inline-end: calc(16px + env(safe-area-inset-left, 0px));
     z-index: var(--z-dialog);
     display: flex;
     align-items: center;

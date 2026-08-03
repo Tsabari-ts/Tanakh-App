@@ -10,7 +10,7 @@ import { NgClass } from '@angular/common';
 @Component({
     selector: 'app-subscribe',
     templateUrl: './subscribe.component.html',
-    styleUrl: './subscribe.component.css',
+    styleUrl: './subscribe.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, NgClass]
 })
