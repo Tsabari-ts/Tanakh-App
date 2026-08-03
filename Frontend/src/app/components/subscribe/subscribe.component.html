@@ -56,12 +56,13 @@
                   </label>
                 </div>
                 <div class="input-container" [class.error]="myForm.submitted && !consentGiven">
-                  <label>
-                    <input type="checkbox" [(ngModel)]="consentGiven" name="consentInput" required
+                  <label for="consentInput">
+                    <input type="checkbox" id="consentInput" [(ngModel)]="consentGiven" name="consentInput" required
                       [attr.aria-invalid]="myForm.submitted && !consentGiven ? 'true' : null"
                       [attr.aria-describedby]="myForm.submitted && !consentGiven ? 'consentInput-error' : null">
-                    <ng-container i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת במייל</ng-container>
+                    <ng-container i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת במייל ומאשר/ת שקראתי את</ng-container>
                   </label>
+                  <button type="button" class="terms-link" (click)="openTerms()" i18n="@@subscribe.termsLink">תנאי השימוש</button>
                   @if (myForm.submitted && !consentGiven) {
                     <div id="consentInput-error" class="error-message" role="alert" i18n="@@subscribe.consentRequired">יש לאשר קבלת הודעות כדי להירשם.</div>
                   }

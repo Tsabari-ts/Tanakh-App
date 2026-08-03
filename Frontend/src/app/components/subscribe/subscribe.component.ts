@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Output, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { Component, EventEmitter, Inject, Output, ChangeDetectionStrategy, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiCallService } from '../../services/api-call.service';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
@@ -6,6 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
+import { TermsService } from '../../shared/legal/terms-dialog/terms.service';
 
 @Component({
     selector: 'app-subscribe',
@@ -18,6 +19,7 @@ import { NgClass } from '@angular/common';
 export class SubscribeComponent {
   @Output() subscriptionStatusChange: EventEmitter<{
      newButtonName: string }> = new EventEmitter();
+  private readonly terms = inject(TermsService);
   private markSubscribeKey = 'userHasSubscribed';
   readonly serverResponse = signal('');
   subscribeSuccessful = false;
@@ -52,6 +54,10 @@ export class SubscribeComponent {
 
   closeDialog() {
     this.dialogRef.close();
+  }
+
+  openTerms(): void {
+    this.terms.open();
   }
 
   submitForm(form: any) {

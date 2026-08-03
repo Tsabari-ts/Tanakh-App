@@ -10,6 +10,7 @@ import { SkipLinkComponent } from './shared/a11y/skip-link/skip-link.component';
 import { RouteFocusService } from './core/a11y/route-focus.service';
 import { AccessibilityWidgetComponent } from './shared/a11y/accessibility-widget/accessibility-widget.component';
 import { AccessibilityStatementService } from './shared/a11y/accessibility-statement-dialog/accessibility-statement.service';
+import { TermsService } from './shared/legal/terms-dialog/terms.service';
 
 @Component({
     selector: 'app-root',
@@ -26,16 +27,22 @@ export class AppComponent {
   readonly errorState = inject(ErrorStateService);
   readonly appUpdate = inject(AppUpdateService);
   private readonly statement = inject(AccessibilityStatementService);
+  private readonly terms = inject(TermsService);
 
   constructor(private location: Location, routeFocus: RouteFocusService) {
     routeFocus.init();
 
-    // Lets the accessibility statement be linked to directly (e.g. for a
-    // reviewer or authority) even though it only opens as a dialog and has
-    // no dedicated route - see ADR discussion in the a11y implementation doc.
+    // Lets the accessibility statement / terms of use be linked to directly
+    // (e.g. for a reviewer or authority) even though they only open as a
+    // dialog and have no dedicated route - see ADR discussion in the a11y
+    // implementation doc.
     afterNextRender(() => {
-      if (new URLSearchParams(window.location.search).get('a11y') === 'statement') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('a11y') === 'statement') {
         this.statement.open();
+      }
+      if (params.get('legal') === 'terms') {
+        this.terms.open();
       }
     });
   }
@@ -46,5 +53,9 @@ export class AppComponent {
 
   openStatement(): void {
     this.statement.open();
+  }
+
+  openTerms(): void {
+    this.terms.open();
   }
 }

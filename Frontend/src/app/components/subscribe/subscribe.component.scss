@@ -95,6 +95,19 @@
     margin-inline-end: 8px;
   }
 
+  .terms-link {
+    display: inline-block;
+    margin-inline-start: 4px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    min-block-size: var(--tap-target-min);
+    color: var(--color-link);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: inherit;
+  }
+
   label {
     position: absolute;
     top: 0;
