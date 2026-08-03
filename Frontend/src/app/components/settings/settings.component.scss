@@ -4,11 +4,104 @@
 // restores the wide-desktop layout (was a max-width:1450px override).
 .centered-container {
     position: fixed;
+    inset-inline: 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 250px);
+    margin-top: 100px;
+    margin-bottom: 150px;
     width: 100%;
-    margin-top: 150px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    max-width: 640px;
+    margin-inline: auto;
+    padding: 0 var(--space-4) var(--space-8);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+}
+
+@include bp.from-md {
+  .centered-container {
+    padding: 0 var(--space-6) var(--space-8);
+  }
+}
+
+.settings-heading {
+  font-size: var(--font-size-h1);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.settings-group__title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  color: var(--color-accent-700);
+}
+
+.settings-card {
+  gap: var(--space-4);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.settings-row--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.settings-row__text {
+  margin-inline-end: auto;
+}
+
+.settings-row__label {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.settings-row__label-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.settings-row__sub {
+  font-size: var(--font-size-sm);
+}
+
+.seg-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.font-scale-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.font-scale-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-neutral-200);
+  overflow: hidden;
+}
+
+.font-scale-fill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
 }
 
 
@@ -21,28 +114,32 @@
 .svg-button {
     display: inline-flex;
     align-items: center;
-    padding: 35px;
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text-hover);
-    border: none;
-    border-radius: 20px;
+    justify-content: center;
+    padding: 12px 28px;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-divider);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
     cursor: pointer;
+    font-family: var(--font-heading);
     font-size: var(--font-size-lg);
     margin: 8px;
     min-block-size: var(--tap-target-min);
     max-width: min(450px, 92vw);
     width: 300px;
     height: 50px;
+    transition: background var(--motion-duration) var(--motion-ease);
 }
 
     .svg-button svg {
         margin-inline-start: 8px;
-        color: black;
+        color: inherit;
     }
 
 .svg-button img {
     margin-inline-start: 8px;
-    color: black;
+    color: inherit;
 }
 
 .svg-button div.icon {
@@ -53,13 +150,16 @@
   margin-inline-end: 20px;
 }
 
+.svg-button .icon-svg {
+  margin-inline-end: 12px;
+}
+
 @include bp.from-xl {
   .centered-container {
     margin-top: 300px;
   }
 
   .svg-button {
-    color: var(--color-panel-text);
     font-size: var(--font-size-xl);
     width: 500px;
     height: auto;
@@ -86,6 +186,11 @@
     background-image: url('/assets/download.png');
   }
 
+  .svg-button:hover:not(:disabled) {
+    background-color: var(--color-accent-100);
+    color: var(--color-accent-800);
+  }
+
   .svg-button:disabled {
     opacity: 0.6;
     cursor: default;
@@ -96,9 +201,9 @@
     margin-block-start: 8px;
     margin-inline: auto;
     padding: 8px 16px;
-    border-radius: 8px;
-    background: var(--color-panel-bg);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
     text-align: center;
-    color: var(--color-panel-text-hover);
+    color: var(--color-text-muted);
     font-size: var(--font-size-sm);
   }

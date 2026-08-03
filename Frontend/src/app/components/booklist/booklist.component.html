@@ -1,16 +1,71 @@
-<div class="centered-container">
-  <h1 class="visually-hidden">{{ heading() }}</h1>
+<div class="tk-screen centered-container">
+  <h1 class="visually-hidden">{{ heading }}</h1>
   @if (loadError()) {
     <p class="empty-state" i18n="@@booklist.loadError">אירעה שגיאה בטעינת רשימת הספרים. נסה שוב מאוחר יותר.</p>
   } @else {
-    <div class="button-row">
-      @for (item of data(); track item.title) {
-        <button class="books-button" type="button" (click)="goTo(item)">
-          {{ item.heTitle }}
-        </button>
-      } @empty {
-        <p class="empty-state" i18n="@@booklist.empty">לא נמצאו ספרים</p>
+    <div class="variation-row">
+      <span class="text-muted variation-label" i18n="@@booklist.variationLabel">תצוגה:</span>
+      @for (v of variationOptions; track v.id) {
+        <button type="button" class="seg-pill" [class.seg-pill--on]="variation() === v.id" (click)="setVariation(v.id)">{{ v.label }}</button>
       }
     </div>
+
+    @for (sec of sections(); track sec.id) {
+      <div class="section-block">
+        <div class="section-heading-row">
+          <h2 class="section-heading">{{ sec.label }}</h2>
+          <span class="text-muted">{{ sec.sub }}</span>
+        </div>
+
+        @if (variation() === 'grid') {
+          <div class="books-grid">
+            @for (item of sec.books; track item.title) {
+              <button type="button" class="book-pill" (click)="goTo(item)">
+                <span>{{ item.heTitle }}</span>
+                <span class="book-pill__badge" [class.book-pill__badge--read]="item.read > 0">{{ item.total }}</span>
+              </button>
+            } @empty {
+              <p class="empty-state" i18n="@@booklist.empty">לא נמצאו ספרים</p>
+            }
+          </div>
+        }
+
+        @if (variation() === 'cards') {
+          <div class="books-cards">
+            @for (item of sec.books; track item.title) {
+              <button type="button" class="book-card card" (click)="goTo(item)">
+                <div class="book-card__head">
+                  <span class="book-card__name">{{ item.heTitle }}</span>
+                  <span class="book-card__ring" [class.book-card__ring--read]="item.read > 0">{{ item.read || '' }}</span>
+                </div>
+                <div class="book-card__progress">
+                  <div class="book-card__progress-fill" [style.width.%]="item.pct"></div>
+                </div>
+                <span class="text-muted book-card__count" i18n="@@booklist.chapterCount">{{ item.total }} פרקים</span>
+              </button>
+            } @empty {
+              <p class="empty-state" i18n="@@booklist.empty">לא נמצאו ספרים</p>
+            }
+          </div>
+        }
+
+        @if (variation() === 'list') {
+          <div class="books-list card">
+            @for (item of sec.books; track item.title) {
+              <button type="button" class="book-row" (click)="goTo(item)">
+                <span class="book-row__name">{{ item.heTitle }}</span>
+                <span class="text-muted book-row__progress-text">{{ item.read ? item.read + '/' + item.total : '' }}</span>
+                <div class="book-row__progress">
+                  <div class="book-row__progress-fill" [style.width.%]="item.pct"></div>
+                </div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" class="book-row__chevron"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            } @empty {
+              <p class="empty-state" i18n="@@booklist.empty">לא נמצאו ספרים</p>
+            }
+          </div>
+        }
+      </div>
+    }
   }
 </div>

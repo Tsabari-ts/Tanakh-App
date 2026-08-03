@@ -4,6 +4,9 @@ import { PwaInstallService } from '../../services/pwa-install.service';
 import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
 import { NgClass } from '@angular/common';
+import { WHATSAPP_CONTACT_URL, CONTACT_EMAIL } from '../../shared/contact-links';
+import { ThemeService } from '../../services/theme.service';
+import { ReaderPrefsService, ReaderFont } from '../../services/reader-prefs.service';
 
 @Component({
     selector: 'app-settings',
@@ -19,17 +22,27 @@ export class SettingsComponent implements OnInit {
               readonly pwaInstall: PwaInstallService,
               private dialogService: DialogService,
               private appComponent: AppComponent,
+              readonly theme: ThemeService,
+              readonly prefs: ReaderPrefsService,
               private destroyRef: DestroyRef) {
                 this.appComponent.showButton.set(true);
+                this.appComponent.backTarget.set(['/home']);
                }
 
-  emailAddress = 'Tanakhdev@gmail.com';
+  fontOptions: { id: ReaderFont; label: string }[] = [
+    { id: 'serif', label: $localize`:@@settings.font.serif:נוטו סריף` },
+    { id: 'heading', label: $localize`:@@settings.font.heading:פרנק רוהל` },
+    { id: 'body', label: $localize`:@@settings.font.body:רוביק` },
+  ];
+
+  emailAddress = CONTACT_EMAIL;
   userHasSubscribed = localStorage.getItem('userHasSubscribed') === 'true';
 
   readonly subscribeButton = signal(this.userHasSubscribed ? $localize`:@@subscribe.subscribedButton:נרשמת לתזכורת` : $localize`:@@settings.subscribeButton:הירשם לתזכורת יומית`);
   subscribeIcon:string = 'calendar-icon';
-  contactUsButton: string = $localize`:@@settings.contactUs:צור קשר`;
-  contactUsIcon:string = 'email-icon';
+  emailUsButton: string = $localize`:@@settings.emailUs:אימייל`;
+  emailUsIcon:string = 'email-icon';
+  whatsappUsButton: string = $localize`:@@settings.whatsappUs:וואטסאפ`;
 
   readonly downloadAppButton = computed(() => {
     if (this.pwaInstall.isStandalone()) return $localize`:@@settings.appInstalled:האפליקציה מותקנת`;
@@ -53,11 +66,15 @@ export class SettingsComponent implements OnInit {
   });
   }
 
-  contactUs(){
+  emailUs(){
     const mailtoLink = this.renderer.createElement('a');
     this.renderer.setProperty(mailtoLink, 'href', 'mailto:' + this.emailAddress);
     this.renderer.appendChild(this.el.nativeElement, mailtoLink);
     mailtoLink.click();
+  }
+
+  whatsappUs(){
+    window.open(WHATSAPP_CONTACT_URL, '_blank', 'noopener');
   }
 
   downloadApp(){

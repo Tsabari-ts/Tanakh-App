@@ -2,16 +2,21 @@ import { Component, ElementRef, OnInit, ChangeDetectionStrategy, DestroyRef, sig
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiCallService } from '../../services/api-call.service';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { USERNAME_KEY } from '../../shared/user-prefs';
 
 @Component({
     selector: 'app-entrance',
     templateUrl: './entrance.component.html',
     styleUrl: './entrance.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule]
 })
 export class EntranceComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly isHolidayOrShabat = signal(false);
+  readonly showNameGate = signal(false);
+  usernameValue = '';
 
   words: string[] = [" ''וזאת", "התורה", "אשר", "שם", " ","משה", "לפני", "בני", "ישראל''"];
 
@@ -57,9 +62,23 @@ export class EntranceComponent implements OnInit {
 
   else{
      setTimeout(()=> {
-        this.router.navigate(['/home']);
+        if (localStorage.getItem(USERNAME_KEY) === null) {
+          this.showNameGate.set(true);
+        } else {
+          this.router.navigate(['/home']);
+        }
      },2000);
   }
 
 }
+
+  submitName(): void {
+    localStorage.setItem(USERNAME_KEY, this.usernameValue.trim());
+    this.router.navigate(['/home']);
+  }
+
+  skipName(): void {
+    localStorage.setItem(USERNAME_KEY, '');
+    this.router.navigate(['/home']);
+  }
 }

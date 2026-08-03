@@ -1,11 +1,13 @@
-@use '../../../styles/breakpoints' as bp;
-
 .welcome-body{
-    background-color: var(--color-dialog-bg);
+    background-color: var(--color-surface);
+    border-radius: calc(var(--radius-lg) * 1.15);
+    overflow: hidden;
+    max-width: 420px;
+    margin: 0 auto;
 }
 
 /* Material's mat-dialog-content sets a translucent default text color that,
-   blended over --color-dialog-bg, falls below AA contrast (~3.66:1) -
+   blended over --color-surface, falls below AA contrast (~3.66:1) -
    pin it to an opaque, verified color instead. */
 .welcome-body [mat-dialog-content] {
     color: var(--color-text);
@@ -16,7 +18,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px;
-    background-color: var(--color-dialog-title-bg);
+    background-color: var(--color-accent-700);
     border-radius: 4px 4px 0 0;
   }
 
@@ -33,7 +35,7 @@
   }
 
   .custom-dialog-title button:hover {
-    background-color: var(--color-dialog-bg);
+    background-color: var(--color-surface);
     border-radius: 50%;
   }
 
@@ -41,25 +43,20 @@
     margin-inline-start: 25%;
     width: 50%;
     min-height: var(--tap-target-min);
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text-hover);
+    background-color: var(--color-accent);
+    color: var(--color-bg);
     border: none;
-    border-radius: 20px;
+    border-radius: 999px;
     cursor: pointer;
+    font-family: var(--font-heading);
     font-size: var(--font-size-lg);
   }
 
-  @include bp.from-lg {
-    .go-setting-button {
-      color: var(--color-panel-text);
-    }
-  }
-
   .go-setting-button:hover {
-    color: var(--color-panel-text-hover);
+    background-color: var(--color-accent-700);
   }
 
   .header{
-    color: var(--color-dialog-title-text);
+    color: var(--color-accent-100);
     font-size: var(--font-size-xl);
   }

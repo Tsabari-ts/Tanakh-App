@@ -1,53 +1,61 @@
-
-<div class="centered-container" #contentContainer>
-
+<div class="tk-screen reader-screen">
   @if (loadError()) {
-    <div class="empty-state">
-      <h1 class="visually-hidden" i18n="@@chapter.loadErrorHeading">שגיאה בטעינת הפרק</h1>
-      <p i18n="@@chapter.loadError">אירעה שגיאה בטעינת הפרק. ייתכן שהפרק אינו קיים.</p>
-      <button class="end-button" type="button" (click)="returnToHomePage()" i18n="@@chapter.backToHome">חזרה לדף הבית</button>
-    </div>
+    <p class="empty-state" i18n="@@chapter.loadError">אירעה שגיאה בטעינת הפרק. נסה שוב מאוחר יותר.</p>
   } @else {
-    <h1 class="tittle">
-      {{title()}}
-    </h1>
-    @if (data(); as verses) {
-      <app-tts-player></app-tts-player>
-      <div>
-        <p class="sentences">
-          @for (verse of verses; track $index) {
-            <button type="button" class="verse-play-btn"
-                    (click)="readFromVerse($index)"
-                    [attr.aria-label]="'הקראה מפסוק ' + ($index + 1)">▶</button>
-            <span class="verse" [id]="'verse-' + $index"
-                  [class.verse--active]="tts.activeVerseIndex() === $index"
-                  [attr.aria-current]="tts.activeVerseIndex() === $index ? 'true' : null">{{ verse }}</span>{{ ' ' }}
-          }
-          <br>
-            <button class="end-button" type="button" (click)="finishedReading()" i18n="@@chapter.finishedReading">סיימתי לקרוא</button>
-          </p>
-        </div>
-      }
+    <div class="reader-toolbar">
+      <button type="button" class="btn btn-icon tk-hit" (click)="prefs.decFont()" i18n-aria-label="@@chapter.decreaseFont" aria-label="הקטן טקסט">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>
+      </button>
+      <button type="button" class="btn btn-icon tk-hit" (click)="prefs.incFont()" i18n-aria-label="@@chapter.increaseFont" aria-label="הגדל טקסט">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button type="button" class="btn tk-hit" [class.seg-pill--on]="prefs.nikud()" (click)="prefs.toggleNikud()">
+        {{ prefs.nikud() ? 'עם ניקוד' : 'ללא ניקוד' }}
+      </button>
 
-      <div id="floatingDiv">
-        <button class="svg-button" type="button" (click)="scrollDown()">
-          <span class="hide-text" i18n="@@chapter.scrollDown">למטה</span>
-          <div class="icon" [ngClass]="downIcon" aria-hidden="true"></div>
+      <div class="reader-toolbar__end">
+        <button type="button" class="btn tk-hit" [class.seg-pill--on]="speaking()" (click)="toggleTTS()">
+          @if (speaking()) {
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          } @else {
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg>
+          }
+          <span>{{ speaking() ? 'עצור' : 'האזן' }}</span>
         </button>
-        <button class="svg-button" type="button" (click)="stopScrolling()">
-          <span class="hide-text" i18n="@@chapter.stop">עצור</span>
-          <div class="icon" [ngClass]="stopIcon" aria-hidden="true"></div>
-        </button>
-        <button class="svg-button" type="button" (click)="scrollUp()">
-          <span class="hide-text" i18n="@@chapter.scrollUp">למעלה</span>
-          <div class="icon" [ngClass]="upIcon" aria-hidden="true"></div>
-        </button>
-        <button class="svg-button" type="button" (click)="GetNextChapter()">
-          <span class="hide-text" i18n="@@chapter.nextChapter">פרק הבא</span>
-          <div class="icon" [ngClass]="nextIcon" aria-hidden="true"></div>
+        <button type="button" class="btn tk-hit" [class.seg-pill--on]="scrollSpeed() > 0" (click)="cycleScroll()" i18n-aria-label="@@chapter.autoScroll" aria-label="גלילה אוטומטית">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m7 6 5 5 5-5"/><path d="m7 13 5 5 5-5"/></svg>
+          <span>{{ scrollSpeed() === 0 ? 'גלילה' : '×' + scrollSpeed() }}</span>
         </button>
       </div>
+    </div>
+
+    <div #readerScroll class="tk-scroll reader-content">
+      <div class="reader-content__inner">
+        <div class="reader-heading">
+          <div class="reader-heading__book">{{ heBook }}</div>
+          <h1 class="reader-heading__chapter" i18n="@@chapter.chapterHeb">פרק {{ chapterHeb(chapterNumber) }}</h1>
+        </div>
+        <div class="reader-verses" [style.font-size.px]="readerFontPx()" [style.font-family]="prefs.fontFamily()">
+          @for (v of verses(); track $index) {
+            <span class="reader-verse"><span class="reader-verse__num">{{ v.heb }}</span> {{ v.text }} </span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="reader-footer">
+      <button type="button" class="btn btn-secondary tk-hit" [disabled]="!hasPrevChapter()" (click)="prevChapter()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <span i18n="@@chapter.prev">הקודם</span>
+      </button>
+      <button type="button" class="btn tk-hit reader-footer__mark" [class.reader-footer__mark--on]="isRead()" (click)="toggleRead()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>{{ isRead() ? 'סומן כנקרא ✓' : 'סמן כנקרא' }}</span>
+      </button>
+      <button type="button" class="btn btn-secondary tk-hit" [disabled]="!hasNextChapter()" (click)="nextChapter()">
+        <span i18n="@@chapter.next">הבא</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleX(-1)"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
   }
 </div>
-
-<app-scroll-to-top-button [contentContainer]="contentContainer"></app-scroll-to-top-button>

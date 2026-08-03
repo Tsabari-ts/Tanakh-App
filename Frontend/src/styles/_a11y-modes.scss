@@ -1,24 +1,40 @@
 // Accessibility mode classes toggled on <html> by A11yService.
 // Nothing here should be applied by any other mechanism - see a11y.service.ts.
+@use 'tokens';
+
+// ============================================================================
+// LEGACY - original high-contrast/inverted-contrast overrides, written
+// against the old --color-panel-*/--color-dialog-* tokens (dropped in the
+// "Organic" redesign - see _tokens.scss). Archived for reference only.
+// ============================================================================
+// html.a11y-high-contrast {
+//   --color-bg: #ffffff; --color-text: #000000; --color-text-muted: #000000;
+//   --color-link: #0000cc; --color-link-visited: #551a8b; --color-border: #000000;
+//   --color-error: #8b0000; --color-focus: #000000; --color-focus-offset: #ffffff;
+//   --color-panel-bg: #000000; --color-panel-text: #ffffff; --color-panel-text-hover: #ffff00;
+//   --color-dialog-bg: #ffffff; --color-dialog-title-bg: #000000; --color-dialog-title-text: #ffffff;
+// }
+// html.a11y-inverted-contrast {
+//   --color-bg: #000000; --color-text: #ffffff; --color-text-muted: #e0e0e0;
+//   --color-link: #7fc4ff; --color-link-visited: #dab6ff; --color-border: #ffffff;
+//   --color-error: #ff9a9a; --color-focus: #ffd479; --color-focus-offset: #000000;
+//   --color-panel-bg: #1a1a1ae6; --color-panel-text: #ffffff; --color-panel-text-hover: #ffd479;
+//   --color-dialog-bg: #121212; --color-dialog-title-bg: #000000; --color-dialog-title-text: #ffffff;
+// }
 
 /* --- High contrast --- */
 html.a11y-high-contrast {
   --color-bg: #ffffff;
+  --color-surface: #ffffff;
   --color-text: #000000;
   --color-text-muted: #000000;
   --color-link: #0000cc;
   --color-link-visited: #551a8b;
   --color-border: #000000;
+  --color-divider: #000000;
   --color-error: #8b0000;
   --color-focus: #000000;
   --color-focus-offset: #ffffff;
-
-  --color-panel-bg: #000000;
-  --color-panel-text: #ffffff;
-  --color-panel-text-hover: #ffff00;
-  --color-dialog-bg: #ffffff;
-  --color-dialog-title-bg: #000000;
-  --color-dialog-title-text: #ffffff;
 
   * {
     text-shadow: none !important;
@@ -29,21 +45,16 @@ html.a11y-high-contrast {
 /* --- Inverted (dark) contrast --- */
 html.a11y-inverted-contrast {
   --color-bg: #000000;
+  --color-surface: #121212;
   --color-text: #ffffff;
   --color-text-muted: #e0e0e0;
   --color-link: #7fc4ff;
   --color-link-visited: #dab6ff;
   --color-border: #ffffff;
+  --color-divider: #ffffff;
   --color-error: #ff9a9a;
   --color-focus: #ffd479;
   --color-focus-offset: #000000;
-
-  --color-panel-bg: #1a1a1ae6;
-  --color-panel-text: #ffffff;
-  --color-panel-text-hover: #ffd479;
-  --color-dialog-bg: #121212;
-  --color-dialog-title-bg: #000000;
-  --color-dialog-title-text: #ffffff;
 }
 
 /* --- Grayscale ---
@@ -70,8 +81,7 @@ html.a11y-highlight-links {
 
 /* --- Readable font --- */
 html.a11y-readable-font {
-  --font-family-body: Arial, Helvetica, sans-serif;
-  --font-family-ui: Arial, Helvetica, sans-serif;
+  --font-body: Arial, Helvetica, sans-serif;
   --letter-spacing: 0.04em;
   --word-spacing: 0.1em;
   --line-height-body: 1.7;
@@ -121,17 +131,18 @@ html.a11y-big-cursor [role='button'] {
   );
 }
 
-/* --- Dark mode (system preference; P2, off in high-contrast modes) --- */
+/* --- Dark mode ---
+   System preference (no explicit choice saved by ThemeService yet - no
+   [data-theme] attribute present) works via the media query; an explicit
+   ThemeService choice (html[data-theme="dark|light"]) overrides it either
+   way. Both branches share one palette definition - see tokens.dark-palette
+   in _tokens.scss. Off in high-contrast modes. */
 @media (prefers-color-scheme: dark) {
-  html:not(.a11y-high-contrast):not(.a11y-inverted-contrast) {
-    --color-bg: #14110d;
-    --color-text: #f0ece5;
-    --color-text-muted: #b9b2a6;
-    --color-link: #7fc4ff;
-    --color-link-visited: #c9a6f0;
-    --color-border: #6e675d;
-    --color-error: #ff9a9a;
-    --color-focus: #7fc4ff;
-    --color-focus-offset: #14110d;
+  html:not(.a11y-high-contrast):not(.a11y-inverted-contrast):not([data-theme]) {
+    @include tokens.dark-palette;
   }
+}
+
+html[data-theme="dark"]:not(.a11y-high-contrast):not(.a11y-inverted-contrast) {
+  @include tokens.dark-palette;
 }

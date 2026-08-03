@@ -1,4 +1,23 @@
-@if (isLoading()) {
+@if (showNameGate()) {
+  <div class="loader-background name-gate-background" role="status">
+    <div class="name-gate card elev-lg">
+      <h1 i18n="@@entrance.nameGateTitle">ברוכים הבאים!</h1>
+      <p class="text-muted" i18n="@@entrance.nameGateBody">איך נקרא לך?</p>
+      <form (ngSubmit)="submitName()">
+        <div class="field">
+          <label for="usernameInput" i18n="@@entrance.nameGateLabel">שם</label>
+          <input class="input" type="text" id="usernameInput" name="usernameInput" maxlength="50"
+            autocomplete="given-name" [(ngModel)]="usernameValue" i18n-placeholder="@@entrance.nameGatePlaceholder"
+            placeholder="לדוגמה: תומר">
+        </div>
+        <div class="name-gate-actions">
+          <button type="button" class="btn btn-ghost" (click)="skipName()" i18n="@@entrance.nameGateSkip">דלג</button>
+          <button type="submit" class="btn btn-primary" i18n="@@entrance.nameGateSubmit">המשך</button>
+        </div>
+      </form>
+    </div>
+  </div>
+} @else if (isLoading()) {
   <div class="loading-container loader-background" role="status">
     <h1 class="visually-hidden" i18n="@@entrance.loading">טוען את האפליקציה</h1>
     <div class="frame">

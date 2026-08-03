@@ -19,3 +19,8 @@
   src: url('/assets/fonts/noto-serif-hebrew-700.woff2') format('woff2');
   unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
 }
+
+// Rubik (UI/body) and Frank Ruhl Libre (headings) - both ship real Hebrew
+// glyph coverage (unlike the reference design's Figtree/Caprasimo). Loaded
+// via Google Fonts <link> in index.html, matching how Roboto was loaded
+// before this redesign.

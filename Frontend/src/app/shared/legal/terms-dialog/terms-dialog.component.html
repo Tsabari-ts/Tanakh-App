@@ -1,14 +1,14 @@
-<div class="terms">
+<div class="terms dialog">
   <!-- No role="dialog"/aria-modal/cdkTrapFocus here: MatDialogContainer
        (from terms.service.ts's dialog.open call) already provides the
        dialog role, aria-modal, focus trap, and Escape-to-close for the
        whole component - mirrors accessibility-statement-dialog. -->
-  <header class="terms__head">
+  <header class="terms__head dialog-title">
     <h2 mat-dialog-title id="terms-title" i18n="@@terms.title">תנאי שימוש</h2>
-    <button type="button" i18n-aria-label="@@terms.close" aria-label="סגירת תנאי השימוש" (click)="close()">✕</button>
+    <button type="button" class="btn btn-icon" i18n-aria-label="@@terms.close" aria-label="סגירת תנאי השימוש" (click)="close()">✕</button>
   </header>
 
-  <div class="terms__body" mat-dialog-content tabindex="0" role="region" i18n-aria-label="@@terms.bodyRegion" aria-label="תוכן תנאי השימוש">
+  <div class="terms__body dialog-body" mat-dialog-content tabindex="0" role="region" i18n-aria-label="@@terms.bodyRegion" aria-label="תוכן תנאי השימוש">
     <p i18n="@@terms.intro">
       השימוש באפליקציה "פרק תנ"ך ביום" כפוף לתנאים המפורטים להלן. המשך השימוש באפליקציה מהווה הסכמה לתנאים אלו.
     </p>
@@ -56,8 +56,8 @@
     <p class="terms__updated" i18n="@@terms.updated">עדכון אחרון: 03/08/2026 (גרסה 1.0)</p>
   </div>
 
-  <footer class="terms__foot" mat-dialog-actions>
-    <button type="button" (click)="print()" i18n="@@terms.print">הדפסה</button>
-    <button type="button" (click)="close()" i18n="@@terms.closeButton">סגירה</button>
+  <footer class="terms__foot dialog-actions" mat-dialog-actions>
+    <button type="button" class="btn btn-secondary" (click)="print()" i18n="@@terms.print">הדפסה</button>
+    <button type="button" class="btn btn-primary" (click)="close()" i18n="@@terms.closeButton">סגירה</button>
   </footer>
 </div>

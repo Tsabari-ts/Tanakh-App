@@ -5,15 +5,15 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent } from 
 import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
 import { TermsService } from '../../shared/legal/terms-dialog/terms.service';
+import { getStoredUsername } from '../../shared/user-prefs';
 
 @Component({
     selector: 'app-subscribe',
     templateUrl: './subscribe.component.html',
     styleUrl: './subscribe.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, NgClass]
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule]
 })
 
 export class SubscribeComponent {
@@ -31,9 +31,11 @@ export class SubscribeComponent {
   loadingInterval: any;
 
   emailValue: string = '';
-  displayNameValue: string = '';
+  displayNameValue: string = getStoredUsername();
   timeValue: string = '';
-  skipShabbatHolidays: boolean = true;
+  /** Not shown in the form - the design simplifies the visible fields to
+      name/email/time/consent, but the backend contract still expects this. */
+  private readonly skipShabbatHolidays: boolean = true;
   consentGiven: boolean = false;
   timeOptions: string[] = this.generateTimeOptions();
 

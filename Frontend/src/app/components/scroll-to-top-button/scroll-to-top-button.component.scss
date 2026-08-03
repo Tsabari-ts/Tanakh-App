@@ -11,10 +11,11 @@
   contain: content;
   display: none;
   height: 100px;
-  background-color: var(--color-panel-bg);
-  color: var(--color-panel-text-hover);
-  border: none;
-  border-radius: 20px;
+  background-color: var(--color-surface);
+  color: var(--color-accent-700);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   z-index: var(--z-scroll-top);
   font-size: var(--font-size-base);
@@ -24,12 +25,12 @@
   .scroll-to-top-button {
     inset-inline-start: calc(7% + env(safe-area-inset-right, 0px));
     width: var(--tap-target-min);
-    color: var(--color-panel-text);
   }
 }
 
 .scroll-to-top-button:hover {
-  color: var(--color-panel-text-hover);
+  background-color: var(--color-accent-100);
+  color: var(--color-accent-800);
 }
 
 .up-text{

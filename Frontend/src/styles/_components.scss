@@ -1,0 +1,166 @@
+// Shared visual vocabulary for the "Organic" design system - pill buttons,
+// soft rounded cards/dialogs, underline-free inputs. Built on the tokens in
+// _tokens.scss. Any component can opt in to these classes instead of
+// re-declaring bespoke button/card CSS.
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: var(--space-2) calc(var(--space-3) * 1.2);
+  border-radius: 999px;
+  min-height: var(--tap-target-min);
+  transition: background var(--motion-duration) var(--motion-ease), border-color var(--motion-duration) var(--motion-ease);
+}
+.btn svg { display: block; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); color: var(--color-bg); }
+.btn-primary:hover { background: var(--color-accent-600); }
+.btn-primary:active { background: var(--color-accent-700); }
+.btn-secondary { border-color: var(--color-divider); background: var(--color-surface); }
+.btn-secondary:hover { background: color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); }
+.btn-secondary:active { background: color-mix(in srgb, var(--color-text) 14%, var(--color-surface)); }
+.btn-ghost { color: var(--color-accent-700); padding-inline: var(--space-1); background: transparent; }
+.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.btn-ghost:active { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-icon { width: var(--tap-target-min); height: var(--tap-target-min); padding: 0; }
+.btn-block { width: 100%; margin-top: var(--space-2); }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: calc(var(--radius-lg) * 1.15);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
+}
+.dialog {
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-radius: calc(var(--radius-lg) * 1.15);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.dialog-title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  background: var(--color-accent-700);
+  color: var(--color-accent-100);
+  padding: var(--space-3) var(--space-4);
+  margin: 0;
+}
+.dialog-body { padding: 0 var(--space-4); font-size: var(--font-size-base); }
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field > label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+.input {
+  width: 100%;
+  min-height: var(--tap-target-min);
+  padding: 6px 14px;
+  font: inherit;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  background: var(--color-bg);
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+}
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+textarea.input { min-height: 90px; resize: vertical; border-radius: var(--radius-md); }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.02em;
+  padding: 3px 10px;
+  border-radius: calc(var(--radius-md) * 0.75);
+}
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
+
+.hr {
+  height: 1px;
+  border: 0;
+  margin: var(--space-4) 0;
+  background: var(--color-divider);
+}
+
+.text-muted { color: var(--color-text-muted); }
+
+/* — toggle switch — dir="rtl": "on" slides the knob to flex-start (right),
+   matching the natural reading-direction convention used across the app. */
+.switch {
+  width: 52px;
+  height: 30px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  padding: 3px;
+  display: flex;
+  justify-content: flex-end;
+  background: var(--color-neutral-300);
+  flex: none;
+  transition: background var(--motion-duration) var(--motion-ease);
+}
+.switch--on {
+  justify-content: flex-start;
+  background: var(--color-accent);
+}
+.switch__knob {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  display: block;
+}
+
+/* — segmented pill picker (e.g. font/variation choice) — */
+.seg-pill {
+  padding: 7px 15px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-body);
+  border: 1px solid var(--color-divider);
+  background: transparent;
+  color: var(--color-text);
+}
+.seg-pill--on {
+  border-color: transparent;
+  background: var(--color-accent);
+  color: var(--color-bg);
+}

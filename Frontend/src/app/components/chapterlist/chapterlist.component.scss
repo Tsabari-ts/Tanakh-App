@@ -1,102 +1,88 @@
 @use '../../../styles/breakpoints' as bp;
 
 .centered-container {
-    position: fixed;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    align-items: flex-start;
-    scroll-behavior: smooth;
+  position: fixed;
+  inset-inline: 0;
   overflow-y: auto;
-   margin-top: 100px;
-  max-height: calc(100vh - 200px);
-  margin-bottom: 100px;
+  max-height: calc(100vh - 250px);
+  margin-top: 100px;
+  margin-bottom: 150px;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  padding: 0 var(--space-4) var(--space-8);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-// Mobile-first: compact button/grid layout is the default; from-xl restores
-// the wide-desktop layout (was a max-width:1450px override).
-.button-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 0;
-    align-items: center;
-}
-
-.chapter-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 20px;
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: calc(25rem / 16);
-    margin: 15px;
-    min-block-size: var(--tap-target-min);
-    max-width: min(450px, 92vw);
-    width: 300px;
-    padding-inline-start: 100px;
-    margin-top: 10px;
-}
-
-.goBackButton{
-    display: inline-flex;
-    align-items: center;
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: var(--font-size-xl);
-    min-block-size: var(--tap-target-min);
-    max-width: 155px;
-    width: 500px;
-    position: relative;
-    margin-top: -215px;
-    margin-bottom: 76px;
-    margin-inline-start: 874px;
-}
-
-@include bp.from-xl {
-  .button-row {
-    align-items: normal;
-  }
-
-  .chapter-button {
-    padding: 35px;
-    font-size: var(--font-size-xl);
-    width: 500px;
-    padding-inline-start: 180px;
-  }
-
-  .goBackButton {
-    margin-bottom: 73px;
-    margin-inline-start: 850px;
+@include bp.from-md {
+  .centered-container {
+    padding: 0 var(--space-6) var(--space-8);
   }
 }
 
-.chapter-button:hover {
-  color: var(--color-panel-text-hover);
+.chapterlist-head {
+  margin-top: var(--space-4);
 }
 
-.goBackButton:hover {
-    color: var(--color-panel-text-hover);
-  }
-
-.return{
-    background-image: url('/assets/return.png');
-    width: 40px;
-    height: 40px;
-    margin-inline-end: 20px;
-    background-size: cover;
+.chapterlist-head__book {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h1);
 }
-.goBackButton img {
-    width: 24px;
-    height: 24px;
-    margin-inline-start: 10px;
+
+.chapterlist-head__sub {
+  font-size: var(--font-size-base);
+  margin-top: 4px;
+}
+
+.chapters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 10px;
+}
+
+@include bp.from-md {
+  .chapters-grid {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    gap: var(--space-3);
   }
+}
+
+.chapter-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.chapter-cell--read {
+  border-color: transparent;
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.chapter-cell__num {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  line-height: 1;
+}
+
+.chapter-cell__check {
+  position: absolute;
+  top: 6px;
+  inset-inline-start: 6px;
+  opacity: 0.9;
+}
+
+.chapter-cell:hover:not(.chapter-cell--read) {
+  background: var(--color-accent-100);
+}

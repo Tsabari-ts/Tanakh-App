@@ -2,6 +2,7 @@ import { Component, Inject, OnInit, ChangeDetectionStrategy, signal } from '@ang
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
+import { ReadingHistoryService } from '../../services/reading-history.service';
 
 @Component({
     selector: 'app-read-permission',
@@ -24,7 +25,8 @@ export class ReadPermissionComponent implements OnInit{
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    public dialogRef: MatDialogRef<ReadPermissionComponent>) {
+    public dialogRef: MatDialogRef<ReadPermissionComponent>,
+    private readingHistory: ReadingHistoryService) {
       this.userHasConfirmedReading = this.data.additionalData.userHasConfirmedReading;
     }
 
@@ -92,5 +94,10 @@ stopLoading(): void {
 
     localStorage.setItem(this.hasStorage, 'true');
     localStorage.setItem(this.sectionRef, sectionData);
+
+    const { book, chapter } = this.data.additionalData;
+    if (book && chapter) {
+      this.readingHistory.markRead(book, chapter);
+    }
   }
 }

@@ -1,14 +1,18 @@
-import { Component, OnInit, ChangeDetectionStrategy, DestroyRef, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, DestroyRef, computed, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { AppComponent } from '../../app.component';
+import { ReadingHistoryService } from '../../services/reading-history.service';
 
-const SECTION_LABELS: Record<string, string> = {
-  torah: $localize`:@@booklist.section.torah:תורה`,
-  prophets: $localize`:@@booklist.section.prophets:נביאים`,
-  writings: $localize`:@@booklist.section.writings:כתובים`,
-};
+const SECTIONS: { id: string; label: string; sub: string }[] = [
+  { id: 'torah', label: $localize`:@@booklist.section.torah:תורה`, sub: $localize`:@@booklist.section.torah.sub:חמישה חומשים` },
+  { id: 'prophets', label: $localize`:@@booklist.section.prophets:נביאים`, sub: $localize`:@@booklist.section.prophets.sub:נביאים ראשונים ואחרונים` },
+  { id: 'writings', label: $localize`:@@booklist.section.writings:כתובים`, sub: $localize`:@@booklist.section.writings.sub:תהילים, משלי ועוד` },
+];
+
+type BooksVariation = 'cards' | 'list' | 'grid';
+const VARIATION_KEY = 'tanach.bookVariation';
 
 @Component({
     selector: 'app-booklist',
@@ -17,50 +21,70 @@ const SECTION_LABELS: Record<string, string> = {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooklistComponent implements OnInit {
-  section: string | null = "";
-  readonly data = signal<any>(undefined);
+  readonly heading = $localize`:@@booklist.heading:ספרי התנ"ך`;
   readonly loadError = signal(false);
-  readonly heading = signal<string>($localize`:@@booklist.heading:ספרי התנ"ך`);
+  readonly variation = signal<BooksVariation>(this.loadVariation());
 
-    constructor(private activatedRoute: ActivatedRoute,
-                private apiService: ApiCallService,
-                private router: Router,
-                private appComponent: AppComponent,
-                private destroyRef: DestroyRef) {
-                  this.appComponent.showButton.set(true);
-                 }
+  readonly variationOptions: { id: BooksVariation; label: string }[] = [
+    { id: 'cards', label: $localize`:@@booklist.variation.cards:כרטיסים` },
+    { id: 'list', label: $localize`:@@booklist.variation.list:רשימה` },
+    { id: 'grid', label: $localize`:@@booklist.variation.grid:תגיות` },
+  ];
 
-  ngOnInit(): void {
-    this.activatedRoute.params
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(p => {
-      this.section = p['section'];
-      const label = this.section != null ? SECTION_LABELS[this.section.toLowerCase()] : undefined;
-      if (label) {
-        this.heading.set(label);
-      }
+  private readonly sectionData = signal<Record<string, any[]>>({});
 
-      if (this.section != null) {
-        this.apiService.getBookList(this.section)
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(data => {
-          if (data.error) {
-            console.log(data.error);
-            this.loadError.set(true);
-            return;
-          }
-          this.data.set(data);
-        }, () => {
-          this.loadError.set(true);
-        })
-      }
-    })
+  readonly sections = computed(() => {
+    const data = this.sectionData();
+    return SECTIONS.map(s => ({
+      id: s.id,
+      label: s.label,
+      sub: s.sub,
+      books: (data[s.id] ?? []).map((item: any) => {
+        const total: number = item.chapters?.length ?? 0;
+        const read = this.readingHistory.countForBook(item.title);
+        const pct = total ? Math.round((read / total) * 100) : 0;
+        return { ...item, section: item.section ?? s.id, total, read, pct };
+      }),
+    }));
+  });
+
+  constructor(private apiService: ApiCallService,
+              private router: Router,
+              private appComponent: AppComponent,
+              private readingHistory: ReadingHistoryService,
+              private destroyRef: DestroyRef) {
+    this.appComponent.showButton.set(true);
+    this.appComponent.backTarget.set(['/home']);
   }
 
-  goTo(path:any){
-    let section = path.section;
-    let book = path.title;
-    this.router.navigate([`/books/${section}/${book}`]);
+  ngOnInit(): void {
+    for (const s of SECTIONS) {
+      this.apiService.getBookList(s.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: data => {
+            if (data.error) {
+              this.loadError.set(true);
+              return;
+            }
+            this.sectionData.update(d => ({ ...d, [s.id]: data }));
+          },
+          error: () => this.loadError.set(true),
+        });
     }
+  }
 
+  setVariation(variation: BooksVariation): void {
+    this.variation.set(variation);
+    localStorage.setItem(VARIATION_KEY, variation);
+  }
+
+  goTo(item: any): void {
+    this.router.navigate([`/books/${item.section}/${item.title}`]);
+  }
+
+  private loadVariation(): BooksVariation {
+    const stored = localStorage.getItem(VARIATION_KEY);
+    return stored === 'cards' || stored === 'list' || stored === 'grid' ? stored : 'cards';
+  }
 }

@@ -1,70 +1,201 @@
-// Design tokens for the whole app. Values below preserve the app's existing
-// dark-panel / tan-dialog visual identity (see _333333e6 panels, #aaa/#fdfdfd
-// text, rgb(196,172,143) dialog body) - they are not a redesign, just the
-// same colors expressed as variables so a11y modes can swap them on <html>.
-:root {
-  /* ---- Typography scale (fluid rem/vw, driven by --a11y-font-scale) ----
-     Each clamp(min, preferred, max) is wrapped in calc(... * scale) so the
-     a11y font-scale widget (1 / 1.15 / 1.3 / 1.5) still multiplies the
-     whole fluid range uniformly - clamp(a,b,c)*k == clamp(a*k,b*k,c*k). */
-  --a11y-font-scale: 1; /* the widget sets: 1 / 1.15 / 1.3 / 1.5 */
-  --font-size-sm: calc(clamp(0.8rem, 0.75rem + 0.2vw, 0.875rem) * var(--a11y-font-scale));
-  --font-size-base: calc(clamp(0.95rem, 0.85rem + 0.3vw, 1rem) * var(--a11y-font-scale));
-  --font-size-md: calc(clamp(1.05rem, 0.95rem + 0.35vw, 1.125rem) * var(--a11y-font-scale));
-  --font-size-lg: calc(clamp(1.15rem, 1rem + 0.5vw, 1.25rem) * var(--a11y-font-scale));
-  --font-size-xl: calc(clamp(1.35rem, 1.15rem + 0.6vw, 1.5rem) * var(--a11y-font-scale));
-  --font-size-h1: calc(clamp(1.6rem, 1.3rem + 1.2vw, 2rem) * var(--a11y-font-scale));
-  --font-size-h2: calc(clamp(1.3rem, 1.1rem + 0.8vw, 1.5rem) * var(--a11y-font-scale));
+// ============================================================================
+// LEGACY - the app's original design tokens (dark-panel/tan-dialog identity,
+// Roboto/Noto Serif Hebrew), replaced wholesale below by the "Organic" design
+// system (parchment/terracotta/olive, Frank Ruhl Libre/Rubik). Kept here only
+// as an archival record of what existed before this redesign - not used by
+// anything below.
+// ============================================================================
+// :root {
+//   --a11y-font-scale: 1;
+//   --font-size-sm: calc(clamp(0.8rem, 0.75rem + 0.2vw, 0.875rem) * var(--a11y-font-scale));
+//   --font-size-base: calc(clamp(0.95rem, 0.85rem + 0.3vw, 1rem) * var(--a11y-font-scale));
+//   --font-size-md: calc(clamp(1.05rem, 0.95rem + 0.35vw, 1.125rem) * var(--a11y-font-scale));
+//   --font-size-lg: calc(clamp(1.15rem, 1rem + 0.5vw, 1.25rem) * var(--a11y-font-scale));
+//   --font-size-xl: calc(clamp(1.35rem, 1.15rem + 0.6vw, 1.5rem) * var(--a11y-font-scale));
+//   --font-size-h1: calc(clamp(1.6rem, 1.3rem + 1.2vw, 2rem) * var(--a11y-font-scale));
+//   --font-size-h2: calc(clamp(1.3rem, 1.1rem + 0.8vw, 1.5rem) * var(--a11y-font-scale));
+//   --line-height-body: 1.5;
+//   --line-height-heading: 1.3;
+//   --line-height-scripture: 1.75;
+//   --letter-spacing: normal;
+//   --word-spacing: normal;
+//   --paragraph-spacing: 1em;
+//   --font-family-body: Roboto, "Helvetica Neue", sans-serif;
+//   --font-family-ui: Roboto, "Helvetica Neue", sans-serif;
+//   --font-family-scripture: "Noto Serif Hebrew", "Times New Roman", serif;
+//   --color-panel-bg: #333333e6;
+//   --color-panel-text: #aaaaaa;
+//   --color-panel-text-hover: #fdfdfd;
+//   --color-dialog-bg: rgb(196, 172, 143);
+//   --color-dialog-title-bg: #333333e6;
+//   --color-dialog-title-text: aliceblue;
+//   --color-bg: #ffffff;
+//   --color-text: #1a1a1a;
+//   --color-text-muted: #55524d;
+//   --color-link: #0b4f9c;
+//   --color-link-visited: #6b2a86;
+//   --color-border: #767676;
+//   --color-error: #7a1f1f;
+//   --color-error-bg: #7a1f1fe6;
+//   --color-success: #1f4d3a;
+//   --color-focus: #0b4f9c;
+//   --color-focus-offset: #ffffff;
+//   --focus-width: 3px;
+//   --focus-offset: 2px;
+//   --motion-duration: 200ms;
+//   --motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+//   --tap-target-min: 2.75rem;
+//   --z-scroll-top: 900;
+//   --z-a11y-widget: 950;
+//   --z-a11y-ruler: 940;
+//   --z-dialog: 1000;
+// }
 
-  --line-height-body: 1.5;
-  --line-height-heading: 1.3;
-  /* Generous line-height for long-form scripture reading (niqqud/cantillation
-     marks need more vertical room than plain prose) - see chapter .sentences. */
-  --line-height-scripture: 1.75;
+// ============================================================================
+// "Organic" design system - source of truth is the Claude Design project
+// (אפליקציית קריאת פרק יומי / organic-3d755d27...). Variable names below
+// match that design system's own tokens exactly, so this file *is* the
+// design system, not a bridge/adaptation of it.
+//
+// Two departures from the source, both deliberate:
+//  1. Fonts: the source uses Caprasimo (headings) and Figtree (body), which
+//     are Latin-only and have no Hebrew glyphs - on this ~100%-Hebrew site
+//     they would silently fall back to a system font for every Hebrew
+//     character. Frank Ruhl Libre (real Hebrew serif) and Rubik (real Hebrew
+//     sans, similar rounded warmth to Figtree) stand in instead.
+//  2. --font-size-* keeps its existing fluid clamp()/--a11y-font-scale
+//     mechanism (the accessibility widget's text-scaling feature depends on
+//     it) but the underlying pixel targets are recomputed against this
+//     design system's own type scale (h1 42px / h2 32px / h3 25px / body
+//     15px in the source styles.css) instead of the old Roboto-based scale.
+// ============================================================================
+:root {
+  // ---- Color: surfaces ----
+  --color-bg: #f5ead8;
+  --color-surface: #ebddc5;
+  --color-text: #201e1d;
+  --color-accent: #c67139;
+  --color-accent-2: #7a8a5e;
+  --color-divider: color-mix(in srgb, #201e1d 16%, transparent);
+
+  --color-neutral-100: #f9f4ed;
+  --color-neutral-200: #eee7db;
+  --color-neutral-300: #dcd3c4;
+  --color-neutral-400: #c0b6a5;
+  --color-neutral-500: #a19786;
+  --color-neutral-600: #82796a;
+  --color-neutral-700: #645c50;
+  --color-neutral-800: #474238;
+  --color-neutral-900: #2e2b25;
+
+  --color-accent-100: #fff2eb;
+  --color-accent-200: #ffe1d0;
+  --color-accent-300: #ffc6a5;
+  --color-accent-400: #f6a06b;
+  --color-accent-500: #d67f48;
+  --color-accent-600: #b2622d;
+  --color-accent-700: #8c491a;
+  --color-accent-800: #643312;
+  --color-accent-900: #402310;
+
+  --color-accent-2-100: #f0fae1;
+  --color-accent-2-200: #e1eecc;
+  --color-accent-2-300: #ccdbb2;
+  --color-accent-2-400: #aebf92;
+  --color-accent-2-500: #8fa073;
+  --color-accent-2-600: #728157;
+  --color-accent-2-700: #56633f;
+  --color-accent-2-800: #3d472b;
+  --color-accent-2-900: #272e1b;
+
+  // ---- Color: functional/semantic (not part of the source design system,
+  // which has no error/link/focus roles - kept close to the accent family
+  // so they read as part of the same palette). ----
+  --color-text-muted: color-mix(in srgb, var(--color-text) 55%, transparent);
+  --color-link: var(--color-accent-700);
+  --color-link-visited: var(--color-accent-2-700);
+  --color-border: var(--color-divider);
+  --color-error: #7a1f1f;
+  --color-error-bg: #7a1f1fe6;
+  --color-success: #1f4d3a;
+  --color-focus: var(--color-accent-700);
+  --color-focus-offset: var(--color-bg);
+
+  // ---- Type ----
+  --font-heading: "Frank Ruhl Libre", "Noto Serif Hebrew", serif;
+  --font-heading-weight: 500;
+  --font-body: "Rubik", "Segoe UI", Arial, sans-serif;
+  /* Scripture-reading font (chapter view) - self-hosted, see _fonts.scss. */
+  --font-scripture: "Noto Serif Hebrew", "Times New Roman", serif;
+
+  --a11y-font-scale: 1; /* the a11y widget sets: 1 / 1.15 / 1.3 / 1.5 */
+  --font-size-sm: calc(clamp(0.78rem, 0.73rem + 0.2vw, 0.85rem) * var(--a11y-font-scale));
+  --font-size-base: calc(clamp(0.9rem, 0.83rem + 0.28vw, 0.94rem) * var(--a11y-font-scale));
+  --font-size-md: calc(clamp(1rem, 0.9rem + 0.35vw, 1.05rem) * var(--a11y-font-scale));
+  --font-size-lg: calc(clamp(1.1rem, 0.97rem + 0.5vw, 1.25rem) * var(--a11y-font-scale));
+  --font-size-xl: calc(clamp(1.3rem, 1.1rem + 0.7vw, 1.56rem) * var(--a11y-font-scale));
+  --font-size-h2: calc(clamp(1.6rem, 1.3rem + 1.2vw, 2rem) * var(--a11y-font-scale));
+  --font-size-h1: calc(clamp(2rem, 1.6rem + 1.6vw, 2.6rem) * var(--a11y-font-scale));
+
+  --line-height-body: 1.55;
+  --line-height-heading: 1.12;
+  --line-height-scripture: 2.05;
   --letter-spacing: normal;
   --word-spacing: normal;
   --paragraph-spacing: 1em;
 
-  --font-family-body: Roboto, "Helvetica Neue", sans-serif;
-  --font-family-ui: Roboto, "Helvetica Neue", sans-serif;
-  /* Biblical text only (chapter reading view) - see _fonts.scss */
-  --font-family-scripture: "Noto Serif Hebrew", "Times New Roman", serif;
+  // ---- Spacing / radius / elevation ----
+  --space-1: 4.4px;
+  --space-2: 8.8px;
+  --space-3: 13.2px;
+  --space-4: 17.6px;
+  --space-6: 26.4px;
+  --space-8: 35.2px;
 
-  /* ---- Color: panels (header/footer/buttons) ---- */
-  --color-panel-bg: #333333e6;
-  --color-panel-text: #aaaaaa;      /* ~5.45:1 on #333333 */
-  --color-panel-text-hover: #fdfdfd;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
 
-  /* ---- Color: dialogs ---- */
-  --color-dialog-bg: rgb(196, 172, 143);
-  --color-dialog-title-bg: #333333e6;
-  --color-dialog-title-text: aliceblue;
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2e2b25 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2e2b25 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2e2b25 22%, transparent);
 
-  /* ---- Color: page ---- */
-  --color-bg: #ffffff;
-  --color-text: #1a1a1a;
-  --color-text-muted: #55524d;      /* 7.6:1 on white */
-  --color-link: #0b4f9c;
-  --color-link-visited: #6b2a86;
-  --color-border: #767676;          /* 4.5:1, safe for UI-component borders */
-  --color-error: #7a1f1f;           /* >=4.5:1 on white and on the tan dialog bg */
-  --color-error-bg: #7a1f1fe6;      /* existing app-toast--error background */
-  --color-success: #1f4d3a;         /* existing update-banner background family */
-  --color-focus: #0b4f9c;
-  --color-focus-offset: #ffffff;
-
-  /* ---- Focus ring ---- */
+  // ---- Focus ring ----
   --focus-width: 3px;
   --focus-offset: 2px;
 
-  /* ---- Motion ---- */
+  // ---- Motion ----
   --motion-duration: 200ms;
   --motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ---- Layout ---- */
+  // ---- Layout ----
   --tap-target-min: 2.75rem; /* 44px */
   --z-scroll-top: 900;
   --z-a11y-widget: 950;
   --z-a11y-ruler: 940;
   --z-dialog: 1000;
+}
+
+// Dark variant, shared by the `prefers-color-scheme: dark` media query
+// (system default) and the manual `[data-theme="dark"]` override - see
+// _a11y-modes.scss for both call sites.
+@mixin dark-palette {
+  --color-bg: #211e1a;
+  --color-surface: #2d2823;
+  --color-text: #f2e9da;
+  --color-text-muted: #b9b2a6;
+  --color-divider: color-mix(in srgb, #f2e9da 18%, transparent);
+  --color-link: #ffc6a5;
+  --color-link-visited: #ccdbb2;
+  --color-border: var(--color-divider);
+  --color-error: #ff9a9a;
+  --color-focus: #ffc6a5;
+  --color-focus-offset: #211e1a;
+
+  --color-neutral-100: #2d2823;
+  --color-neutral-200: #37312a;
+  --color-neutral-300: #463e34;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
 }

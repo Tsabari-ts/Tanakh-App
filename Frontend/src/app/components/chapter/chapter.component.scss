@@ -1,206 +1,84 @@
-@use '../../../styles/breakpoints' as bp;
-
-.tittle{
-    text-align: start;
-    width: 75%;
-    max-width: 100%;
-    text-decoration: underline;
-    text-align: justify;
-    font-family: var(--font-family-scripture);
-    font-size: var(--font-size-h2);
-    line-height: var(--line-height-heading);
-}
-
-.verse--active {
-    background-color: color-mix(in srgb, var(--color-focus) 20%, transparent);
-    border-radius: 4px;
-    box-shadow: 0 0 0 2px var(--color-focus);
-}
-
-.verse-play-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    inline-size: var(--tap-target-min);
-    block-size: var(--tap-target-min);
-    vertical-align: middle;
-    border: none;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--color-text-muted);
-    opacity: 0.35;
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-}
-
-.verse-play-btn:hover,
-.verse-play-btn:focus-visible {
-    opacity: 1;
-    color: var(--color-link);
-    background: color-mix(in srgb, var(--color-link) 12%, transparent);
-}
-
-.sentences{
-    margin: auto;
-    margin-bottom: 150px;
-    width: 75%;
-    max-width: 65ch;
-    padding: 10px;
-    text-align: justify;
-    font-family: var(--font-family-scripture);
-    font-size: var(--font-size-h2);
-    /* generous default for niqqud/cantillation, but still grows further
-       under the a11y "increased text spacing" mode (--line-height-body) */
-    line-height: max(var(--line-height-body), var(--line-height-scripture));
-    letter-spacing: var(--letter-spacing);
-    word-spacing: var(--word-spacing);
-    padding-bottom: 100px;
-}
-
-.scrollBar{
-    position: fixed;
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    inset-inline-start: 50%;
-    background: var(--color-panel-bg);
-    padding: 5px;
-}
-
-.scroll-to-top-button {
-    position: fixed;
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    inset-inline-start: 20px;
-    display: none;
-  }
-
-
-  .centered-container {
-    scroll-behavior: smooth;
-  transition-timing-function: ease-in-out;
-  -webkit-overflow-scrolling: touch;
+.reader-screen {
   position: fixed;
+  inset-inline: 0;
+  margin-top: 100px;
+  margin-bottom: 150px;
+  height: calc(100vh - 250px);
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  align-items: flex-start;
-  scroll-behavior: smooth;
-overflow-y: auto;
- margin-top: 100px;
-max-height: calc(100vh - 200px);
-margin-bottom: 100px;
-box-sizing: border-box;
-
+  flex-direction: column;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  overflow: hidden;
-}
-
-#floatingDiv {
-  position: fixed;
-  bottom: calc(13% + env(safe-area-inset-bottom, 0px));
-  inset-inline-start: 10%;
-  width: 80%;
-  background-color: var(--color-panel-bg);
-  padding: 10px;
-  box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.1);
+.reader-toolbar {
   display: flex;
-  justify-content: space-around;
   align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
 }
 
-// Mobile-first: icon-only compact button is the default; from-lg restores
-// the wider desktop button with its label (was a max-width:1024px override).
-.svg-button {
-  display: inline-flex;
+.reader-toolbar__end {
+  margin-inline-start: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.reader-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+}
+
+.reader-content__inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.reader-heading {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.reader-heading__book {
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+}
+
+.reader-heading__chapter {
+  margin: 6px 0 0;
+  font-size: 40px;
+}
+
+.reader-verses {
+  line-height: var(--line-height-scripture);
+  text-align: justify;
+  color: var(--color-text);
+}
+
+.reader-verse__num {
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  font-size: 0.72em;
+  vertical-align: 0.15em;
+  margin-inline-start: 4px;
+}
+
+.reader-footer {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 15px;
-  background-color: var(--color-panel-bg);
-  color: var(--color-panel-text);
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: var(--font-size-xl);
-  margin: 8px;
-  min-block-size: var(--tap-target-min);
-  max-width: min(450px, 92vw);
-  width: 60px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-bg);
 }
 
-.hide-text {
-  display: none;
+.reader-footer__mark {
+  flex: 1;
+  background: var(--color-accent);
+  color: var(--color-bg);
 }
 
-.svg-button div.icon {
-  width: 30px;
-  height: 30px;
-  background-size: cover;
-  margin-inline-start: 0px;
-}
-
-@include bp.from-lg {
-  .svg-button {
-    width: 200px;
-  }
-
-  .hide-text {
-    display: inline;
-  }
-
-  .svg-button div.icon {
-    margin-inline-start: 20px;
-    width: 40px;
-    height: 40px;
-  }
-}
-
-.svg-button:hover {
-  color: var(--color-panel-text-hover);
-}
-
-.end-button{
-  margin-inline-start: 0;
-  width: 100%;
-  min-height: var(--tap-target-min);
-  background-color: var(--color-panel-bg);
-  color: var(--color-panel-text-hover);
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: var(--font-size-lg);
-  margin-top: 50px;
-}
-
-@include bp.from-lg {
-  .end-button {
-    color: var(--color-panel-text);
-    width: 60%;
-    margin-inline-start: 20%;
-  }
-}
-
-.end-button:hover {
-  color: var(--color-panel-text-hover);
-}
-
-.down-icon {
-  background-image: url('/assets/arrowDown.png');
-}
-
-.stop-icon {
-  background-image: url('/assets/stopIcon.png');
-}
-
-.up-icon {
-  background-image: url('/assets/arrowUp.png');
-}
-
-.next-icon {
-  background-image: url('/assets/arrowNext.png');
+.reader-footer__mark--on {
+  background: var(--color-accent-2-500);
+  color: #fff;
 }

@@ -2,8 +2,8 @@
 <html dir="rtl" lang="he">
 <head>
   <meta charset="utf-8">
-  <meta name="theme-color" content="#333333">
-  <title>תנ"ך</title>
+  <meta name="theme-color" content="#f5ead8">
+  <title>פרק יומי — קריאת תנ״ך</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="preload" href="assets/fonts/noto-serif-hebrew-400.woff2" as="font" type="font/woff2" crossorigin>
@@ -14,7 +14,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="תנ&quot;ך">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script>
     // Apply saved a11y settings before first paint so users in high-contrast /
@@ -25,6 +25,8 @@
       try {
         var s = JSON.parse(localStorage.getItem('tanach.a11y.v1') || '{}');
         var h = document.documentElement;
+        var theme = localStorage.getItem('tanach.theme');
+        if (theme === 'dark' || theme === 'light') { h.setAttribute('data-theme', theme); }
         if (s.fontScale) { h.style.setProperty('--a11y-font-scale', s.fontScale); }
         if (s.contrast === 'high') { h.classList.add('a11y-high-contrast'); }
         if (s.contrast === 'inverted') { h.classList.add('a11y-inverted-contrast'); }

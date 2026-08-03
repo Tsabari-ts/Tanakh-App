@@ -1,16 +1,21 @@
-
-<div class="centered-container">
+<div class="tk-screen centered-container">
   <h1 class="visually-hidden" i18n="@@chapterlist.heading">רשימת פרקים</h1>
   @if (loadError()) {
     <p class="empty-state" i18n="@@chapterlist.loadError">אירעה שגיאה בטעינת רשימת הפרקים. נסה שוב מאוחר יותר.</p>
   } @else {
-    <div class="button-row">
-      @for (versesNumber of chapters(); track $index; let chapterNumber = $index) {
-        <div>
-          <button class="chapter-button" type="button" (click)="goToChapter(chapterNumber + 1)" i18n="@@chapterlist.chapterLabel">
-            פרק {{ getChapterName(chapterNumber + 1) }} ({{ versesNumber }})
-          </button>
-        </div>
+    <div class="chapterlist-head">
+      <div class="chapterlist-head__book">{{ heBook }}</div>
+      <div class="text-muted chapterlist-head__sub" i18n="@@chapterlist.progress">בחרו פרק · {{ readCount() }} מתוך {{ chapters().length }} נקראו</div>
+    </div>
+
+    <div class="chapters-grid">
+      @for (cell of chapterCells(); track cell.n) {
+        <button type="button" class="chapter-cell" [class.chapter-cell--read]="cell.read" (click)="goToChapter(cell.n)" title="פרק {{ cell.n }}">
+          <span class="chapter-cell__num">{{ cell.heb }}</span>
+          @if (cell.read) {
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" class="chapter-cell__check"><path d="M20 6 9 17l-5-5"/></svg>
+          }
+        </button>
       } @empty {
         <p class="empty-state" i18n="@@chapterlist.empty">לא נמצאו פרקים</p>
       }

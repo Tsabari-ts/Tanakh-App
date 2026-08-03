@@ -1,86 +1,156 @@
 @use '../../../styles/breakpoints' as bp;
 
-// Mobile-first: compact hero spacing/buttons are the default; from-xl
-// restores the wide-desktop layout (was a max-width:1450px override).
 .centered-container {
   position: fixed;
+  inset-inline: 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 250px);
+  margin-top: 100px;
+  margin-bottom: 150px;
   width: 100%;
-  margin-top: 170px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.button-row {
+  max-width: 720px;
+  margin-inline: auto;
+  padding: 0 var(--space-4) var(--space-8);
+  box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
-.svg-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 20px;
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: calc(25rem / 16);
-    margin: 8px;
-    min-block-size: var(--tap-target-min);
-    max-width: min(450px, 92vw);
-    width: 300px;
-}
-
-    .svg-button svg {
-        margin-inline-start: 8px;
-        color: black;
-    }
-
-.svg-button img {
-    margin-inline-start: 8px;
-    color: black;
-}
-
-.svg-button div.icon {
-  width: 20px;
-  height: 20px;
-  background-size: cover;
-  margin-inline-start: 5px;
-  margin-inline-end: 20px;
-}
-
-@include bp.from-xl {
+@include bp.from-md {
   .centered-container {
-    margin-top: 300px;
-  }
-
-  .svg-button {
-    padding: 35px;
-    font-size: var(--font-size-xl);
-    width: 500px;
-  }
-
-  .svg-button div.icon {
-    width: 40px;
-    height: 40px;
-    margin-inline-start: 20px;
-    margin-inline-end: 50px;
+    padding: 0 var(--space-6) var(--space-8);
   }
 }
 
-.svg-button:hover {
-  color: var(--color-panel-text-hover);
+.home-greeting {
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
 }
 
-.torah-icon {
-  background-image: url('/assets/book.svg');
+.home-title {
+  font-size: var(--font-size-h1);
+  margin: 0;
 }
 
-.BookWithBookmark-icon {
-  background-image: url('/assets/openBookWithBookmark.svg');
+.hero-card {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  border-radius: calc(var(--radius-lg) * 1.15);
+  padding: var(--space-6);
+  position: relative;
+  overflow: hidden;
 }
-.stteing-icon {
-  background-image: url('/assets/setting.svg');
+
+.hero-card__blob {
+  position: absolute;
+  inset-inline-start: -40px;
+  top: -40px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #ffffff 16%, transparent);
+}
+
+.hero-card__content {
+  position: relative;
+}
+
+.hero-card__kicker {
+  font-size: var(--font-size-sm);
+  opacity: 0.85;
+  margin-bottom: 8px;
+}
+
+.hero-card__label {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-h2);
+  line-height: 1.05;
+}
+
+.hero-card__snippet {
+  opacity: 0.85;
+  font-size: var(--font-size-sm);
+  margin-top: 6px;
+}
+
+.hero-card__cta {
+  margin-top: var(--space-4);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  padding: 12px 22px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.stat-card {
+  align-items: flex-start;
+}
+
+.stat-card__value {
+  font-family: var(--font-heading);
+  font-size: 34px;
+  line-height: 1;
+}
+
+.stat-card__value--accent { color: var(--color-accent-700); }
+.stat-card__value--accent-2 { color: var(--color-accent-2-700); }
+
+.stat-card__label {
+  font-size: var(--font-size-sm);
+}
+
+.browse-row {
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  border-radius: calc(var(--radius-lg) * 1.15);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  text-align: start;
+  color: var(--color-text);
+  font-family: inherit;
+  width: 100%;
+}
+
+.browse-row:hover {
+  background: var(--color-accent-100);
+}
+
+.browse-row__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--color-accent-2-200);
+  color: var(--color-accent-2-800);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.browse-row__text {
+  margin-inline-end: auto;
+}
+
+.browse-row__title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+}
+
+.browse-row__sub {
+  font-size: var(--font-size-sm);
+}
+
+.browse-row__chevron {
+  opacity: 0.5;
+  flex: none;
 }

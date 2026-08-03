@@ -1,15 +1,15 @@
-<div class="stmt">
+<div class="stmt dialog">
   <!-- No role="dialog"/aria-modal/cdkTrapFocus here: MatDialogContainer
        (from accessibility-statement.service.ts's dialog.open call) already
        provides the dialog role, aria-modal, focus trap, and Escape-to-close
        for the whole component - adding them again here nested a second
        "dialog" landmark inside the first one. -->
-  <header class="stmt__head">
+  <header class="stmt__head dialog-title">
     <h2 mat-dialog-title id="stmt-title" i18n="@@a11yStatement.title">הצהרת נגישות</h2>
-    <button type="button" i18n-aria-label="@@a11yStatement.close" aria-label="סגירת הצהרת הנגישות" (click)="close()">✕</button>
+    <button type="button" class="btn btn-icon" i18n-aria-label="@@a11yStatement.close" aria-label="סגירת הצהרת הנגישות" (click)="close()">✕</button>
   </header>
 
-  <div class="stmt__body" mat-dialog-content tabindex="0" role="region" i18n-aria-label="@@a11yStatement.bodyRegion" aria-label="תוכן הצהרת הנגישות">
+  <div class="stmt__body dialog-body" mat-dialog-content tabindex="0" role="region" i18n-aria-label="@@a11yStatement.bodyRegion" aria-label="תוכן הצהרת הנגישות">
     <p i18n="@@a11yStatement.intro">
       אנו רואים חשיבות רבה במתן שירות שוויוני לכלל המשתמשים, ופועלים להנגשת האפליקציה לאנשים עם מוגבלות.
     </p>
@@ -57,8 +57,8 @@
     <p class="stmt__updated" i18n="@@a11yStatement.updated">עדכון אחרון: 02/08/2026</p>
   </div>
 
-  <footer class="stmt__foot" mat-dialog-actions>
-    <button type="button" (click)="print()" i18n="@@a11yStatement.print">הדפסה</button>
-    <button type="button" (click)="close()" i18n="@@a11yStatement.closeButton">סגירה</button>
+  <footer class="stmt__foot dialog-actions" mat-dialog-actions>
+    <button type="button" class="btn btn-secondary" (click)="print()" i18n="@@a11yStatement.print">הדפסה</button>
+    <button type="button" class="btn btn-primary" (click)="close()" i18n="@@a11yStatement.closeButton">סגירה</button>
   </footer>
 </div>

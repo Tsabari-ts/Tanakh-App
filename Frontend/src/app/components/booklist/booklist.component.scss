@@ -2,74 +2,220 @@
 
 .centered-container {
   position: fixed;
+  inset-inline: 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 250px);
+  margin-top: 100px;
+  margin-bottom: 150px;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  padding: 0 var(--space-4) var(--space-8);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@include bp.from-md {
+  .centered-container {
+    padding: 0 var(--space-6) var(--space-8);
+  }
+}
+
+.variation-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+}
+
+.variation-label {
+  font-size: var(--font-size-sm);
+  margin-inline-end: 4px;
+}
+
+.section-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.section-heading {
+  margin: 0;
+  font-size: var(--font-size-h2);
+}
+
+/* — grid variation — */
+.books-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  gap: 8px;
+}
+
+.book-pill {
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.book-pill__badge {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-body);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book-pill__badge--read {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* — cards variation — */
+.books-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+
+.book-card {
+  align-items: stretch;
+  gap: 10px;
+  cursor: pointer;
+  text-align: start;
+  border: 1px solid var(--color-divider);
+  font-family: inherit;
+  color: var(--color-text);
+}
+
+.book-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.book-card__name {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+}
+
+.book-card__ring {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: var(--font-size-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-600);
+}
+
+.book-card__ring--read {
+  background: var(--color-accent-2-200);
+  color: var(--color-accent-2-800);
+}
+
+.book-card__progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-neutral-200);
+  overflow: hidden;
+}
+
+.book-card__progress-fill {
   height: 100%;
-  align-items: flex-start;
-  scroll-behavior: smooth;
-overflow-y: auto;
- margin-top: 100px;
-max-height: calc(100vh - 200px);
-margin-bottom: 100px;
-box-sizing: border-box;
+  background: var(--color-accent);
+  border-radius: 999px;
 }
 
-  // Mobile-first: compact button/grid layout is the default; from-xl
-  // restores the wide-desktop layout (was a max-width:1450px override).
-  .button-row{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 0;
-    align-items: center;
-  }
-
-  .books-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 20px;
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: calc(25rem / 16);
-    margin: 8px;
-    min-block-size: var(--tap-target-min);
-    max-width: min(450px, 92vw);
-    width: 300px;
-    padding-inline-start: 100px;
+.book-card__count {
+  font-size: var(--font-size-sm);
 }
 
-.goBackButton{
-  position: relative;
-  margin-top: -215px;
-  margin-bottom: 76px;
-  margin-inline-start: 874px;
+/* — list variation — */
+.books-list {
+  padding: 0;
+  overflow: hidden;
 }
 
-@include bp.from-xl {
-  .button-row {
-    align-items: normal;
-  }
-
-  .books-button {
-    padding: 35px;
-    font-size: var(--font-size-xl);
-    width: 500px;
-    padding-inline-start: 180px;
-  }
-
-  .goBackButton {
-    position: static;
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-inline-start: 0;
-  }
+.book-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 14px var(--space-4);
+  cursor: pointer;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-text);
+  font-family: inherit;
 }
 
-.books-button:hover {
-  color: var(--color-panel-text-hover);
+.book-row:last-child {
+  border-bottom: 0;
+}
+
+.book-row__name {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-md);
+  margin-inline-end: auto;
+}
+
+.book-row__progress-text {
+  font-size: var(--font-size-sm);
+  min-width: 48px;
+  text-align: end;
+}
+
+.book-row__progress {
+  width: 80px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-neutral-200);
+  overflow: hidden;
+  flex: none;
+}
+
+.book-row__progress-fill {
+  height: 100%;
+  background: var(--color-accent-2-500);
+  border-radius: 999px;
+}
+
+.book-row__chevron {
+  opacity: 0.4;
+  transform: scaleX(-1);
+  flex: none;
+}
+
+.book-row:hover,
+.book-card:hover,
+.book-pill:hover {
+  background: var(--color-accent-100);
 }

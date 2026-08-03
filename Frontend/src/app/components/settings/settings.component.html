@@ -1,23 +1,95 @@
+<div class="tk-screen centered-container">
+  <h1 class="settings-heading" i18n="@@settings.heading">הגדרות</h1>
 
-  <div class="centered-container">
-    <h1 class="visually-hidden" i18n="@@settings.heading">הגדרות</h1>
-    <div class="button-row">
-          <button class="svg-button" type="button" (click)="contactUs()">
-            <div class="icon" [ngClass]="contactUsIcon" aria-hidden="true"></div>
-            {{ contactUsButton }}
-          </button>
-          <button class="svg-button" type="button" (click)="downloadApp()" [disabled]="pwaInstall.isStandalone()">
-            <div class="icon" [ngClass]="downloadAppIcon" aria-hidden="true"></div>
-            {{ downloadAppButton() }}
-          </button>
-          <button class="svg-button" type="button" (click)="openSubscribe()">
-            <div class="icon" [ngClass]="subscribeIcon" aria-hidden="true"></div>
-            {{ subscribeButton() }}
-          </button>
+  <div class="settings-group">
+    <div class="settings-group__title" i18n="@@settings.display">תצוגה</div>
+    <div class="card settings-card">
+      <!-- <div class="settings-row">
+        <div class="settings-row__text">
+          <div class="settings-row__label" i18n="@@settings.darkMode">מצב כהה</div>
+          <div class="text-muted settings-row__sub" i18n="@@settings.darkModeSub">נעים יותר לקריאת לילה</div>
+        </div>
+        <button type="button" class="switch" [class.switch--on]="theme.isDark()" role="switch" [attr.aria-checked]="theme.isDark()" i18n-aria-label="@@settings.darkMode" aria-label="מצב כהה" (click)="theme.toggle()">
+          <span class="switch__knob"></span>
+        </button>
+      </div> -->
+
+      <div class="settings-row settings-row--stack">
+        <div class="settings-row__label" i18n="@@settings.readerFont">גופן קריאה</div>
+        <div class="seg-row">
+          @for (f of fontOptions; track f.id) {
+            <button type="button" class="seg-pill" [class.seg-pill--on]="prefs.font() === f.id" (click)="prefs.setFont(f.id)">{{ f.label }}</button>
+          }
+        </div>
       </div>
-      @if (pwaInstall.isIos() && !pwaInstall.isStandalone()) {
-        <p class="ios-install-hint" i18n="@@settings.iosInstallHint">
-          להתקנת האפליקציה: לחצו על כפתור השיתוף בדפדפן ובחרו "הוספה למסך הבית".
-        </p>
-      }
+
+      <div class="settings-row settings-row--stack">
+        <div class="settings-row__label-row">
+          <span class="settings-row__label" i18n="@@settings.readerFontSize">גודל טקסט בקריאה</span>
+          <span class="text-muted">{{ prefs.scalePercent() }}%</span>
+        </div>
+        <div class="font-scale-control">
+          <button type="button" class="btn btn-secondary btn-icon" (click)="prefs.decFont()" i18n-aria-label="@@chapter.decreaseFont" aria-label="הקטן">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>
+          </button>
+          <div class="font-scale-track">
+            <div class="font-scale-fill" [style.width.%]="prefs.scalePercent()"></div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-icon" (click)="prefs.incFont()" i18n-aria-label="@@chapter.increaseFont" aria-label="הגדל">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <div class="settings-group">
+    <div class="settings-group__title" i18n="@@settings.reading">קריאה</div>
+    <div class="card settings-card">
+      <div class="settings-row">
+        <div class="settings-row__text">
+          <div class="settings-row__label" i18n="@@settings.nikudDefault">ניקוד כברירת מחדל</div>
+          <div class="text-muted settings-row__sub" i18n="@@settings.nikudDefaultSub">הצגת הפסוקים עם ניקוד מלא</div>
+        </div>
+        <button type="button" class="switch" [class.switch--on]="prefs.nikud()" role="switch" [attr.aria-checked]="prefs.nikud()" i18n-aria-label="@@settings.nikudDefault" aria-label="ניקוד כברירת מחדל" (click)="prefs.toggleNikud()">
+          <span class="switch__knob"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group__title" i18n="@@settings.reminderGroup">תזכורת יומית</div>
+    <div class="card settings-card">
+      <button class="svg-button" type="button" (click)="openSubscribe()">
+        <div class="icon" [ngClass]="subscribeIcon" aria-hidden="true"></div>
+        {{ subscribeButton() }}
+      </button>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group__title" i18n="@@settings.actionsGroup">עוד</div>
+    <div class="button-row">
+      <button class="svg-button" type="button" (click)="downloadApp()" [disabled]="pwaInstall.isStandalone()">
+        <div class="icon" [ngClass]="downloadAppIcon" aria-hidden="true"></div>
+        {{ downloadAppButton() }}
+      </button>
+    </div>
+    <div class="button-row">
+      <button class="svg-button" type="button" (click)="whatsappUs()">
+        <svg class="icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.4A10 10 0 1 0 12 2Zm0 18.2a8.1 8.1 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.7.8-.8 1-.2.2-.3.2-.5.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.2-.5s0-.4-.1-.5c-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-1 2.2c0 1.3 1 2.6 1.1 2.8.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+        {{ whatsappUsButton }}
+      </button>
+      <button class="svg-button" type="button" (click)="emailUs()">
+        <div class="icon" [ngClass]="emailUsIcon" aria-hidden="true"></div>
+        {{ emailUsButton }}
+      </button>
+    </div>
+    @if (pwaInstall.isIos() && !pwaInstall.isStandalone()) {
+      <p class="ios-install-hint" i18n="@@settings.iosInstallHint">
+        להתקנת האפליקציה: לחצו על כפתור השיתוף בדפדפן ובחרו "הוספה למסך הבית".
+      </p>
+    }
+  </div>
+</div>

@@ -159,7 +159,7 @@ background-position: center;
 }
 
 .loader-background {
-  background-color: var(--color-panel-bg);
+  background-color: var(--color-surface);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -188,4 +188,36 @@ background-position: center;
   position:absolute;
   min-height: 150px;
   width: 100%;
+}
+
+.name-gate-background {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.name-gate {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  gap: var(--space-4);
+}
+
+.name-gate h1 {
+  font-size: var(--font-size-h1);
+  margin: 0;
+}
+
+.name-gate .field {
+  text-align: start;
+  margin-top: var(--space-2);
+}
+
+.name-gate-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
 }

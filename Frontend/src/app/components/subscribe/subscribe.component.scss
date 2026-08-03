@@ -1,230 +1,105 @@
-@use '../../../styles/breakpoints' as bp;
-
-.welcome-body{
-    background-color: var(--color-dialog-bg);
+.welcome-body {
+  background-color: var(--color-surface);
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 /* Material's mat-dialog-content sets a translucent default text color that,
-   blended over --color-dialog-bg, falls below AA contrast (~3.66:1) -
+   blended over --color-surface, falls below AA contrast (~3.66:1) -
    pin it to an opaque, verified color instead. */
 .welcome-body [mat-dialog-content] {
     color: var(--color-text);
 }
 
-.custom-dialog-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: var(--color-dialog-title-bg);
-    border-radius: 4px 4px 0 0;
-  }
-
-  .custom-dialog-title span {
-    flex-grow: 1;
-  }
-
-  .custom-dialog-title button {
+.custom-dialog-title button {
     background-color: transparent;
     border: none;
     cursor: pointer;
+    color: inherit;
     min-inline-size: var(--tap-target-min);
     min-block-size: var(--tap-target-min);
-  }
+}
 
-  .custom-dialog-title button:hover {
-    background-color: var(--color-dialog-bg);
+.custom-dialog-title button:hover {
+    background-color: color-mix(in srgb, var(--color-accent-100) 15%, transparent);
     border-radius: 50%;
-  }
+}
 
-  // Mobile-first: compact form spacing/dialog colors are the default;
-  // from-lg restores the wide-desktop layout (was a max-width:1024px override).
-  .go-setting-button{
-    margin-inline-start: 20%;
-    width: 60%;
-    min-height: var(--tap-target-min);
-    background-color: var(--color-panel-bg);
-    color: var(--color-panel-text-hover);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: var(--font-size-lg);
-  }
+.header {
+  color: inherit;
+  font-size: inherit;
+  margin: 0;
+}
 
-  .go-setting-button:disabled {
-    cursor: not-allowed;
-  }
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
 
-  .header{
-    color: var(--color-dialog-title-text);
-    font-size: var(--font-size-lg);
-  }
+.go-setting-button,
+.btn-block {
+  margin-top: var(--space-2);
+}
 
-  .progress-container {
-    width: 100%;
-    max-width: 100%;
-    border: 1px solid var(--color-border);
-    height: 20px;
-    position: relative;
-    overflow: hidden;
-  }
+.progress-container {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 999px;
+  border: 1px solid var(--color-divider);
+  height: 10px;
+  position: relative;
+  overflow: hidden;
+  margin-top: var(--space-3);
+}
 
-  .progress-bar {
-    height: 100%;
-    background-color: var(--color-panel-bg);
-    transition: width 0.5s;
-  }
+.progress-bar {
+  height: 100%;
+  background-color: var(--color-accent);
+  transition: width 0.5s;
+}
 
- .serverResponse{
-    font-size: var(--font-size-lg);
-    color: var(--color-error);
-  }
+.serverResponse {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--font-size-base);
+  color: var(--color-success);
+}
 
+.consent-field {
+  gap: 2px;
+}
 
-  .input-container {
-    position: relative;
-    margin-bottom: 5px;
-    width: 100%;
-  }
+.consent-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
 
-  .input-container input[type="checkbox"] {
-    width: 1.5rem;
-    height: 1.5rem;
-    min-block-size: 1.5rem;
-    vertical-align: middle;
-    margin-inline-end: 8px;
-  }
+.consent-label input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  min-block-size: 1.25rem;
+  accent-color: var(--color-accent);
+}
 
-  .terms-link {
-    display: inline-block;
-    /* the floating text-input `label` below is position:absolute and, being
-       positioned, paints above static siblings regardless of DOM order -
-       without this the label sits on top of the button and swallows clicks. */
-    position: relative;
-    z-index: 1;
-    margin-inline-start: 4px;
-    background: transparent;
-    border: none;
-    padding: 0;
-    min-block-size: var(--tap-target-min);
-    color: var(--color-link);
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: inherit;
-  }
-
-  label {
-    position: absolute;
-    top: 0;
-    margin-inline-start: 40px;
-    transition: transform 0.3s ease-out, font-size 0.3s ease-out;
-  }
-
-  label.active {
-    display: none;
-  }
-
-  input,
-  select {
-    padding: 5px;
-    font-size: var(--font-size-base);
-    border: none;
-    border-bottom: 2px solid var(--color-text);
-    width: 85%;
-    min-block-size: var(--tap-target-min);
-    margin-inline-start: 15px;
-  }
-
-  .underline {
-    position: absolute;
-    bottom: 0;
-    inset-inline-end: 0;
-    height: 2px;
-    background-color: var(--color-text);
-    transform-origin: bottom right;
-    transform: scaleX(0);
-    transition: transform 0.3s ease-out;
-  }
-
-  input:focus + .underline {
-    transform: scaleX(1);
-  }
-
-  input:focus + label, input:not(:placeholder-shown) + label {
-    transform: translateY(-20px) scale(0.8);
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
-  }
-
-  select {
-    width: 89.05%;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
-  }
-
-   select::after {
-     content: '\25BC';
-     position: fixed;
-    top: 50%;
-    inset-inline-start: 10px;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--color-text);
-  }
-
-  .options {
-    position: absolute;
-    top: 100%;
-    inset-inline-start: 0;
-    width: 100%;
-    border: 1px solid var(--color-border);
-    border-top: none;
-    display: none;
-  }
-
-  .input-container.error input,
-.input-container.error select {
-  border-color: var(--color-error);
-  border-width: 2px;
+.terms-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  min-block-size: var(--tap-target-min);
+  color: var(--color-link);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
 }
 
 .error-message {
   color: var(--color-error);
-  margin-top: 0;
-  font-size: var(--font-size-base);
-  width: 300px;
-  max-width: 100%;
-  margin-inline-start: 15px;
+  margin-top: 4px;
+  font-size: var(--font-size-sm);
 }
-
-@include bp.from-lg {
-  .go-setting-button {
-    color: var(--color-panel-text);
-  }
-
-  .header{
-    font-size: var(--font-size-xl);
-  }
-
-  .input-container {
-    margin-bottom: 20px;
-  }
-
-  .error-message {
-    margin-top: 5px;
-  }
-
-  select {
-    width: 87.05%;
-  }
-
-  .progress-container {
-    width: 420px;
-  }
-}
-
-  .go-setting-button:hover {
-    color: var(--color-panel-text-hover);
-  }
