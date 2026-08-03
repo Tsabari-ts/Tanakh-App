@@ -97,6 +97,11 @@
 
   .terms-link {
     display: inline-block;
+    /* the floating text-input `label` below is position:absolute and, being
+       positioned, paints above static siblings regardless of DOM order -
+       without this the label sits on top of the button and swallows clicks. */
+    position: relative;
+    z-index: 1;
     margin-inline-start: 4px;
     background: transparent;
     border: none;
