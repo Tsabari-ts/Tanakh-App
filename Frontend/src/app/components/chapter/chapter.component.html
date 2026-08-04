@@ -32,8 +32,8 @@
     <div #readerScroll class="tk-scroll reader-content">
       <div class="reader-content__inner">
         <div class="reader-heading">
-          <div class="reader-heading__book">{{ heBook }}</div>
-          <h1 class="reader-heading__chapter" i18n="@@chapter.chapterHeb">פרק {{ chapterHeb(chapterNumber) }}</h1>
+          <h2 class="reader-heading__book">{{ heBook }}</h2>
+          <!-- <h1 class="reader-heading__chapter" i18n="@@chapter.chapterHeb">פרק {{ chapterHeb(chapterNumber) }}</h1> -->
         </div>
         <div class="reader-verses" [style.font-size.px]="readerFontPx()" [style.font-family]="prefs.fontFamily()">
           @for (v of verses(); track $index) {

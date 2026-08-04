@@ -1,7 +1,7 @@
 .reader-screen {
   position: fixed;
   inset-inline: 0;
-  margin-top: 100px;
+  margin-top: 60px;
   margin-bottom: 150px;
   height: calc(100vh - 250px);
   display: flex;
@@ -26,7 +26,7 @@
 .reader-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-6) var(--space-4) var(--space-8);
+  padding: var(--space-4) var(--space-4) var(--space-8);
 }
 
 .reader-content__inner {
@@ -36,12 +36,10 @@
 
 .reader-heading {
   text-align: center;
-  margin-bottom: var(--space-6);
 }
 
 .reader-heading__book {
   color: var(--color-accent);
-  font-size: var(--font-size-sm);
 }
 
 .reader-heading__chapter {
@@ -70,6 +68,7 @@
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--color-divider);
   background: var(--color-bg);
+  margin-bottom: -4.5rem;
 }
 
 .reader-footer__mark {

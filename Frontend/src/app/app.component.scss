@@ -22,33 +22,68 @@ body {
 
   // App is dir="rtl" only (see index.html), so physical env(safe-area-inset-*)
   // sides are hardcoded here: inline-start = right, inline-end = left.
-  .title {
-    /* Matches the source design's sticky top bar exactly: translucent wash
-       of the page background, blurred - not a flat opaque surface. */
-    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--color-divider);
-    padding: calc(10px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-left, 0px)) 10px calc(10px + env(safe-area-inset-right, 0px));
-    width: 100%;
-    position: absolute;
-    top: 0;
-    inset-inline-start: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
+  // .title {
+  //   background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  //   backdrop-filter: blur(8px);
+  //   -webkit-backdrop-filter: blur(8px);
+  //   border-bottom: 1px solid var(--color-divider);
+  //   padding: calc(10px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-left, 0px)) 10px calc(10px + env(safe-area-inset-right, 0px));
+  //   width: 100%;
+  //   position: absolute;
+  //   top: 0;
+  //   inset-inline-start: 0;
+  //   z-index: 1;
+  //   display: flex;
+  //   align-items: center;
+  //   gap: var(--space-3);
+  // }
 
-  .title .site-name {
-    margin: 0;
-    margin-inline-end: auto;
-    color: var(--color-text);
-    font-family: var(--font-heading);
-    font-weight: 500;
-    font-size: var(--font-size-h2);
-  }
+  // .title .site-name {
+  //   margin: 0;
+  //   margin-inline-end: auto;
+  //   color: var(--color-text);
+  //   font-family: var(--font-heading);
+  //   font-weight: 500;
+  //   font-size: var(--font-size-h2);
+  // }
 
+  // App is dir="rtl" only (see index.html), so physical env(safe-area-inset-*)
+// sides are hardcoded here: inline-start = right, inline-end = left.
+.title {
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-divider);
+  padding: calc(10px + env(safe-area-inset-top, 0px))
+           calc(10px + env(safe-area-inset-left, 0px))
+           10px
+           calc(10px + env(safe-area-inset-right, 0px));
+
+  width: 100%;
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title .site-name {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--font-size-h2);
+
+  white-space: nowrap;
+  pointer-events: none;
+}
   .main-footer {
     background: color-mix(in srgb, var(--color-bg) 88%, transparent);
     backdrop-filter: blur(8px);
@@ -108,7 +143,7 @@ body {
     cursor: pointer;
     font-family: var(--font-body);
     font-size: var(--font-size-sm);
-    min-block-size: var(--tap-target-min);
+    // min-block-size: var(--tap-target-min);
     display: inline-flex;
     align-items: center;
   }
@@ -116,6 +151,14 @@ body {
   .footer-credit:hover {
     color: var(--color-accent-700);
     text-decoration: underline;
+  }
+
+  .hr-footer{
+    width: 20%;
+    background: var(--color-accent);
+    margin-top: 1px;
+    margin-bottom: 1px;
+    height: 0.2rem;
   }
 
   .header-icon-btn {

@@ -1,4 +1,11 @@
 .terms {
+  /* Overrides the global .dialog rule's width: min(440px, 100%) - that
+     value is sized for the compact custom-overlay pattern, not for a
+     MatDialog opened at width: 700px (terms.service.ts). Left as-is, the
+     card only filled 440px of the 700px panel and sat unbalanced against
+     its inline-start edge (no margin: auto anywhere) instead of being
+     centered - fill the panel completely instead. */
+  width: 100%;
   max-height: 80vh;
   font-family: var(--font-body);
 }
@@ -13,6 +20,17 @@
 .terms__head h2 {
   margin: 0;
   font-family: var(--font-heading);
+}
+
+/* .btn sets color: var(--color-text) (near-black) which fails contrast on
+   the --color-accent-700 header background - the title text gets its light
+   color from .dialog-title, but the button's own color rule overrides that
+   inheritance, so it needs the same light color set explicitly. */
+.terms__head .btn-icon {
+  color: var(--color-accent-100);
+}
+.terms__head .btn-icon:hover {
+  background: color-mix(in srgb, var(--color-accent-100) 20%, transparent);
 }
 
 .terms__body {
