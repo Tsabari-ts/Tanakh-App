@@ -33,7 +33,12 @@ export class ChapterComponent implements OnInit, OnDestroy {
   readonly loadError = signal(false);
   readonly scrollSpeed = signal(0);
 
-  readonly isRead = computed(() => this.readingHistory.isRead(this.book, this.chapterNumber));
+  /* Not a computed(): it would only read this.book/this.chapterNumber once
+     and never again, since those are plain fields (set from route params,
+     not signals) and computed() only tracks signal reads as dependencies -
+     the mark-as-read button would then keep showing the previous chapter's
+     state after navigating. Set explicitly wherever the chapter changes. */
+  readonly isRead = signal(false);
   readonly speaking = computed(() => this.tts.state() === 'playing');
   readonly readerFontPx = computed(() => Math.round(20 * this.prefs.scale()));
 
@@ -65,6 +70,7 @@ export class ChapterComponent implements OnInit, OnDestroy {
         this.book = p['book'];
         this.chapterNumber = parseInt(p['chapterNumber'], 10) || 1;
         this.appComponent.backTarget.set(['/books', this.section, this.book]);
+        this.isRead.set(this.readingHistory.isRead(this.book, this.chapterNumber));
         this.loadChapter();
       });
   }
@@ -132,7 +138,9 @@ export class ChapterComponent implements OnInit, OnDestroy {
 
   toggleRead(): void {
     this.readingHistory.toggleRead(this.book, this.chapterNumber);
-    if (this.readingHistory.isRead(this.book, this.chapterNumber)) {
+    const nowRead = this.readingHistory.isRead(this.book, this.chapterNumber);
+    this.isRead.set(nowRead);
+    if (nowRead) {
       this.saveProgress();
     }
   }
