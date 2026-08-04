@@ -74,7 +74,10 @@
 .dialog-body { padding: 0 var(--space-4); font-size: var(--font-size-base); }
 .dialog-actions {
   display: flex;
-  justify-content: center;
+  /* !important: Angular Material's own [mat-dialog-actions] styles set
+     justify-content: start and win the cascade otherwise, so centering
+     the buttons here silently loses without it. */
+  justify-content: center !important;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
 }
