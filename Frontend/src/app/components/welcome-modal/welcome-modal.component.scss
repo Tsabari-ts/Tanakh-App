@@ -4,6 +4,28 @@
     overflow: hidden;
     max-width: 420px;
     margin: 0 auto;
+    box-shadow: 0 0 0 3px var(--color-accent), var(--shadow-lg);
+    animation: welcomeModalPop 480ms var(--motion-ease);
+}
+
+@keyframes welcomeModalPop {
+    0% {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.03);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .welcome-body {
+        animation: none;
+    }
 }
 
 /* Material's mat-dialog-content sets a translucent default text color that,

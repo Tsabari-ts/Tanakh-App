@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
@@ -15,6 +15,7 @@ interface LastPosition {
 
 const DEFAULT_POSITION: LastPosition = { section: 'torah', book: 'Genesis', chapter: 1 };
 const DEFAULT_HE_BOOK = 'בראשית';
+const WELCOME_MODAL_DELAY_MS = 30000;
 
 @Component({
     selector: 'app-home',
@@ -22,8 +23,7 @@ const DEFAULT_HE_BOOK = 'בראשית';
     styleUrl: './home.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent implements OnInit {
-  userHasSeenWelcomeModal = localStorage.getItem('userHasSeenWelcomeModal');
+export class HomeComponent implements OnInit, OnDestroy {
   hasStorage = localStorage.getItem('HasStorage') === 'true';
   username = getStoredUsername();
   greeting = this.computeGreeting();
@@ -42,6 +42,8 @@ export class HomeComponent implements OnInit {
     ? $localize`:@@home.continueSnippet:המשיכו לקרוא מהמקום שבו הפסקתם`
     : $localize`:@@home.startSnippet:התחילו את מסע הקריאה שלכם מבראשית פרק א׳`;
 
+  private welcomeModalTimeoutId?: ReturnType<typeof setTimeout>;
+
   constructor(private router: Router,
               private dialogService: DialogService,
               private appComponent: AppComponent,
@@ -51,8 +53,10 @@ export class HomeComponent implements OnInit {
                }
 
   ngOnInit(){
-    if (!this.userHasSeenWelcomeModal) {
-      this.dialogService.openWelcomeDialog();
+    if (this.dialogService.shouldShowWelcomeDialog()) {
+      this.welcomeModalTimeoutId = setTimeout(() => {
+        this.dialogService.openWelcomeDialog();
+      }, WELCOME_MODAL_DELAY_MS);
     }
 
     if (this.lastPosition) {
@@ -65,6 +69,10 @@ export class HomeComponent implements OnInit {
         error: () => { /* keep default Hebrew name on failure */ },
       });
     }
+  }
+
+  ngOnDestroy(){
+    clearTimeout(this.welcomeModalTimeoutId);
   }
 
   private computeGreeting(): string {
