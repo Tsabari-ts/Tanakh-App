@@ -1,0 +1,57 @@
+<div class="admin-users__filters">
+  <input type="text" placeholder="חיפוש לפי טלפון או שם" [(ngModel)]="search" (keyup.enter)="applyFilters()" />
+
+  <select [(ngModel)]="status" (change)="applyFilters()">
+    <option value="">כל הסטטוסים</option>
+    <option value="active">פעיל</option>
+    <option value="unsubscribed">חסום</option>
+  </select>
+
+  <button type="button" (click)="applyFilters()">חיפוש</button>
+  <button type="button" (click)="exportCsv()">ייצוא ל-CSV</button>
+</div>
+
+<div class="admin-users__table-wrap">
+  <table mat-table [dataSource]="items()">
+    <ng-container matColumnDef="phoneNumber">
+      <th mat-header-cell *matHeaderCellDef>טלפון</th>
+      <td mat-cell *matCellDef="let user">{{ user.phoneNumber ?? '—' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="displayName">
+      <th mat-header-cell *matHeaderCellDef>שם</th>
+      <td mat-cell *matCellDef="let user">{{ user.displayName ?? '—' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>סטטוס</th>
+      <td mat-cell *matCellDef="let user">{{ user.status === 'active' ? 'פעיל' : 'חסום' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>תאריך הרשמה</th>
+      <td mat-cell *matCellDef="let user">{{ user.createdAt | date:'short' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let user">
+        @if (user.status === 'active') {
+          <button type="button" (click)="block(user)">חסימה</button>
+        } @else {
+          <button type="button" (click)="unblock(user)">שחרור</button>
+        }
+        <button type="button" (click)="delete(user)">מחיקה</button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  @if (!loading() && items().length === 0) {
+    <p class="admin-users__empty">לא נמצאו משתמשים.</p>
+  }
+</div>
+
+<mat-paginator [length]="totalCount()" [pageSize]="25" [pageSizeOptions]="[10, 25, 50, 100]" (page)="onPage($event)" />

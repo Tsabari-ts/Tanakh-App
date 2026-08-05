@@ -152,7 +152,7 @@ namespace Tanakh.Infrastructure.Reminders
             delivery.MessageBody = message;
             delivery.SegmentCount = segments.SegmentCount;
 
-            SmsSendResult result = await smsSender.SendAsync(subscriber.PhoneNumber, message, cancellationToken);
+            SmsSendResult result = await smsSender.SendAsync(subscriber.PhoneNumber, message, SmsMessageType.Reminder, cancellationToken);
 
             delivery.ProviderResponse = result.RawResponse;
             delivery.ProviderStatusCode = result.StatusCode;

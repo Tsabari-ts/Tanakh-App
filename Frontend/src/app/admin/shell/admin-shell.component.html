@@ -1,8 +1,30 @@
 <div class="admin-shell">
   <header class="admin-shell__header">
     <h1>לוח ניהול</h1>
-    <button type="button" (click)="logout()">התנתקות</button>
+
+    <div class="admin-shell__range">
+      @for (preset of presets; track preset.id) {
+        <button
+          type="button"
+          [class.active]="dateRange.preset() === preset.id"
+          (click)="setPreset(preset.id)">
+          {{ preset.label }}
+        </button>
+      }
+      <button type="button" class="admin-shell__refresh" (click)="refresh()" title="רענון">⟳</button>
+    </div>
+
+    <button type="button" class="admin-shell__logout" (click)="logout()">התנתקות</button>
   </header>
 
-  <p class="admin-shell__placeholder">מחובר. מודולי הדשבורד יתווספו בשלבים הבאים.</p>
+  <nav class="admin-shell__nav">
+    <a routerLink="overview" routerLinkActive="active">סקירה כללית</a>
+    <a routerLink="users" routerLinkActive="active">משתמשים</a>
+    <a routerLink="sms" routerLinkActive="active">SMS</a>
+    <a routerLink="logs" routerLinkActive="active">לוגים</a>
+  </nav>
+
+  <main class="admin-shell__content">
+    <router-outlet />
+  </main>
 </div>

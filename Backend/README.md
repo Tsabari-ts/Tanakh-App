@@ -13,6 +13,7 @@ SMS4FREE - email is no longer used for anything, reminders or otherwise):
 | `Sms:Pass` | SMS4FREE account password |
 | `Sms:Sender` | Sender name/number shown to recipients. Currently the registered mobile number (SMS4FREE locks the sender to it on the free 10-message trial) - must switch to an English business/app name once the trial is used up, which likely needs its own sender-verification step with SMS4FREE per the 2020 telecom regulation. |
 | `Sms:ApiUrl` | SMS4FREE send endpoint. Defaults to `https://api.sms4free.co.il/ApiSMS/v2/SendSMS` - **verify this against the account's own API page before relying on it**, don't assume it's still current. |
+| `Sms:BalanceApiUrl` | SMS4FREE balance-check endpoint, used by the admin SMS dashboard (`ISmsBalanceService`, 5-minute cache). Defaults to `https://api.sms4free.co.il/ApiSMS/AvailableSMS` - same "verify before relying on it" caveat as `Sms:ApiUrl`. |
 | `Sms:TimeoutSeconds` | HTTP timeout for the send call. Default 15. |
 | `Sms:DryRun` | When `true` (the default), no HTTP call is made - the dispatcher builds the message and logs it as if sent. **Must stay `true` in every non-production environment** - there is no SMS4FREE sandbox account, so this is the only way to test without spending real messages. |
 

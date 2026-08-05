@@ -1,0 +1,98 @@
+@if (balance(); as b) {
+  @if (!b.ok || (b.balance !== null && b.balance < b.lowBalanceThreshold)) {
+    <div class="admin-sms__banner">
+      @if (!b.ok) {
+        שגיאה בבדיקת מכסה SMS4FREE{{ b.error ? ': ' + b.error : '' }}
+      } @else {
+        יתרת ה-SMS נמוכה ({{ b.balance }} הודעות בלבד)
+      }
+    </div>
+  }
+}
+
+<div class="admin-sms__cards">
+  <div class="kpi-card">
+    <span class="kpi-card__label">יתרת הודעות</span>
+    @if (balance(); as b) {
+      <span class="kpi-card__value" [class.kpi-card__value--error]="!b.ok">
+        {{ b.ok ? b.balance : 'שגיאה' }}
+      </span>
+    }
+  </div>
+
+  @if (stats(); as s) {
+    <div class="kpi-card">
+      <span class="kpi-card__label">נשלחו היום</span>
+      <span class="kpi-card__value">{{ s.sentToday }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">נשלחו השבוע</span>
+      <span class="kpi-card__value">{{ s.sentThisWeek }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">נשלחו החודש</span>
+      <span class="kpi-card__value">{{ s.sentThisMonth }}</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-card__label">אחוז הצלחה</span>
+      <span class="kpi-card__value">{{ s.successRatePercent }}%</span>
+    </div>
+  }
+</div>
+
+<div class="admin-sms__test">
+  <button type="button" (click)="sendTest()" [disabled]="testSending()">
+    {{ testSending() ? 'שולח…' : 'שלח הודעת בדיקה' }}
+  </button>
+  @if (testSentMessage()) {
+    <span>{{ testSentMessage() }}</span>
+  }
+</div>
+
+<div class="admin-sms__filters">
+  <select [(ngModel)]="status" (change)="applyFilters()">
+    <option value="">כל הסטטוסים</option>
+    <option value="sent">נשלח</option>
+    <option value="failed">נכשל</option>
+  </select>
+
+  <button type="button" (click)="exportCsv()">ייצוא ל-CSV</button>
+</div>
+
+<div class="admin-sms__table-wrap">
+  <table mat-table [dataSource]="items()">
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>תאריך</th>
+      <td mat-cell *matCellDef="let log">{{ log.createdAt | date:'short' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="maskedPhone">
+      <th mat-header-cell *matHeaderCellDef>נמען</th>
+      <td mat-cell *matCellDef="let log">{{ log.maskedPhone }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>סוג</th>
+      <td mat-cell *matCellDef="let log">{{ log.type }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="success">
+      <th mat-header-cell *matHeaderCellDef>סטטוס</th>
+      <td mat-cell *matCellDef="let log">{{ log.success ? 'נשלח' : 'נכשל' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="providerStatusCode">
+      <th mat-header-cell *matHeaderCellDef>קוד ספק</th>
+      <td mat-cell *matCellDef="let log">{{ log.providerStatusCode ?? '—' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  @if (!loading() && items().length === 0) {
+    <p class="admin-sms__empty">אין רשומות שליחה.</p>
+  }
+</div>
+
+<mat-paginator [length]="totalCount()" [pageSize]="25" [pageSizeOptions]="[10, 25, 50, 100]" (page)="onPage($event)" />

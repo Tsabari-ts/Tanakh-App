@@ -94,6 +94,26 @@ namespace Tanakh.Infrastructure.Services
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task ReactivateAsync(Guid subscriberId, CancellationToken cancellationToken = default)
+        {
+            Subscriber? subscriber = await dbContext.Subscribers
+                .FirstOrDefaultAsync(s => s.Id == subscriberId, cancellationToken);
+
+            // An anonymized subscriber (phone_number = NULL, e.g. after an
+            // admin "delete") can't be reactivated - ck_subscribers_
+            // phone_required_when_active would reject it, and there's no
+            // phone number left to send reminders to anyway.
+            if (subscriber is null || subscriber.Status == SubscriberStatus.Active || subscriber.PhoneNumber is null)
+            {
+                return;
+            }
+
+            subscriber.Status = SubscriberStatus.Active;
+            subscriber.UnsubscribedAt = null;
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task<SubscriberPreferences?> GetPreferencesAsync(Guid subscriberId, CancellationToken cancellationToken = default)
         {
             Subscriber? subscriber = await dbContext.Subscribers

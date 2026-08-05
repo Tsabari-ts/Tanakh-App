@@ -7,7 +7,9 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Domain;
+using Tanakh.Domain.Entities;
 using Tanakh.Domain.Validation;
+using Tanakh.Infrastructure.Data;
 using Tanakh.Infrastructure.Options;
 
 namespace Tanakh.Infrastructure.Services
@@ -30,15 +32,19 @@ namespace Tanakh.Infrastructure.Services
         private readonly HttpClient httpClient;
         private readonly SmsOptions options;
         private readonly ILogger<Sms4FreeSmsSender> logger;
+        private readonly AppDbContext dbContext;
 
-        public Sms4FreeSmsSender(HttpClient httpClient, IOptions<SmsOptions> options, ILogger<Sms4FreeSmsSender> logger)
+        public Sms4FreeSmsSender(
+            HttpClient httpClient, IOptions<SmsOptions> options, ILogger<Sms4FreeSmsSender> logger, AppDbContext dbContext)
         {
             this.httpClient = httpClient;
             this.options = options.Value;
             this.logger = logger;
+            this.dbContext = dbContext;
         }
 
-        public async Task<SmsSendResult> SendAsync(string phoneNumberE164, string message, CancellationToken cancellationToken = default)
+        public async Task<SmsSendResult> SendAsync(
+            string phoneNumberE164, string message, SmsMessageType type, CancellationToken cancellationToken = default)
         {
             string maskedPhone = IsraeliMobilePhoneValidator.MaskForLogging(phoneNumberE164);
 
@@ -47,7 +53,9 @@ namespace Tanakh.Infrastructure.Services
                 logger.LogInformation(
                     "SMS dry-run: would send {Length}-char message to {Phone}.",
                     message.Length, maskedPhone);
-                return new SmsSendResult(Success: true, IsPermanentFailure: false, IsLowBalance: false, StatusCode: 1, RawResponse: "dry-run");
+                SmsSendResult dryRunResult = new(Success: true, IsPermanentFailure: false, IsLowBalance: false, StatusCode: 1, RawResponse: "dry-run");
+                await LogAsync(phoneNumberE164, message, type, dryRunResult, cancellationToken);
+                return dryRunResult;
             }
 
             Sms4FreeRequest request = new(options.Key, options.User, options.Pass, options.Sender, phoneNumberE164, message);
@@ -75,12 +83,42 @@ namespace Tanakh.Infrastructure.Services
                         maskedPhone, statusCode, parsed?.Message);
                 }
 
-                return new SmsSendResult(success, isPermanent, isLowBalance, statusCode, rawBody);
+                SmsSendResult result = new(success, isPermanent, isLowBalance, statusCode, rawBody);
+                await LogAsync(phoneNumberE164, message, type, result, cancellationToken);
+                return result;
             }
             catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
             {
                 logger.LogWarning(ex, "SMS send to {Phone} failed at the transport level (timeout/network).", maskedPhone);
-                return new SmsSendResult(Success: false, IsPermanentFailure: false, IsLowBalance: false, StatusCode: 0, RawResponse: ex.Message);
+                SmsSendResult transportFailureResult = new(Success: false, IsPermanentFailure: false, IsLowBalance: false, StatusCode: 0, RawResponse: ex.Message);
+                await LogAsync(phoneNumberE164, message, type, transportFailureResult, cancellationToken);
+                return transportFailureResult;
+            }
+        }
+
+        private async Task LogAsync(
+            string phoneNumberE164, string message, SmsMessageType type, SmsSendResult result, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await dbContext.SmsLogs.AddAsync(new SmsLog
+                {
+                    Id = Guid.CreateVersion7(),
+                    ToPhoneNumber = phoneNumberE164,
+                    Type = type,
+                    Message = message,
+                    Success = result.Success,
+                    ProviderResponse = result.RawResponse,
+                    ProviderStatusCode = result.StatusCode,
+                }, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Logging the send must never be why the send itself
+                // "fails" from the caller's perspective - the real SMS
+                // outcome (result) has already been determined above.
+                logger.LogError(ex, "Failed to write sms_log row for a {Type} send.", type);
             }
         }
 

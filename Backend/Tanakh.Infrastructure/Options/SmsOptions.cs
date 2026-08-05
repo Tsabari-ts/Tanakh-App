@@ -24,6 +24,10 @@ namespace Tanakh.Infrastructure.Options
         // assume this is still correct without checking.
         public string ApiUrl { get; set; } = "https://api.sms4free.co.il/ApiSMS/v2/SendSMS";
 
+        // TODO(LAUNCH): same caveat as ApiUrl - verify against the
+        // account's own API page before relying on it.
+        public string BalanceApiUrl { get; set; } = "https://api.sms4free.co.il/ApiSMS/AvailableSMS";
+
         public int TimeoutSeconds { get; set; } = 15;
 
         // No sandbox account exists (per spec Q21) - DryRun must be true in

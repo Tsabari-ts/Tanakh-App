@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Tanakh.Domain.Entities;
 
 namespace Tanakh.Domain
 {
@@ -16,6 +17,10 @@ namespace Tanakh.Domain
 
     public interface ISmsSender
     {
-        Task<SmsSendResult> SendAsync(string phoneNumberE164, string message, CancellationToken cancellationToken = default);
+        // type is written to sms_log by the implementation itself (see
+        // Sms4FreeSmsSender) - every call is logged regardless of caller,
+        // so callers don't each need their own logging code.
+        Task<SmsSendResult> SendAsync(
+            string phoneNumberE164, string message, SmsMessageType type, CancellationToken cancellationToken = default);
     }
 }

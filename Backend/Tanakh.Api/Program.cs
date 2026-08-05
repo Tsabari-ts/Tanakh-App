@@ -135,6 +135,8 @@ builder.Services.AddHttpClient<ISmsSender, Sms4FreeSmsSender>()
         int timeoutSeconds = serviceProvider.GetRequiredService<IOptions<SmsOptions>>().Value.TimeoutSeconds;
         client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
     });
+builder.Services.AddHttpClient<ISmsBalanceService, SmsBalanceService>()
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
 builder.Services.AddHealthChecks()
     .AddCheck<TanakhDataHealthCheck>("tanakh-data", tags: new[] { "ready" });
 builder.Services.AddControllers();

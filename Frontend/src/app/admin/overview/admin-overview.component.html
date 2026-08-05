@@ -1,0 +1,45 @@
+@if (loading() && !overview()) {
+  <p>טוען…</p>
+} @else if (error()) {
+  <p class="admin-overview__error">שגיאה בטעינת הנתונים.</p>
+} @else if (overview(); as data) {
+  <div class="admin-overview__grid">
+    <div class="kpi-card">
+      <span class="kpi-card__label">סה"כ משתמשים</span>
+      <span class="kpi-card__value">{{ data.totalUsers.current }}</span>
+      <span class="kpi-card__change">{{ formatChange(data.totalUsers.changePercent) }}</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-card__label">נרשמו בטווח</span>
+      <span class="kpi-card__value">{{ data.signupsInRange.current }}</span>
+      <span class="kpi-card__change">{{ formatChange(data.signupsInRange.changePercent) }}</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-card__label">משתמשים פעילים</span>
+      <span class="kpi-card__value">{{ data.activeUsers.current }}</span>
+      <span class="kpi-card__change">{{ formatChange(data.activeUsers.changePercent) }}</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-card__label">הודעות פנויות במכסה</span>
+      @if (data.smsBalance.ok) {
+        <span class="kpi-card__value">{{ data.smsBalance.balance }}</span>
+      } @else {
+        <span class="kpi-card__value kpi-card__value--error">שגיאה בבדיקת מכסה</span>
+      }
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-card__label">הודעות שנשלחו בטווח</span>
+      <span class="kpi-card__value">{{ data.smsSentInRange.current }}</span>
+      <span class="kpi-card__change">{{ formatChange(data.smsSentInRange.changePercent) }}</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-card__label">שגיאות פתוחות</span>
+      <span class="kpi-card__value" [class.kpi-card__value--error]="data.openErrors > 0">{{ data.openErrors }}</span>
+    </div>
+  </div>
+}

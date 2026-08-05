@@ -29,6 +29,10 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
 
+        public DbSet<SmsLog> SmsLogs => Set<SmsLog>();
+
+        public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

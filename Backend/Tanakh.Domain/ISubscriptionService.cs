@@ -31,6 +31,13 @@ namespace Tanakh.Domain
         // Idempotent - safe to call twice for the same subscriber.
         Task UnsubscribeAsync(Guid subscriberId, CancellationToken cancellationToken = default);
 
+        // Admin "unblock" - flips Status back to Active without touching
+        // preferences/consent (unlike SubscribeAsync, which is the
+        // self-service re-subscribe flow and expects a fresh phone/time/
+        // consent submission). Idempotent - safe to call on an already-
+        // active subscriber. No-op if the subscriber doesn't exist.
+        Task ReactivateAsync(Guid subscriberId, CancellationToken cancellationToken = default);
+
         // Null if the subscriber doesn't exist or isn't active.
         Task<SubscriberPreferences?> GetPreferencesAsync(Guid subscriberId, CancellationToken cancellationToken = default);
 

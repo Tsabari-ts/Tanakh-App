@@ -89,6 +89,7 @@ namespace Tanakh.Api.Controllers
             await smsSender.SendAsync(
                 adminOptions.Phone,
                 $"קוד האימות שלך למערכת הניהול: {code} (בתוקף ל-{OtpValidityMinutes} דקות)",
+                SmsMessageType.Otp,
                 cancellationToken);
 
             return Ok(new { otpRequired = true });

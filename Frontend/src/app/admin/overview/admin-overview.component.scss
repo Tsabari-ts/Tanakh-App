@@ -1,0 +1,43 @@
+.admin-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-overview__error {
+  color: var(--color-error);
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+}
+
+.kpi-card__label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.kpi-card__value {
+  font-size: 1.75rem;
+  font-weight: 700;
+
+  &--error {
+    color: var(--color-error);
+    font-size: 1rem;
+  }
+}
+
+.kpi-card__change {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}

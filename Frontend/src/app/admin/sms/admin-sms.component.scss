@@ -1,0 +1,104 @@
+.admin-sms__banner {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+  background: var(--color-error-bg);
+  color: var(--color-neutral-100);
+  font-weight: 600;
+}
+
+.admin-sms__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-surface);
+}
+
+.kpi-card__label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.kpi-card__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+
+  &--error {
+    color: var(--color-error);
+  }
+}
+
+.admin-sms__test {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.admin-sms__filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+}
+
+.admin-sms__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+
+  table {
+    width: 100%;
+    background: transparent;
+  }
+}
+
+.admin-sms__empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-text-muted);
+}
