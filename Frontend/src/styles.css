@@ -267,6 +267,37 @@ a {
   border-radius: calc(var(--radius-lg) * 1.15) !important;
 }
 
+/* — Material dark mode (admin panel) — */
+/* MatTable/MatPaginator/MatDialog (admin Users/SMS/Logs modules) come from
+   Angular Material's prebuilt `indigo-pink` theme, which is a fixed light
+   theme with its own hardcoded surface/text colors - it doesn't respond to
+   [data-theme="dark"] on its own the way the rest of this app's
+   hand-rolled CSS-variable-based UI does. These overrides only apply where
+   ConfirmDialogComponent doesn't already supply its own opaque card (see
+   the `.mat-mdc-dialog-surface: transparent` rule above), so the two don't
+   fight each other. */
+:root[data-theme='dark'] {
+  .mat-mdc-table,
+  .mat-mdc-paginator {
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+  .mat-mdc-header-cell {
+    color: var(--color-text-muted);
+  }
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    border-bottom-color: var(--color-divider);
+  }
+  .mat-mdc-paginator-icon {
+    fill: var(--color-text);
+  }
+  .mat-mdc-select-value,
+  .mat-mdc-paginator-range-label {
+    color: var(--color-text);
+  }
+}
+
 /* — scrollbars & motion — */
 .tk-scroll {
   scrollbar-width: thin;

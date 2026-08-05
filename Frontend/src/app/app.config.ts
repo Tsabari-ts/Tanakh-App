@@ -15,6 +15,7 @@ import { AppUpdateService } from './core/app-update.service';
 import { PwaInstallService } from './services/pwa-install.service';
 import { TtsProvider } from './core/tts/tts-provider';
 import { WebSpeechProvider } from './core/tts/web-speech-provider.service';
+import { MaintenanceService } from './services/maintenance.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,6 +33,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAppInitializer(() => inject(AppUpdateService).init()),
     provideAppInitializer(() => inject(PwaInstallService).init()),
+    provideAppInitializer(() => inject(MaintenanceService).check()),
     WelcomeModalComponent,
     SubscribeComponent,
     ReadPermissionComponent

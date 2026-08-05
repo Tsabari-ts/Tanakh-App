@@ -1,0 +1,8 @@
+@if (text(); as bannerText) {
+  @if (!dismissed()) {
+    <div class="announcement-banner card elev-md" role="status">
+      <p>{{ bannerText }}</p>
+      <button type="button" class="btn btn-primary" (click)="dismiss()" i18n="@@cookieBanner.dismiss">הבנתי</button>
+    </div>
+  }
+}

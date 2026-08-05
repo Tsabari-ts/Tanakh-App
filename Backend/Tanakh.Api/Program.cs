@@ -67,6 +67,7 @@ builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddSingleton<IUnsubscribeTokenService, UnsubscribeTokenService>();
 builder.Services.AddScoped<INextChapterResolver, NextChapterResolver>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IAppSettingsService, AppSettingsService>();
 builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
@@ -225,6 +226,34 @@ app.Use(async (context, next) =>
     {
         context.Response.Headers.Append("X-Robots-Tag", "noindex, nofollow");
     }
+    await next();
+});
+
+// Maintenance mode: enforced here, not just as a frontend overlay - a
+// 503 for every route except the admin panel (so it can be turned back
+// off), health checks, and /api/v1/system (the public status endpoints
+// the frontend interstitial itself needs to read).
+app.Use(async (context, next) =>
+{
+    PathString path = context.Request.Path;
+    bool exempt = path.StartsWithSegments("/api/v1/admin")
+        || path.StartsWithSegments("/api/v1/system")
+        || path.StartsWithSegments("/health");
+
+    if (!exempt)
+    {
+        IAppSettingsService appSettingsService = context.RequestServices.GetRequiredService<IAppSettingsService>();
+        MaintenanceStatus maintenance = await appSettingsService.GetMaintenanceAsync(context.RequestAborted);
+
+        if (maintenance.Enabled)
+        {
+            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(new { maintenance = true, message = maintenance.Message });
+            return;
+        }
+    }
+
     await next();
 });
 

@@ -12,6 +12,9 @@ import { AccessibilityWidgetComponent } from './shared/a11y/accessibility-widget
 import { AccessibilityStatementService } from './shared/a11y/accessibility-statement-dialog/accessibility-statement.service';
 import { TermsService } from './shared/legal/terms-dialog/terms.service';
 import { CookieBannerComponent } from './shared/cookie-banner/cookie-banner.component';
+import { MaintenanceScreenComponent } from './shared/maintenance-screen/maintenance-screen.component';
+import { AnnouncementBannerComponent } from './shared/announcement-banner/announcement-banner.component';
+import { MaintenanceService } from './services/maintenance.service';
 import { WHATSAPP_CONTACT_URL } from './shared/contact-links';
 
 @Component({
@@ -19,7 +22,7 @@ import { WHATSAPP_CONTACT_URL } from './shared/contact-links';
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [Dir, RouterOutlet, ErrorScreenComponent, SkipLinkComponent, AccessibilityWidgetComponent, CookieBannerComponent]
+    imports: [Dir, RouterOutlet, ErrorScreenComponent, SkipLinkComponent, AccessibilityWidgetComponent, CookieBannerComponent, MaintenanceScreenComponent, AnnouncementBannerComponent]
 })
 export class AppComponent {
   title = 'Tanakh';
@@ -32,6 +35,7 @@ export class AppComponent {
   readonly notifications = inject(NotificationService);
   readonly errorState = inject(ErrorStateService);
   readonly appUpdate = inject(AppUpdateService);
+  readonly maintenance = inject(MaintenanceService);
   private readonly statement = inject(AccessibilityStatementService);
   private readonly terms = inject(TermsService);
 

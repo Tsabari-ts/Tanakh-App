@@ -1,0 +1,87 @@
+<section class="admin-system__section">
+  <h2>בריאות המערכת</h2>
+
+  @if (health(); as h) {
+    <div class="admin-system__cards">
+      <div class="kpi-card">
+        <span class="kpi-card__label">פעיל מאז</span>
+        <span class="kpi-card__value kpi-card__value--small">{{ h.processStartedAt | date:'short' }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card__label">זמן פעילות</span>
+        <span class="kpi-card__value kpi-card__value--small">{{ formatUptime(h.uptimeSeconds) }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card__label">חיבור למסד נתונים</span>
+        <span class="kpi-card__value" [class.kpi-card__value--error]="!h.databaseConnected">
+          {{ h.databaseConnected ? 'מחובר' : 'שגיאה' }}
+        </span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card__label">שטח דיסק פנוי</span>
+        <span class="kpi-card__value kpi-card__value--small">{{ formatBytes(h.diskFreeBytes) }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card__label">גרסת build</span>
+        <span class="kpi-card__value kpi-card__value--small">{{ h.buildVersion }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-card__label">גיבויים</span>
+        <span class="kpi-card__value kpi-card__value--small">{{ h.backupsNote }}</span>
+      </div>
+    </div>
+  }
+</section>
+
+<section class="admin-system__section">
+  <h2>מצב תחזוקה</h2>
+  <div class="admin-system__form">
+    <label>
+      <input type="checkbox" [(ngModel)]="maintenanceEnabled" />
+      הפעל מצב תחזוקה
+    </label>
+    <input type="text" placeholder="הודעה למשתמשים (אופציונלי)" [(ngModel)]="maintenanceMessage" />
+    <button type="button" (click)="saveMaintenance()">שמירה</button>
+    @if (maintenanceSaved()) {
+      <span class="admin-system__saved">נשמר</span>
+    }
+  </div>
+</section>
+
+<section class="admin-system__section">
+  <h2>הודעה גלובלית</h2>
+  <div class="admin-system__form">
+    <input type="text" placeholder="טקסט ההודעה" [(ngModel)]="bannerText" />
+    <input type="datetime-local" [(ngModel)]="bannerExpiresAt" />
+    <button type="button" (click)="saveBanner()">פרסום</button>
+    <button type="button" (click)="clearBanner()">ניקוי</button>
+    @if (bannerSaved()) {
+      <span class="admin-system__saved">נשמר</span>
+    }
+  </div>
+</section>
+
+<section class="admin-system__section">
+  <h2>Feature Flags</h2>
+  <div class="admin-system__form">
+    <input type="text" placeholder="שם הדגל החדש" [(ngModel)]="newFlagName" (keyup.enter)="addFlag()" />
+    <button type="button" (click)="addFlag()">הוספה</button>
+  </div>
+
+  <table class="admin-system__flags-table">
+    @for (flag of flags(); track flag.name) {
+      <tr>
+        <td>{{ flag.name }}</td>
+        <td>
+          <button type="button" (click)="toggleFlag(flag)">
+            {{ flag.enabled ? 'מופעל' : 'כבוי' }}
+          </button>
+        </td>
+        <td>{{ flag.updatedAt | date:'short' }}</td>
+        <td><button type="button" (click)="deleteFlag(flag)">מחיקה</button></td>
+      </tr>
+    } @empty {
+      <tr><td>אין דגלים מוגדרים.</td></tr>
+    }
+  </table>
+</section>

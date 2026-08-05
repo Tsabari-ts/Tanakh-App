@@ -1,0 +1,23 @@
+.announcement-banner {
+  position: fixed;
+  z-index: 800;
+  inset-inline: var(--space-4);
+  top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
+  max-width: 480px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.announcement-banner p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  flex: 1;
+}
+
+.announcement-banner .btn {
+  flex: none;
+}

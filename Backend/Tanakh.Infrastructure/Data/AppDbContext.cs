@@ -33,6 +33,10 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();
 
+        public DbSet<AppSetting> AppSettings => Set<AppSetting>();
+
+        public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

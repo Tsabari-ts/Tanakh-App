@@ -27,6 +27,10 @@ export const adminRoutes: Routes = [
       {
         path: 'logs',
         loadComponent: () => import('./logs/admin-logs.component').then(m => m.AdminLogsComponent)
+      },
+      {
+        path: 'system',
+        loadComponent: () => import('./system/admin-system.component').then(m => m.AdminSystemComponent)
       }
     ]
   }

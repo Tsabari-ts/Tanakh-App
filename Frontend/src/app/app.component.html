@@ -40,11 +40,14 @@
   </footer>
 
   <app-cookie-banner></app-cookie-banner>
+  <app-announcement-banner></app-announcement-banner>
 
   <div class="img-background" aria-hidden="true"></div>
 
   <main id="main-content" tabindex="-1">
-    @if (errorState.state().kind === 'none') {
+    @if (maintenance.status()?.enabled) {
+      <app-maintenance-screen [message]="maintenance.status()?.message ?? null"></app-maintenance-screen>
+    } @else if (errorState.state().kind === 'none') {
       <router-outlet></router-outlet>
     } @else {
       <app-error-screen></app-error-screen>

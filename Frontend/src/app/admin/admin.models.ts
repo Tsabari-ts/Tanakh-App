@@ -78,3 +78,28 @@ export interface DateRange {
   from: string;
   to: string;
 }
+
+export interface SystemHealth {
+  processStartedAt: string;
+  uptimeSeconds: number;
+  databaseConnected: boolean;
+  diskFreeBytes: number | null;
+  buildVersion: string;
+  backupsNote: string;
+}
+
+export interface MaintenanceStatus {
+  enabled: boolean;
+  message: string | null;
+}
+
+export interface BannerStatus {
+  text: string;
+  expiresAt: string;
+}
+
+export interface FeatureFlag {
+  name: string;
+  enabled: boolean;
+  updatedAt: string;
+}

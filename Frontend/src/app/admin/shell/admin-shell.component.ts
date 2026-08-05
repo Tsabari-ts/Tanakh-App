@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { AdminAuthService } from '../admin-auth.service';
 import { AdminDateRangeService } from '../admin-date-range.service';
 import { DateRangePreset } from '../admin.models';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-admin-shell',
@@ -18,6 +19,7 @@ export class AdminShellComponent {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   readonly dateRange = inject(AdminDateRangeService);
+  readonly theme = inject(ThemeService);
 
   readonly presets: { id: DateRangePreset; label: string }[] = [
     { id: 'today', label: 'היום' },

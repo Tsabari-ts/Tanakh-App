@@ -50,4 +50,12 @@ export class ApiCallService {
   updateReadingProgress(readingProgress: any) {
     return this.http.post(`${this.baseUrl}/api/v1/reading-progress`, readingProgress, { responseType: 'text' });
   }
+
+  getMaintenanceStatus(): Observable<{ enabled: boolean; message: string | null }> {
+    return this.http.get<{ enabled: boolean; message: string | null }>(`${this.baseUrl}/api/v1/system/maintenance`);
+  }
+
+  getAnnouncementBanner(): Observable<{ text: string; expiresAt: string } | null> {
+    return this.http.get<{ text: string; expiresAt: string } | null>(`${this.baseUrl}/api/v1/system/banner`);
+  }
 }

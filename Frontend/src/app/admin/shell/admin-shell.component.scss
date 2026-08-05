@@ -45,6 +45,7 @@
   line-height: 1;
 }
 
+.admin-shell__theme,
 .admin-shell__logout {
   padding: 0.5rem 1rem;
   border: 1px solid var(--color-border);
@@ -52,6 +53,7 @@
   background: var(--color-surface);
   color: var(--color-text);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .admin-shell__nav {

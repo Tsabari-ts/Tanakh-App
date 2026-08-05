@@ -1,0 +1,50 @@
+.maintenance-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: #1a1a1ae6;
+  color: var(--color-accent-100);
+  font-family: var(--font-body);
+}
+
+.maintenance-screen h1 {
+  margin: 0;
+  font-weight: 300;
+  font-size: var(--font-size-h2);
+}
+
+.maintenance-screen p {
+  max-width: 480px;
+  margin: 0;
+  color: #dddddd;
+  font-size: var(--font-size-base);
+}
+
+.maintenance-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.maintenance-screen__actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-accent-100);
+  color: var(--color-accent-900);
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-base);
+  min-block-size: var(--tap-target-min);
+}
+
+.maintenance-screen__actions button:hover {
+  background: var(--color-accent-200);
+}
