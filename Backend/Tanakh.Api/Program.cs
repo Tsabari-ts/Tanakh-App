@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +12,9 @@ using Scalar.AspNetCore;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.RateLimiting;
+using System.Threading.Tasks;
 using Tanakh.Api;
 using Tanakh.Api.Auth;
 using Tanakh.Api.Services;
@@ -56,6 +61,7 @@ builder.Services.AddScoped<ITanakhTextService, TanakhTextService>();
 builder.Services.AddScoped<IJewishCalendarService, JewishCalendarService>();
 builder.Services.AddScoped<IReadingProgressService, ReadingProgressService>();
 builder.Services.AddSingleton<IHashingService, HashingService>();
+builder.Services.AddSingleton<IAdminPasswordHasher, AdminPasswordHasher>();
 builder.Services.AddScoped<ISubscriberAnonymizationService, SubscriberAnonymizationService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddSingleton<IUnsubscribeTokenService, UnsubscribeTokenService>();
@@ -74,10 +80,52 @@ builder.Services.AddOptions<RemindersOptions>()
     .Bind(builder.Configuration.GetSection(RemindersOptions.SectionName));
 builder.Services.AddOptions<AdminOptions>()
     .Bind(builder.Configuration.GetSection(AdminOptions.SectionName));
-builder.Services.AddAuthentication()
-    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
-        BasicAuthenticationHandler.SchemeName, null);
-builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(AdminCookieAuthDefaults.SchemeName)
+    .AddCookie(AdminCookieAuthDefaults.SchemeName, options =>
+    {
+        options.Cookie.Name = "tanakh_admin";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = false;
+
+        // This is an API, not a browser login-page flow - return 401/403
+        // JSON instead of the default redirect-to-login-page behavior.
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        };
+    });
+builder.Services.AddAuthorization(options =>
+    options.AddPolicy("AdminOnly", policy => policy.RequireClaim(ClaimTypes.Role, "admin")));
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        return ValueTask.CompletedTask;
+    };
+
+    // 5 attempts / 15 minutes per IP, then hard-rejected until the window
+    // rolls - this is also the "30-minute lockout" from the spec in
+    // practice (two consecutive rolled windows without a successful login).
+    options.AddPolicy(RateLimiterPolicyNames.AdminLogin, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(15),
+                QueueLimit = 0
+            }));
+});
 builder.Services.AddHostedService<RetentionHostedService>();
 builder.Services.AddHostedService<ReminderPlannerService>();
 builder.Services.AddHostedService<ReminderDispatcherService>();
@@ -102,6 +150,22 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
+
+// --hash-admin-password <pw>: one-off local utility to produce the value
+// for Admin__PasswordHash - never derived any other way, and safe to run
+// in any environment (it touches no database/service state).
+int hashPasswordFlagIndex = Array.IndexOf(args, "--hash-admin-password");
+if (hashPasswordFlagIndex >= 0)
+{
+    if (hashPasswordFlagIndex + 1 >= args.Length)
+    {
+        throw new InvalidOperationException("--hash-admin-password requires a password argument.");
+    }
+
+    IAdminPasswordHasher hasher = app.Services.GetRequiredService<IAdminPasswordHasher>();
+    Console.WriteLine(hasher.Hash(args[hashPasswordFlagIndex + 1]));
+    return;
+}
 
 // --seed / --reset-db: one-shot dev convenience commands, hard-blocked
 // outside Development so they can never run against staging/prod.
@@ -143,7 +207,26 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+// Cookie auth requires credentialed CORS requests, which browsers reject
+// under AllowAnyOrigin() ("Access-Control-Allow-Origin: *" is incompatible
+// with "credentials: include") - so this is now an explicit allowlist
+// instead of wide-open, for every endpoint, not just the admin ones.
+string[] allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? Array.Empty<string>();
+app.UseCors(x => x.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials());
+
+// Hidden-route hardening (spec section 1): every admin response is marked
+// noindex/nofollow, regardless of whether the request succeeds or fails.
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/v1/admin"))
+    {
+        context.Response.Headers.Append("X-Robots-Tag", "noindex, nofollow");
+    }
+    await next();
+});
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,0 +1,9 @@
+# Cloudflare Pages static-response headers - https://developers.cloudflare.com/pages/configuration/headers/
+# Copied into the deployed output root by `ng build` (src/assets -> dist/tanakh),
+# so it sits alongside index.html.
+#
+# TODO(LAUNCH): "admin-x9k2" here MUST match environment.production.ts's
+# adminRoutePath exactly - both are placeholders substituted by the deploy
+# pipeline before a real production build ships. See docs/LAUNCH-CHECKLIST.md, L-01.
+/admin-x9k2/*
+  X-Robots-Tag: noindex, nofollow

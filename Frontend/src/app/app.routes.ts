@@ -1,7 +1,15 @@
 import { Routes } from '@angular/router';
+import { environment } from '../environments/environment';
 
 export const routes: Routes = [
   { path: "", redirectTo: "entrance", pathMatch: "full" },
+  {
+    // Hidden admin panel - deliberately not in the app's navigation, not
+    // localized, and excluded from the sitemap/robots. See
+    // Frontend/src/assets/_headers for the noindex header on this prefix.
+    path: environment.adminRoutePath,
+    loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes)
+  },
   {
     path: "entrance",
     loadComponent: () => import('./components/entrance/entrance.component').then(m => m.EntranceComponent),

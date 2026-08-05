@@ -1,0 +1,38 @@
+<div class="admin-login">
+  <div class="admin-login__card">
+    <h1>כניסת מנהל</h1>
+
+    @if (step() === 'credentials') {
+      <form (ngSubmit)="submitCredentials()" #credentialsForm="ngForm">
+        <label for="username">שם משתמש</label>
+        <input id="username" name="username" type="text" autocomplete="username" [(ngModel)]="username" required />
+
+        <label for="password">סיסמה</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" [(ngModel)]="password" required />
+
+        @if (errorMessage()) {
+          <p class="admin-login__error">{{ errorMessage() }}</p>
+        }
+
+        <button type="submit" [disabled]="!credentialsForm.form.valid || busy()">
+          {{ busy() ? 'שולח…' : 'המשך' }}
+        </button>
+      </form>
+    } @else {
+      <form (ngSubmit)="submitOtp()" #otpForm="ngForm">
+        <p class="admin-login__hint">נשלח קוד אימות בן 6 ספרות ב-SMS</p>
+
+        <label for="code">קוד אימות</label>
+        <input id="code" name="code" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" [(ngModel)]="code" required />
+
+        @if (errorMessage()) {
+          <p class="admin-login__error">{{ errorMessage() }}</p>
+        }
+
+        <button type="submit" [disabled]="!otpForm.form.valid || busy()">
+          {{ busy() ? 'מאמת…' : 'אימות' }}
+        </button>
+      </form>
+    }
+  </div>
+</div>

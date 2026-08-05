@@ -28,6 +28,21 @@ And a `Hashing` section bound to `Tanakh.Infrastructure.Options.HashingOptions`:
 |---|---|
 | `Hashing:Pepper` | HMAC key used by `IHashingService` (`consent_records.ip_hash`) and by `UnsubscribeTokenService` to sign manage tokens. Never rotate without a documented migration plan — rotating it invalidates every manage token currently in circulation. |
 
+And an `Admin` section bound to `Tanakh.Infrastructure.Options.AdminOptions`, for the hidden admin panel (login → SMS OTP → cookie session, `AdminAuthController`/`AdminController`):
+
+| Key | Purpose |
+|---|---|
+| `Admin:Username` | The single admin login username. |
+| `Admin:PasswordHash` | Output of `dotnet run -- --hash-admin-password <password>` (PBKDF2-HMACSHA256, never a plaintext password). Re-run and replace to change the password. |
+| `Admin:Phone` | E.164 phone number (`+9725XXXXXXXX`) that login OTP codes are sent to, via the same `ISmsSender`/SMS4FREE integration reminders use. |
+| `Admin:LowBalanceThreshold` | SMS4FREE balance threshold for the future low-balance dashboard warning. Default 50. |
+
+And a `Cors:AllowedOrigins` array — the frontend origin(s) allowed to make credentialed requests (required for the admin cookie to work cross-origin; `AllowAnyOrigin()` is incompatible with `credentials: include`):
+
+| Key | Purpose |
+|---|---|
+| `Cors:AllowedOrigins:0`, `:1`, ... | Exact origins (scheme+host+port, no path) allowed to call the API with credentials. Locally this is `https://localhost:4200` (see `appsettings.Development.json`); production must set this to the real Cloudflare Pages origin before launch (see `docs/LAUNCH-CHECKLIST.md` L-01, same "no prod domain chosen yet" gap as `apiUrl`). |
+
 ### Development
 
 This project already has a `UserSecretsId` in `Tanakh.Api/Tanakh.Api.csproj`. Set secrets locally with:
@@ -38,6 +53,9 @@ dotnet user-secrets set "Sms:User" "..."
 dotnet user-secrets set "Sms:Pass" "..."
 dotnet user-secrets set "Sms:Sender" "..."
 dotnet user-secrets set "Hashing:Pepper" "any long random string, dev-only value is fine locally"
+dotnet user-secrets set "Admin:Username" "..."
+dotnet user-secrets set "Admin:PasswordHash" "$(dotnet run -- --hash-admin-password 'your-dev-password')"
+dotnet user-secrets set "Admin:Phone" "+9725XXXXXXXX"
 ```
 
 (Run `dotnet user-secrets init` first only if `UserSecretsId` is ever missing from the csproj.)
@@ -55,6 +73,10 @@ Sms__Pass
 Sms__Sender
 Sms__DryRun=false
 Hashing__Pepper
+Admin__Username
+Admin__PasswordHash
+Admin__Phone
+Cors__AllowedOrigins__0
 ```
 
 Azure Key Vault integration was intentionally not added — this app's deployment targets

@@ -1,17 +1,18 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tanakh.Api.Auth;
-using Tanakh.Api.Pages;
+using Tanakh.Api.Model;
 using Tanakh.Domain;
 
 namespace Tanakh.Api.Controllers
 {
+    // Dashboard content (KPIs, users, SMS log, etc.) lands in later phases -
+    // this controller currently only carries the two manual actions the old
+    // HTML admin page exposed (T-23), now as JSON under cookie auth.
     [Route("api/v1/admin")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = BasicAuthenticationHandler.SchemeName)]
+    [Authorize(Policy = "AdminOnly")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminService adminService;
@@ -21,26 +22,18 @@ namespace Tanakh.Api.Controllers
             this.adminService = adminService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetDashboardAsync(CancellationToken cancellationToken)
-        {
-            AdminDashboard dashboard = await adminService.GetDashboardAsync(cancellationToken);
-            string html = AdminPages.RenderDashboard(dashboard, "/api/v1/admin/actions");
-            return Content(html, "text/html; charset=utf-8");
-        }
-
         [HttpPost("actions/unsubscribe")]
-        public async Task<IActionResult> UnsubscribeAsync([FromForm] string phoneNumber, CancellationToken cancellationToken)
+        public async Task<IActionResult> UnsubscribeAsync([FromBody] AdminUnsubscribeRequest request, CancellationToken cancellationToken)
         {
-            await adminService.UnsubscribeByPhoneAsync(phoneNumber, cancellationToken);
-            return Redirect("/api/v1/admin");
+            bool found = await adminService.UnsubscribeByPhoneAsync(request.PhoneNumber, cancellationToken);
+            return found ? Ok() : NotFound();
         }
 
         [HttpPost("actions/requeue")]
-        public async Task<IActionResult> RequeueAsync([FromForm] Guid deliveryId, CancellationToken cancellationToken)
+        public async Task<IActionResult> RequeueAsync([FromBody] AdminRequeueRequest request, CancellationToken cancellationToken)
         {
-            await adminService.RequeueFailedDeliveryAsync(deliveryId, cancellationToken);
-            return Redirect("/api/v1/admin");
+            bool found = await adminService.RequeueFailedDeliveryAsync(request.DeliveryId, cancellationToken);
+            return found ? Ok() : NotFound();
         }
     }
 }
