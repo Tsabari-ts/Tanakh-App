@@ -2,7 +2,10 @@ namespace Tanakh.Api.Model
 {
     public class SubscriptionRequest
     {
-        public required string Email { get; set; }
+        // Any format the user typed (spaces/dashes/+972/00972/local) -
+        // normalized and validated server-side via
+        // IsraeliMobilePhoneValidator, same rule the client uses.
+        public required string PhoneNumber { get; set; }
 
         public string? DisplayName { get; set; }
 

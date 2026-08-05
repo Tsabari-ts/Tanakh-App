@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Domain;
 using Tanakh.Domain.Entities;
+using Tanakh.Domain.Sms;
 using Tanakh.Infrastructure.Data;
 using Tanakh.Infrastructure.Options;
 using Tanakh.Infrastructure.Services;
@@ -18,9 +19,11 @@ namespace Tanakh.Infrastructure.Reminders
 {
     // Polls reminder_deliveries every DispatchIntervalSeconds, claims due
     // rows via SELECT...FOR UPDATE SKIP LOCKED (safe with N concurrent API
-    // instances), and sends each through IEmailSender. Folds in T-07's
-    // sending-reaper, T-08's retry backoff, T-09's lateness skip, and T-10's
-    // send-rate pacing - they all live in the same send loop.
+    // instances), and sends each through ISmsSender. Folds in the
+    // sending-reaper, retry backoff, lateness skip, and send-rate pacing -
+    // they all live in the same send loop. The outbox/claim mechanism is
+    // unchanged from the email-era design (see docs/adr/001-scheduler.md) -
+    // only what happens at the "send" step changed.
     public class ReminderDispatcherService : BackgroundService
     {
         private static readonly TimeSpan SendingReaperThreshold = TimeSpan.FromMinutes(10);
@@ -61,12 +64,8 @@ namespace Tanakh.Infrastructure.Reminders
         {
             using IServiceScope scope = scopeFactory.CreateScope();
             AppDbContext dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            IEmailSender emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
-            ISuppressionService suppressionService = scope.ServiceProvider.GetRequiredService<ISuppressionService>();
-            IHashingService hashingService = scope.ServiceProvider.GetRequiredService<IHashingService>();
-            INextChapterResolver nextChapterResolver = scope.ServiceProvider.GetRequiredService<INextChapterResolver>();
+            ISmsSender smsSender = scope.ServiceProvider.GetRequiredService<ISmsSender>();
             IJewishCalendarService jewishCalendarService = scope.ServiceProvider.GetRequiredService<IJewishCalendarService>();
-            IUnsubscribeTokenService unsubscribeTokenService = scope.ServiceProvider.GetRequiredService<IUnsubscribeTokenService>();
 
             await ReapStuckSendingRowsAsync(dbContext, cancellationToken);
 
@@ -89,16 +88,7 @@ namespace Tanakh.Infrastructure.Reminders
 
             foreach (ReminderDelivery delivery in deliveries)
             {
-                DeliveryOutcome outcome = await ProcessDeliveryAsync(
-                    delivery,
-                    isShabbatOrHoliday,
-                    dbContext,
-                    emailSender,
-                    suppressionService,
-                    hashingService,
-                    nextChapterResolver,
-                    unsubscribeTokenService,
-                    cancellationToken);
+                DeliveryOutcome outcome = await ProcessDeliveryAsync(delivery, isShabbatOrHoliday, dbContext, smsSender, cancellationToken);
 
                 switch (outcome)
                 {
@@ -127,71 +117,62 @@ namespace Tanakh.Infrastructure.Reminders
             ReminderDelivery delivery,
             bool isShabbatOrHoliday,
             AppDbContext dbContext,
-            IEmailSender emailSender,
-            ISuppressionService suppressionService,
-            IHashingService hashingService,
-            INextChapterResolver nextChapterResolver,
-            IUnsubscribeTokenService unsubscribeTokenService,
+            ISmsSender smsSender,
             CancellationToken cancellationToken)
         {
             Subscriber? subscriber = await dbContext.Subscribers
                 .FirstOrDefaultAsync(s => s.Id == delivery.SubscriberId, cancellationToken);
 
-            if (subscriber is null || subscriber.Status != SubscriberStatus.Active)
+            if (subscriber is null || subscriber.Status != SubscriberStatus.Active || subscriber.PhoneNumber is null)
             {
                 delivery.Status = DeliveryStatus.Skipped;
                 return DeliveryOutcome.Skipped;
             }
 
-            // T-09: grace window - don't send a badly overdue reminder late.
+            // Grace window - don't send a badly overdue reminder late.
             if (DateTimeOffset.UtcNow - delivery.ScheduledFor > TimeSpan.FromMinutes(options.MaxLatenessMinutes))
             {
                 delivery.Status = DeliveryStatus.Skipped;
                 return DeliveryOutcome.Skipped;
             }
 
-            // T-12: hard block, unconditional - not gated on
-            // subscriber.SkipShabbatHolidays. Blocked deliveries are
-            // skipped outright, never queued for after Shabbat/Yom Tov.
+            // Hard block, unconditional - not gated on
+            // subscriber.SkipShabbatHolidays. Blocked deliveries are skipped
+            // outright, never queued for after Shabbat/Yom Tov.
             if (isShabbatOrHoliday)
             {
                 delivery.Status = DeliveryStatus.Skipped;
                 return DeliveryOutcome.Skipped;
             }
 
-            // T-11: belt-and-braces - EmailSender itself also checks this,
-            // but checking here lets a suppressed address be recorded as
-            // Skipped specifically, rather than a generic Failed.
-            if (await suppressionService.IsSuppressedAsync(subscriber.Email, cancellationToken))
-            {
-                delivery.Status = DeliveryStatus.Skipped;
-                return DeliveryOutcome.Skipped;
-            }
+            string message = BuildReminderSms(subscriber);
+            SmsSegmentCalculator.Result segments = SmsSegmentCalculator.Calculate(message);
 
-            NextChapterResult next = await nextChapterResolver.ResolveAsync(subscriber.Id, cancellationToken);
-            string subscriberToken = unsubscribeTokenService.Issue(subscriber.Id);
-            // T-22: lets analytics attribute reading sessions back to reminder emails.
-            string targetUrl = $"{options.PublicBaseUrl}/books/{next.Section.ToLowerInvariant()}/{next.Book}/{next.Chapter}/false" +
-                $"?sid={Uri.EscapeDataString(subscriberToken)}&src=reminder&utm_source=email&utm_medium=reminder&utm_campaign=daily";
-            string unsubscribeUrl = $"{options.ApiBaseUrl}/api/v1/subscriptions/unsubscribe?token={Uri.EscapeDataString(subscriberToken)}";
+            delivery.TargetUrl = options.PublicBaseUrl;
+            delivery.MessageBody = message;
+            delivery.SegmentCount = segments.SegmentCount;
 
-            delivery.TargetUrl = targetUrl;
+            SmsSendResult result = await smsSender.SendAsync(subscriber.PhoneNumber, message, cancellationToken);
 
-            EmailMessage message = BuildReminderEmail(subscriber, next, targetUrl, unsubscribeUrl);
-            bool sent = await emailSender.SendMessageAsync(message);
+            delivery.ProviderResponse = result.RawResponse;
+            delivery.ProviderStatusCode = result.StatusCode;
 
-            if (sent)
+            if (result.Success)
             {
                 delivery.Status = DeliveryStatus.Sent;
                 delivery.SentAt = DateTimeOffset.UtcNow;
                 return DeliveryOutcome.Sent;
             }
 
-            // T-08: retry with backoff up to MaxAttempts, then a final Failed.
-            // Raw SMTP gives no reliable transient/permanent signal (that
-            // needs a real ESP's structured error codes / bounce webhooks,
-            // deliberately out of scope while still on SmtpClient), so every
-            // failure is treated as retryable until attempts are exhausted.
+            // Permanent failures (bad number, rejected content) are never
+            // retried - retrying the same request produces the same result.
+            if (result.IsPermanentFailure)
+            {
+                delivery.Status = DeliveryStatus.Failed;
+                delivery.LastError = $"SMS4FREE status {result.StatusCode} (permanent).";
+                return DeliveryOutcome.Failed;
+            }
+
             if (delivery.AttemptCount < options.MaxAttempts)
             {
                 int backoffMinutes = 1;
@@ -203,35 +184,22 @@ namespace Tanakh.Infrastructure.Reminders
 
                 delivery.Status = DeliveryStatus.Pending;
                 delivery.NextAttemptAt = DateTimeOffset.UtcNow.AddMinutes(backoffMinutes);
-                delivery.LastError = "Email delivery failed.";
+                delivery.LastError = $"SMS4FREE status {result.StatusCode}.";
                 return DeliveryOutcome.RetryScheduled;
             }
 
             delivery.Status = DeliveryStatus.Failed;
-            delivery.LastError = "Email delivery failed after all retry attempts.";
+            delivery.LastError = $"SMS send failed after all retry attempts (last status {result.StatusCode}).";
             return DeliveryOutcome.Failed;
         }
 
-        private static EmailMessage BuildReminderEmail(Subscriber subscriber, NextChapterResult next, string targetUrl, string unsubscribeUrl)
+        private string BuildReminderSms(Subscriber subscriber)
         {
-            string greeting = string.IsNullOrWhiteSpace(subscriber.DisplayName) ? "שלום" : $"שלום {subscriber.DisplayName}";
-            string cycleNote = next.CompletedCycle
-                ? "\n\nסיימת מחזור קריאה שלם של התנ\"ך - מתחילים שוב מבראשית!"
-                : string.Empty;
+            string nameSegment = string.IsNullOrWhiteSpace(subscriber.DisplayName) ? string.Empty : $" {subscriber.DisplayName}";
 
-            return new EmailMessage
-            {
-                To = subscriber.Email,
-                Subject = "התזכורת היומית שלך לקריאת תנ\"ך",
-                Body = $"{greeting},\n\n" +
-                       $"הגיע הזמן להמשיך בקריאת התנ\"ך. הפרק של היום:\n{targetUrl}{cycleNote}\n\n" +
-                       $"לביטול ההרשמה לתזכורות: {unsubscribeUrl}",
-                Headers = new Dictionary<string, string>
-                {
-                    ["List-Unsubscribe"] = $"<{unsubscribeUrl}>",
-                    ["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
-                }
-            };
+            return options.SmsTemplate
+                .Replace("{שם}", nameSegment)
+                .Replace("{קישור}", options.PublicBaseUrl);
         }
 
         private static async Task ReapStuckSendingRowsAsync(AppDbContext dbContext, CancellationToken cancellationToken)

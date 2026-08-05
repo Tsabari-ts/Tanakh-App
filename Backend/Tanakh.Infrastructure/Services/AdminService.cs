@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Domain;
 using Tanakh.Domain.Entities;
+using Tanakh.Domain.Validation;
 using Tanakh.Infrastructure.Data;
 
 namespace Tanakh.Infrastructure.Services
@@ -26,24 +27,19 @@ namespace Tanakh.Infrastructure.Services
         public async Task<AdminDashboard> GetDashboardAsync(CancellationToken cancellationToken = default)
         {
             int active = await dbContext.Subscribers.CountAsync(s => s.Status == SubscriberStatus.Active, cancellationToken);
-            int pending = await dbContext.Subscribers.CountAsync(s => s.Status == SubscriberStatus.PendingConfirmation, cancellationToken);
             int unsubscribed = await dbContext.Subscribers.CountAsync(s => s.Status == SubscriberStatus.Unsubscribed, cancellationToken);
-            int bounced = await dbContext.Subscribers.CountAsync(s => s.Status == SubscriberStatus.Bounced, cancellationToken);
-            int totalSubscribers = await dbContext.Subscribers.CountAsync(cancellationToken);
-            int confirmedEver = await dbContext.Subscribers.CountAsync(s => s.ConfirmedAt != null, cancellationToken);
 
             DateTimeOffset sevenDaysAgo = DateTimeOffset.UtcNow.AddDays(-7);
             int signupsLast7Days = await dbContext.Subscribers.CountAsync(s => s.CreatedAt >= sevenDaysAgo, cancellationToken);
-
-            double confirmationRate = totalSubscribers == 0 ? 0 : 100.0 * confirmedEver / totalSubscribers;
-            double bounceRate = totalSubscribers == 0 ? 0 : 100.0 * bounced / totalSubscribers;
+            int failedLast7Days = await dbContext.ReminderDeliveries
+                .CountAsync(d => d.Status == DeliveryStatus.Failed && d.UpdatedAt >= sevenDaysAgo, cancellationToken);
 
             List<FailedDeliverySummary> failedDeliveries = await (
                 from delivery in dbContext.ReminderDeliveries
                 join subscriber in dbContext.Subscribers on delivery.SubscriberId equals subscriber.Id
                 where delivery.Status == DeliveryStatus.Failed
                 orderby delivery.UpdatedAt descending
-                select new FailedDeliverySummary(delivery.Id, subscriber.Email, delivery.LastError, delivery.AttemptCount))
+                select new FailedDeliverySummary(delivery.Id, subscriber.PhoneNumber, delivery.LastError, delivery.AttemptCount))
                 .Take(RecentFailedDeliveriesLimit)
                 .ToListAsync(cancellationToken);
 
@@ -59,18 +55,22 @@ namespace Tanakh.Infrastructure.Services
                 join subscriber in dbContext.Subscribers on delivery.SubscriberId equals subscriber.Id
                 where delivery.ScheduledFor >= todayStartUtc && delivery.ScheduledFor < todayEndUtc
                 orderby delivery.ScheduledFor
-                select new ScheduledDeliverySummary(delivery.Id, subscriber.Email, delivery.ScheduledFor, delivery.Status.ToString()))
+                select new ScheduledDeliverySummary(delivery.Id, subscriber.PhoneNumber, delivery.ScheduledFor, delivery.Status.ToString()))
                 .ToListAsync(cancellationToken);
 
             return new AdminDashboard(
-                active, pending, unsubscribed, bounced, signupsLast7Days,
-                confirmationRate, bounceRate, failedDeliveries, scheduledToday);
+                active, unsubscribed, signupsLast7Days, failedLast7Days, failedDeliveries, scheduledToday);
         }
 
-        public async Task<bool> UnsubscribeByEmailAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<bool> UnsubscribeByPhoneAsync(string phoneNumber, CancellationToken cancellationToken = default)
         {
+            if (IsraeliMobilePhoneValidator.Validate(phoneNumber, out string e164) != IsraeliMobilePhoneValidator.ValidationResult.Valid)
+            {
+                return false;
+            }
+
             Subscriber? subscriber = await dbContext.Subscribers
-                .FirstOrDefaultAsync(s => s.Email == email, cancellationToken);
+                .FirstOrDefaultAsync(s => s.PhoneNumber == e164, cancellationToken);
 
             if (subscriber is null)
             {
@@ -78,20 +78,6 @@ namespace Tanakh.Infrastructure.Services
             }
 
             await subscriptionService.UnsubscribeAsync(subscriber.Id, cancellationToken);
-            return true;
-        }
-
-        public async Task<bool> ResendConfirmationByEmailAsync(string email, CancellationToken cancellationToken = default)
-        {
-            Subscriber? subscriber = await dbContext.Subscribers
-                .FirstOrDefaultAsync(s => s.Email == email && s.Status == SubscriberStatus.PendingConfirmation, cancellationToken);
-
-            if (subscriber is null)
-            {
-                return false;
-            }
-
-            await subscriptionService.ResendConfirmationAsync(subscriber.Id, cancellationToken);
             return true;
         }
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using System;
 using System.Diagnostics;
@@ -55,7 +56,6 @@ builder.Services.AddScoped<ITanakhTextService, TanakhTextService>();
 builder.Services.AddScoped<IJewishCalendarService, JewishCalendarService>();
 builder.Services.AddScoped<IReadingProgressService, ReadingProgressService>();
 builder.Services.AddSingleton<IHashingService, HashingService>();
-builder.Services.AddScoped<ISuppressionService, SuppressionService>();
 builder.Services.AddScoped<ISubscriberAnonymizationService, SubscriberAnonymizationService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddSingleton<IUnsubscribeTokenService, UnsubscribeTokenService>();
@@ -64,8 +64,8 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IDatabaseSeeder, DatabaseSeeder>();
 builder.Services.AddOptions<TanakhDataOptions>()
     .Bind(builder.Configuration.GetSection(TanakhDataOptions.SectionName));
-builder.Services.AddOptions<EmailOptions>()
-    .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
+builder.Services.AddOptions<SmsOptions>()
+    .Bind(builder.Configuration.GetSection(SmsOptions.SectionName));
 builder.Services.AddOptions<HashingOptions>()
     .Bind(builder.Configuration.GetSection(HashingOptions.SectionName));
 builder.Services.AddOptions<RetentionOptions>()
@@ -81,7 +81,12 @@ builder.Services.AddAuthorization();
 builder.Services.AddHostedService<RetentionHostedService>();
 builder.Services.AddHostedService<ReminderPlannerService>();
 builder.Services.AddHostedService<ReminderDispatcherService>();
-builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddHttpClient<ISmsSender, Sms4FreeSmsSender>()
+    .ConfigureHttpClient((serviceProvider, client) =>
+    {
+        int timeoutSeconds = serviceProvider.GetRequiredService<IOptions<SmsOptions>>().Value.TimeoutSeconds;
+        client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+    });
 builder.Services.AddHealthChecks()
     .AddCheck<TanakhDataHealthCheck>("tanakh-data", tags: new[] { "ready" });
 builder.Services.AddControllers();
@@ -154,10 +159,10 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 
 // Readiness: can this instance actually serve traffic correctly. Only
 // checks TanakhData/TanakhStructure file presence - the one dependency
-// this app's core function genuinely can't run without. SMTP/email is
-// deliberately excluded: it's an optional, gracefully-degraded feature
-// (see EmailOptions), not a readiness-gating dependency, and Subscribe
-// already reports its own failure per-request when email delivery fails.
+// this app's core function genuinely can't run without. SMS4FREE is
+// deliberately excluded: reminder sends happen asynchronously via the
+// dispatcher background service, not on the request path, so a down
+// provider doesn't make this instance unable to serve traffic.
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
     Predicate = check => check.Tags.Contains("ready")

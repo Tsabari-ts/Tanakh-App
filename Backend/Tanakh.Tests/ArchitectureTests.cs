@@ -7,7 +7,7 @@ namespace Tanakh.Tests
 {
     public class ArchitectureTests
     {
-        private static readonly Assembly DomainAssembly = typeof(IEmailSender).Assembly;
+        private static readonly Assembly DomainAssembly = typeof(ISubscriptionService).Assembly;
 
         [Fact]
         public void Domain_Should_Not_Depend_On_Infrastructure_Api_Or_AspNetCore()

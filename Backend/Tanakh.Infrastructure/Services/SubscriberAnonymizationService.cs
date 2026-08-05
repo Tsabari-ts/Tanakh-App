@@ -27,9 +27,10 @@ namespace Tanakh.Infrastructure.Services
                 return;
             }
 
-            // Still unique (citext + the subscriber's own id) so the
-            // unique index on email never rejects an anonymize operation.
-            subscriber.Email = $"deleted-{subscriber.Id}@anonymized.invalid";
+            // NULL, not a tombstone string - the unique index on
+            // phone_number allows multiple NULLs (Postgres default), so
+            // this never collides with another row.
+            subscriber.PhoneNumber = null;
             subscriber.DisplayName = null;
 
             await dbContext.SaveChangesAsync(cancellationToken);

@@ -23,15 +23,9 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<ReminderDelivery> ReminderDeliveries => Set<ReminderDelivery>();
 
-        public DbSet<EmailEvent> EmailEvents => Set<EmailEvent>();
-
-        public DbSet<SuppressionEntry> SuppressionEntries => Set<SuppressionEntry>();
-
         public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
 
         public DbSet<AuditLogEntry> AuditLog => Set<AuditLogEntry>();
-
-        public DbSet<ConfirmationToken> ConfirmationTokens => Set<ConfirmationToken>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

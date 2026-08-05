@@ -32,6 +32,24 @@ namespace Tanakh.Domain.Entities
 
         public string? TargetUrl { get; set; }
 
+        // The exact SMS text sent (after {שם}/link substitution) - needed to
+        // answer "what did this subscriber actually receive" and to compute
+        // SegmentCount after the fact.
+        public string? MessageBody { get; set; }
+
+        // Segments SMS4FREE actually billed for this send - UCS-2 (Hebrew)
+        // is 70 chars/segment single, 67/segment multi-part. Recorded from
+        // the message actually sent, not the template.
+        public int? SegmentCount { get; set; }
+
+        // Raw response body from SMS4FREE, verbatim - the only thing that
+        // makes a real delivery failure debuggable after the fact.
+        public string? ProviderResponse { get; set; }
+
+        // SMS4FREE's "status" field: >0 recipient count, 0/negative = error
+        // code (see Sms4FreeSmsSender for the mapping).
+        public int? ProviderStatusCode { get; set; }
+
         public DateTimeOffset CreatedAt { get; set; }
 
         public DateTimeOffset UpdatedAt { get; set; }

@@ -27,34 +27,27 @@ namespace Tanakh.Api.Pages
                 <h1>לוח ניהול</h1>
                 <div class="stats">
                     <div class="stat"><b>{dashboard.ActiveSubscribers}</b>מנויים פעילים</div>
-                    <div class="stat"><b>{dashboard.PendingConfirmationSubscribers}</b>ממתינים לאישור</div>
                     <div class="stat"><b>{dashboard.UnsubscribedSubscribers}</b>בוטלו</div>
-                    <div class="stat"><b>{dashboard.BouncedSubscribers}</b>נחסמו (bounce)</div>
                     <div class="stat"><b>{dashboard.SignupsLast7Days}</b>הרשמות ב-7 ימים</div>
-                    <div class="stat"><b>{dashboard.ConfirmationRatePercent:F1}%</b>שיעור אישור</div>
-                    <div class="stat"><b>{dashboard.BounceRatePercent:F1}%</b>שיעור bounce</div>
+                    <div class="stat"><b>{dashboard.FailedDeliveriesLast7Days}</b>כשלונות שליחה ב-7 ימים</div>
                 </div>
 
                 <h2>פעולות ידניות</h2>
                 <form method="post" action="{actionBaseUrl}/unsubscribe" style="margin-bottom:0.5rem">
-                    <input type="email" name="email" placeholder="אימייל לביטול הרשמה" required />
+                    <input type="tel" name="phoneNumber" placeholder="מספר טלפון לביטול הרשמה" required />
                     <button type="submit">בטל הרשמה</button>
-                </form>
-                <form method="post" action="{actionBaseUrl}/resend-confirmation">
-                    <input type="email" name="email" placeholder="אימייל לשליחת אישור מחדש" required />
-                    <button type="submit">שלח אישור מחדש</button>
                 </form>
 
                 <h2>משלוחים שנכשלו ({dashboard.RecentFailedDeliveries.Count})</h2>
                 <table>
-                    <tr><th>אימייל</th><th>ניסיונות</th><th>שגיאה אחרונה</th><th></th></tr>
+                    <tr><th>טלפון</th><th>ניסיונות</th><th>שגיאה אחרונה</th><th></th></tr>
                 """);
 
             foreach (FailedDeliverySummary failure in dashboard.RecentFailedDeliveries)
             {
                 html.Append($"""
                     <tr>
-                        <td>{failure.Email}</td>
+                        <td>{failure.PhoneNumber}</td>
                         <td>{failure.AttemptCount}</td>
                         <td>{failure.LastError}</td>
                         <td>
@@ -72,13 +65,13 @@ namespace Tanakh.Api.Pages
 
                 <h2>משלוחים מתוזמנים היום ({dashboard.DeliveriesScheduledToday.Count})</h2>
                 <table>
-                    <tr><th>אימייל</th><th>מתוזמן ל</th><th>סטטוס</th></tr>
+                    <tr><th>טלפון</th><th>מתוזמן ל</th><th>סטטוס</th></tr>
                 """);
 
             foreach (ScheduledDeliverySummary scheduled in dashboard.DeliveriesScheduledToday)
             {
                 html.Append($"""
-                    <tr><td>{scheduled.Email}</td><td>{scheduled.ScheduledFor:yyyy-MM-dd HH:mm} UTC</td><td>{scheduled.Status}</td></tr>
+                    <tr><td>{scheduled.PhoneNumber}</td><td>{scheduled.ScheduledFor:yyyy-MM-dd HH:mm} UTC</td><td>{scheduled.Status}</td></tr>
                     """);
             }
 

@@ -30,16 +30,9 @@ namespace Tanakh.Api.Controllers
         }
 
         [HttpPost("actions/unsubscribe")]
-        public async Task<IActionResult> UnsubscribeAsync([FromForm] string email, CancellationToken cancellationToken)
+        public async Task<IActionResult> UnsubscribeAsync([FromForm] string phoneNumber, CancellationToken cancellationToken)
         {
-            await adminService.UnsubscribeByEmailAsync(email, cancellationToken);
-            return Redirect("/api/v1/admin");
-        }
-
-        [HttpPost("actions/resend-confirmation")]
-        public async Task<IActionResult> ResendConfirmationAsync([FromForm] string email, CancellationToken cancellationToken)
-        {
-            await adminService.ResendConfirmationByEmailAsync(email, cancellationToken);
+            await adminService.UnsubscribeByPhoneAsync(phoneNumber, cancellationToken);
             return Redirect("/api/v1/admin");
         }
 

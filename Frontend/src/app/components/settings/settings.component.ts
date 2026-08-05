@@ -7,6 +7,7 @@ import { NgClass } from '@angular/common';
 import { WHATSAPP_CONTACT_URL, CONTACT_EMAIL } from '../../shared/contact-links';
 import { ThemeService } from '../../services/theme.service';
 import { ReaderPrefsService, ReaderFont } from '../../services/reader-prefs.service';
+import { hasStoredManageToken } from '../../shared/reminder-subscription';
 
 @Component({
     selector: 'app-settings',
@@ -36,7 +37,7 @@ export class SettingsComponent implements OnInit {
   ];
 
   emailAddress = CONTACT_EMAIL;
-  userHasSubscribed = localStorage.getItem('userHasSubscribed') === 'true';
+  userHasSubscribed = hasStoredManageToken();
 
   readonly subscribeButton = signal(this.userHasSubscribed ? $localize`:@@subscribe.subscribedButton:נרשמת לתזכורת` : $localize`:@@settings.subscribeButton:הירשם לתזכורת יומית`);
   subscribeIcon:string = 'calendar-icon';

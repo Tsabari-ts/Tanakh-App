@@ -28,7 +28,23 @@ export class ApiCallService {
   }
 
   subscribe(subscriptionRequest: any) {
-    return this.http.post(`${this.baseUrl}/api/v1/subscriptions`, subscriptionRequest, { responseType: 'text' });
+    return this.http.post<{ manageToken: string }>(`${this.baseUrl}/api/v1/subscriptions`, subscriptionRequest);
+  }
+
+  getReminderPreferences(manageToken: string) {
+    return this.http.get<any>(`${this.baseUrl}/api/v1/subscriptions/me`, { params: { token: manageToken } });
+  }
+
+  updateReminderPreferences(manageToken: string, preferredTime?: string, action?: 'pause' | 'resume') {
+    return this.http.post(`${this.baseUrl}/api/v1/subscriptions/me`, {
+      token: manageToken,
+      preferredTime: preferredTime ?? null,
+      action: action ?? null
+    });
+  }
+
+  unsubscribeReminder(manageToken: string) {
+    return this.http.post(`${this.baseUrl}/api/v1/subscriptions/me/unsubscribe`, { token: manageToken });
   }
 
   updateReadingProgress(readingProgress: any) {

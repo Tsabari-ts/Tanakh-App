@@ -6,8 +6,11 @@ Accepted. Implemented in `Backend/Tanakh.Infrastructure/Reminders/` (`ReminderPl
 
 ## Context
 
-Phase 4 needs to send each subscriber a daily reminder email at their chosen
-local time. The app's load is tiny (a niche reading app, not a bulk mailer),
+Phase 4 needs to send each subscriber a daily reminder at their chosen local
+time - originally by email, later switched to SMS via SMS4FREE (see the SMS
+migration spec); the scheduling mechanism itself didn't change between the
+two, only what happens at the "send" step. The app's load is tiny (a niche
+reading app, not a bulk mailer),
 but the mechanism still needs to survive restarts, support running more than
 one API instance without double-sending, and be easy to inspect when
 something goes wrong ("why didn't Dana get her reminder yesterday?").

@@ -11,8 +11,6 @@ namespace Tanakh.Infrastructure.Options
 
         public int ReminderDeliveriesRetentionDays { get; set; } = 90;
 
-        public int EmailEventsRetentionDays { get; set; } = 180;
-
         public int UnsubscribedSubscriberRetentionMonths { get; set; } = 12;
 
         // How often the retention sweep runs, not how long anything is kept.

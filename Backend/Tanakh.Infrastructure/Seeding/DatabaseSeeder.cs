@@ -16,13 +16,11 @@ namespace Tanakh.Infrastructure.Seeding
     {
         private readonly AppDbContext dbContext;
         private readonly IConfiguration configuration;
-        private readonly IHashingService hashingService;
 
-        public DatabaseSeeder(AppDbContext dbContext, IConfiguration configuration, IHashingService hashingService)
+        public DatabaseSeeder(AppDbContext dbContext, IConfiguration configuration)
         {
             this.dbContext = dbContext;
             this.configuration = configuration;
-            this.hashingService = hashingService;
         }
 
         public async Task ResetSchemaAsync(CancellationToken cancellationToken = default)
@@ -50,20 +48,15 @@ namespace Tanakh.Infrastructure.Seeding
                 return;
             }
 
-            Subscriber pending = NewSubscriber("pending@example.com", SubscriberStatus.PendingConfirmation);
+            Subscriber active = NewSubscriber("+972501111111", SubscriberStatus.Active);
+            active.DisplayName = "דנה";
 
-            Subscriber active = NewSubscriber("active@example.com", SubscriberStatus.Active);
-            active.ConfirmedAt = DateTimeOffset.UtcNow.AddDays(-30);
-
-            Subscriber unsubscribed = NewSubscriber("unsubscribed@example.com", SubscriberStatus.Unsubscribed);
+            Subscriber unsubscribed = NewSubscriber("+972502222222", SubscriberStatus.Unsubscribed);
             unsubscribed.UnsubscribedAt = DateTimeOffset.UtcNow.AddDays(-10);
-            unsubscribed.UnsubscribeReason = "No longer interested";
 
-            Subscriber bounced = NewSubscriber("bounced@example.com", SubscriberStatus.Bounced);
-            Subscriber complained = NewSubscriber("complained@example.com", SubscriberStatus.Complained);
+            Subscriber failing = NewSubscriber("+972503333333", SubscriberStatus.Active);
 
-            await dbContext.Subscribers.AddRangeAsync(
-                [pending, active, unsubscribed, bounced, complained], cancellationToken);
+            await dbContext.Subscribers.AddRangeAsync([active, unsubscribed, failing], cancellationToken);
 
             await dbContext.ReadingProgresses.AddRangeAsync(
             [
@@ -88,6 +81,8 @@ namespace Tanakh.Infrastructure.Seeding
                 {
                     Id = Guid.CreateVersion7(), SubscriberId = active.Id, ScheduledFor = yesterday,
                     SentAt = yesterday, Status = DeliveryStatus.Sent, AttemptCount = 1,
+                    MessageBody = "היי דנה 😊 הגיע הזמן לפרק התנ\"ך היומי שלך! לחצו להמשיך לקרוא: https://localhost:4200 לביטול תזכורות - בהגדרות באתר",
+                    SegmentCount = 2, ProviderStatusCode = 1, ProviderResponse = "{\"status\":1,\"message\":\"ok\"}",
                     IdempotencyKey = ReminderDelivery.ComputeIdempotencyKey(active.Id, yesterday)
                 },
                 new ReminderDelivery
@@ -98,55 +93,20 @@ namespace Tanakh.Infrastructure.Seeding
                 },
                 new ReminderDelivery
                 {
-                    Id = Guid.CreateVersion7(), SubscriberId = bounced.Id, ScheduledFor = yesterday,
-                    Status = DeliveryStatus.Failed, AttemptCount = 3, LastError = "Mailbox does not exist",
-                    IdempotencyKey = ReminderDelivery.ComputeIdempotencyKey(bounced.Id, yesterday)
-                }
-            ], cancellationToken);
-
-            await dbContext.EmailEvents.AddRangeAsync(
-            [
-                new EmailEvent
-                {
-                    Id = Guid.CreateVersion7(), Provider = "ses", ProviderEventId = "seed-evt-delivered",
-                    EventType = EmailEventType.Delivered, SubscriberId = active.Id, Payload = "{}",
-                    OccurredAt = yesterday, ReceivedAt = yesterday
-                },
-                new EmailEvent
-                {
-                    Id = Guid.CreateVersion7(), Provider = "ses", ProviderEventId = "seed-evt-bounce",
-                    EventType = EmailEventType.Bounce, BounceType = BounceType.Hard, SubscriberId = bounced.Id,
-                    Payload = "{}", OccurredAt = yesterday, ReceivedAt = yesterday
-                },
-                new EmailEvent
-                {
-                    Id = Guid.CreateVersion7(), Provider = "ses", ProviderEventId = "seed-evt-complaint",
-                    EventType = EmailEventType.Complaint, SubscriberId = complained.Id, Payload = "{}",
-                    OccurredAt = yesterday, ReceivedAt = yesterday
-                }
-            ], cancellationToken);
-
-            await dbContext.SuppressionEntries.AddRangeAsync(
-            [
-                new SuppressionEntry
-                {
-                    Id = Guid.CreateVersion7(), EmailHash = hashingService.HashEmail(bounced.Email),
-                    Reason = SuppressionReason.HardBounce, Source = "seed-data"
-                },
-                new SuppressionEntry
-                {
-                    Id = Guid.CreateVersion7(), EmailHash = hashingService.HashEmail(complained.Email),
-                    Reason = SuppressionReason.Complaint, Source = "seed-data"
+                    Id = Guid.CreateVersion7(), SubscriberId = failing.Id, ScheduledFor = yesterday,
+                    Status = DeliveryStatus.Failed, AttemptCount = 3, LastError = "SMS4FREE status -3 (permanent).",
+                    ProviderStatusCode = -3, ProviderResponse = "{\"status\":-3,\"message\":\"לא נמצאו נמענים\"}",
+                    IdempotencyKey = ReminderDelivery.ComputeIdempotencyKey(failing.Id, yesterday)
                 }
             ], cancellationToken);
 
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        private static Subscriber NewSubscriber(string email, SubscriberStatus status) => new()
+        private static Subscriber NewSubscriber(string phoneNumber, SubscriberStatus status) => new()
         {
             Id = Guid.CreateVersion7(),
-            Email = email,
+            PhoneNumber = phoneNumber,
             PreferredTime = new TimeOnly(8, 0),
             Timezone = "Asia/Jerusalem",
             Status = status,

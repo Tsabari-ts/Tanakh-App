@@ -13,10 +13,17 @@ namespace Tanakh.Infrastructure.Data.Configurations
             {
                 tb.HasCheckConstraint(
                     "ck_subscribers_status",
-                    "status IN ('pending_confirmation','active','unsubscribed','bounced','complained')");
+                    "status IN ('active','unsubscribed')");
                 tb.HasCheckConstraint(
                     "ck_subscribers_timezone_not_empty",
                     "length(trim(timezone)) > 0");
+                tb.HasCheckConstraint(
+                    // An active subscriber must have a phone number to send
+                    // reminders to; an anonymized (unsubscribed, past the
+                    // retention window) row nulls it out - see
+                    // SubscriberAnonymizationService.
+                    "ck_subscribers_phone_required_when_active",
+                    "status <> 'active' OR phone_number IS NOT NULL");
             });
 
             builder.HasKey(s => s.Id);
@@ -26,11 +33,13 @@ namespace Tanakh.Infrastructure.Data.Configurations
             builder.Property(s => s.Id)
                 .ValueGeneratedNever();
 
-            builder.Property(s => s.Email)
-                .HasColumnType("citext")
-                .IsRequired();
+            builder.Property(s => s.PhoneNumber)
+                .HasMaxLength(20);
 
-            builder.HasIndex(s => s.Email)
+            // Regular (non-partial) unique index - Postgres already treats
+            // multiple NULLs as distinct, which is exactly what an
+            // anonymized subscriber (phone_number = NULL) needs.
+            builder.HasIndex(s => s.PhoneNumber)
                 .IsUnique();
 
             builder.Property(s => s.Timezone)

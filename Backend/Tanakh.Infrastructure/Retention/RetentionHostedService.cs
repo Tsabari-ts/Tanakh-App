@@ -71,16 +71,6 @@ namespace Tanakh.Infrastructure.Retention
                     .ExecuteDeleteAsync(cancellationToken),
                 cancellationToken);
 
-            DateTimeOffset emailEventsCutoff = DateTimeOffset.UtcNow.AddDays(-options.EmailEventsRetentionDays);
-            await RunBatchedDeleteAsync(
-                "email_events",
-                () => dbContext.EmailEvents
-                    .Where(e => e.ReceivedAt < emailEventsCutoff)
-                    .OrderBy(e => e.Id)
-                    .Take(options.BatchSize)
-                    .ExecuteDeleteAsync(cancellationToken),
-                cancellationToken);
-
             await AnonymizeExpiredSubscribersAsync(dbContext, anonymizationService, cancellationToken);
         }
 
@@ -119,7 +109,7 @@ namespace Tanakh.Infrastructure.Retention
 
             do
             {
-                // "deleted-" prefix marks rows already anonymized, so a
+                // phone_number = NULL marks rows already anonymized, so a
                 // previously-anonymized subscriber (still status =
                 // unsubscribed, still past the cutoff) isn't reprocessed
                 // every sweep.
@@ -127,7 +117,7 @@ namespace Tanakh.Infrastructure.Retention
                     .Where(s => s.Status == SubscriberStatus.Unsubscribed
                         && s.UnsubscribedAt != null
                         && s.UnsubscribedAt < cutoff
-                        && !s.Email.StartsWith("deleted-"))
+                        && s.PhoneNumber != null)
                     .OrderBy(s => s.Id)
                     .Take(options.BatchSize)
                     .Select(s => s.Id)

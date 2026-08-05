@@ -10,31 +10,31 @@ namespace Tanakh.Tests
             new(Options.Create(new HashingOptions { Pepper = pepper }));
 
         [Fact]
-        public void HashEmail_Is_Case_And_Whitespace_Insensitive()
+        public void Hash_Is_Deterministic()
         {
             HashingService service = CreateService("test-pepper");
 
-            string hash1 = service.HashEmail("Someone@Example.com");
-            string hash2 = service.HashEmail("  someone@example.com  ");
+            string hash1 = service.Hash("some-value");
+            string hash2 = service.Hash("some-value");
 
             Assert.Equal(hash1, hash2);
         }
 
         [Fact]
-        public void HashEmail_Differs_By_Pepper()
+        public void Hash_Differs_By_Pepper()
         {
-            string hashWithPepperA = CreateService("pepper-a").HashEmail("someone@example.com");
-            string hashWithPepperB = CreateService("pepper-b").HashEmail("someone@example.com");
+            string hashWithPepperA = CreateService("pepper-a").Hash("some-value");
+            string hashWithPepperB = CreateService("pepper-b").Hash("some-value");
 
             Assert.NotEqual(hashWithPepperA, hashWithPepperB);
         }
 
         [Fact]
-        public void HashEmail_Throws_When_Pepper_Not_Configured()
+        public void Hash_Throws_When_Pepper_Not_Configured()
         {
             HashingService service = CreateService(string.Empty);
 
-            Assert.Throws<InvalidOperationException>(() => service.HashEmail("someone@example.com"));
+            Assert.Throws<InvalidOperationException>(() => service.Hash("some-value"));
         }
     }
 }

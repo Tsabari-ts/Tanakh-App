@@ -27,17 +27,18 @@ namespace Tanakh.Infrastructure.Options
 
         public int DefaultStartChapter { get; set; } = 1;
 
-        public int ConfirmTokenTtlHours { get; set; } = 48;
+        // {שם} -> " {DisplayName}" (with its own leading space) or empty if
+        // no display name; {קישור} -> PublicBaseUrl. Kept in config, not
+        // hardcoded, so wording can change without a deploy (see spec §9.1).
+        public string SmsTemplate { get; set; } =
+            "היי{שם} 😊 הגיע הזמן לפרק התנ\"ך היומי שלך! לחצו להמשיך לקרוא: {קישור} לביטול תזכורות - בהגדרות באתר";
 
-        public int ManageTokenTtlDays { get; set; } = 90;
-
-        // Frontend origin - confirmation/unsubscribe pages link back here
-        // (e.g. "start reading" -> a chapter URL) once they're done.
+        // Frontend origin - the SMS reminder links back here; the client's
+        // own localStorage remembers the last-read chapter and continues
+        // from there (no server-computed deep link).
         public string PublicBaseUrl { get; set; } = string.Empty;
 
-        // This API's own origin - confirmation/unsubscribe links in emails
-        // point here, since those pages are server-rendered (not part of
-        // the Angular app).
+        // This API's own origin.
         public string ApiBaseUrl { get; set; } = string.Empty;
     }
 }
