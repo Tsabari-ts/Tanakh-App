@@ -18,6 +18,15 @@ body {
     top: 0;
     bottom: 0;
     inset-inline: 0;
+    // Without this, this decorative layer paints above any sibling that
+    // isn't itself positioned (CSS stacking: positioned auto-z-index
+    // content always paints above static in-flow content, regardless of
+    // DOM order) - every page happens to avoid that today only because its
+    // content wrapper is position:fixed (see .centered-container etc.), but
+    // admin-login's plain static .admin-login div isn't, so its whole form
+    // silently rendered underneath this image. Pin it behind everything
+    // unconditionally instead of relying on every future page opting in.
+    z-index: -1;
   }
 
   // App is dir="rtl" only (see index.html), so physical env(safe-area-inset-*)

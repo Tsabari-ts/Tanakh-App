@@ -1,7 +1,10 @@
 import { Component, ChangeDetectionStrategy, inject, signal, afterNextRender } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { Dir } from '@angular/cdk/bidi';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
+import { environment } from '../environments/environment';
 import { NotificationService } from './services/notification.service';
 import { ErrorStateService } from './services/error-state.service';
 import { ErrorScreenComponent } from './shared/error-screen/error-screen.component';
@@ -32,6 +35,16 @@ export class AppComponent {
    *  history (Location.back()) is unreliable (deep links, refreshes). */
   readonly backTarget = signal<any[] | null>(null);
   readonly whatsappContactUrl = WHATSAPP_CONTACT_URL;
+  // The hidden admin panel is a separate internal tool, not a page of the
+  // public reader-facing site - it needs its own header/nav (admin-shell)
+  // instead of the public site's header/footer/cookie-banner/a11y-widget/
+  // background image sitting underneath (and, for the header, visually on
+  // top of) it.
+  readonly isAdminRoute = toSignal(
+    inject(Router).events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(event => event.urlAfterRedirects.startsWith(`/${environment.adminRoutePath}`))),
+    { initialValue: window.location.pathname.startsWith(`/${environment.adminRoutePath}`) });
   readonly notifications = inject(NotificationService);
   readonly errorState = inject(ErrorStateService);
   readonly appUpdate = inject(AppUpdateService);

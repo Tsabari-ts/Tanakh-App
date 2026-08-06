@@ -28,9 +28,15 @@
         @if (errorMessage()) {
           <p class="admin-login__error">{{ errorMessage() }}</p>
         }
+        @if (resendMessage()) {
+          <p class="admin-login__hint">{{ resendMessage() }}</p>
+        }
 
         <button type="submit" [disabled]="!otpForm.form.valid || busy()">
           {{ busy() ? 'מאמת…' : 'אימות' }}
+        </button>
+        <button type="button" class="admin-login__resend" [disabled]="busy()" (click)="resendOtp()">
+          שליחת קוד מחדש
         </button>
       </form>
     }

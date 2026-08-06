@@ -56,6 +56,18 @@
       cursor: not-allowed;
     }
   }
+
+  // Overrides the general `button` rule above (same specificity would
+  // otherwise lose to source order) - the resend action is secondary to
+  // the primary submit button, styled as a plain text link instead.
+  .admin-login__resend {
+    margin-top: 0;
+    padding: 0.5rem;
+    background: transparent;
+    color: var(--color-link);
+    font-size: 0.85rem;
+    text-decoration: underline;
+  }
 }
 
 .admin-login__hint {

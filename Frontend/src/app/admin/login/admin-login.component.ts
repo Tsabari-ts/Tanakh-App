@@ -22,6 +22,7 @@ export class AdminLoginComponent {
   readonly step = signal<LoginStep>('credentials');
   readonly busy = signal(false);
   readonly errorMessage = signal('');
+  readonly resendMessage = signal('');
 
   username = '';
   password = '';
@@ -56,6 +57,7 @@ export class AdminLoginComponent {
 
     this.busy.set(true);
     this.errorMessage.set('');
+    this.resendMessage.set('');
 
     this.authService.verifyOtp(this.code)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -68,6 +70,35 @@ export class AdminLoginComponent {
           this.busy.set(false);
           this.code = '';
           this.errorMessage.set('קוד האימות שגוי או שפג תוקפו');
+        }
+      });
+  }
+
+  // Re-runs the same login step (credentials are already held in memory
+  // from the first submit) so a fresh OTP is sent without forcing the user
+  // back to re-type their username/password. Shares the backend's per-IP
+  // login rate limit (5/15min) with the initial submit, so it can't be
+  // used to bypass that.
+  resendOtp(): void {
+    if (this.busy()) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.errorMessage.set('');
+    this.resendMessage.set('');
+
+    this.authService.login(this.username, this.password)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.busy.set(false);
+          this.code = '';
+          this.resendMessage.set('קוד חדש נשלח');
+        },
+        error: () => {
+          this.busy.set(false);
+          this.errorMessage.set('שליחת הקוד מחדש נכשלה, נסה/י שוב');
         }
       });
   }
