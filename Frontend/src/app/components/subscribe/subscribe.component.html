@@ -21,6 +21,7 @@
 
   @if (detailsVisible() && !showCancelConfirm()) {
     @if (!userHasSubscribed()) {
+      @if (!otpStep()) {
       <p>
         <b i18n="@@subscribe.intro1">לקבלת תזכורת יומית ב-SMS נא למלא את השדות.</b>
         <br>
@@ -28,7 +29,6 @@
         <br>
         <b i18n="@@subscribe.intro3">ניתן לבטל את התזכורות בכל עת דרך ההגדרות באתר.</b>
       </p>
-      @if (!otpStep()) {
       <form #myForm="ngForm" (ngSubmit)="submitForm(myForm)" novalidate>
         <div class="field">
           <label for="displayNameInput" i18n="@@subscribe.nameLabel">שם</label>
