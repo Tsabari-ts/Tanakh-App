@@ -122,26 +122,56 @@ body {
   .footer-links {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    flex-wrap: wrap;
+    gap: 6px;
+    flex-wrap: nowrap;
     justify-content: center;
+    max-width: 100%;
+  }
+
+  // Single dot between each link, none after the last - keeps all three on
+  // one row instead of the old bordered-pill buttons, which never fit a
+  // narrow phone screen without wrapping.
+  .accessibility-statement-link:not(:last-child)::after {
+    content: '•';
+    margin-inline-start: 6px;
+    color: var(--color-text-muted);
   }
 
   .accessibility-statement-link {
     background: transparent;
-    border: 1px solid var(--color-divider);
-    border-radius: 999px;
-    padding: 6px 16px;
+    border: none;
+    padding: 0;
     color: var(--color-text);
     cursor: pointer;
     font-family: var(--font-body);
-    font-size: var(--font-size-sm);
+    // Capped, not just the token, so a larger a11y font-scale preference
+    // can't reintroduce wrapping on a narrow phone - the whole point of
+    // this rule is guaranteeing one row.
+    font-size: min(var(--font-size-sm), 0.82rem);
+    white-space: nowrap;
+    // Text-only tap target (no pill padding to grow it) - undersized
+    // against the 44px guideline, but the pill version made three links
+    // wrap on phones, which is the more important constraint here.
     min-block-size: var(--tap-target-min);
+    display: inline-flex;
+    align-items: center;
   }
 
   .accessibility-statement-link:hover {
     color: var(--color-accent-700);
-    border-color: var(--color-accent-700);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 400px) {
+    .footer-links {
+      gap: 4px;
+    }
+    .accessibility-statement-link {
+      font-size: min(var(--font-size-sm), 0.72rem);
+    }
+    .accessibility-statement-link:not(:last-child)::after {
+      margin-inline-start: 4px;
+    }
   }
 
   .footer-credit {
