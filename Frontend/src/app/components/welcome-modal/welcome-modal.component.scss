@@ -1,31 +1,9 @@
-.welcome-body{
-    background-color: var(--color-surface);
-    border-radius: calc(var(--radius-lg) * 1.15);
-    overflow: hidden;
+/* .dialog already sets background/radius/overflow/shadow - only the
+   narrower max-width (this dialog opens in a 500px MatDialog panel, see
+   dialog.service.ts) is specific to this component. */
+.welcome-body {
     max-width: 420px;
     margin: 0 auto;
-    box-shadow: 0 0 0 3px var(--color-accent), var(--shadow-lg);
-    animation: welcomeModalPop 480ms var(--motion-ease);
-}
-
-@keyframes welcomeModalPop {
-    0% {
-        transform: scale(0.92);
-        opacity: 0;
-    }
-    60% {
-        transform: scale(1.03);
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .welcome-body {
-        animation: none;
-    }
 }
 
 /* Material's mat-dialog-content sets a translucent default text color that,
@@ -34,51 +12,3 @@
 .welcome-body [mat-dialog-content] {
     color: var(--color-text);
 }
-
-.custom-dialog-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: var(--color-accent-700);
-    border-radius: 4px 4px 0 0;
-  }
-
-  .custom-dialog-title span {
-    flex-grow: 1;
-  }
-
-  .custom-dialog-title button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    min-inline-size: var(--tap-target-min);
-    min-block-size: var(--tap-target-min);
-  }
-
-  .custom-dialog-title button:hover {
-    background-color: var(--color-surface);
-    border-radius: 50%;
-  }
-
-  .go-setting-button{
-    margin-inline-start: 25%;
-    width: 50%;
-    min-height: var(--tap-target-min);
-    background-color: var(--color-accent);
-    color: var(--color-bg);
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    font-family: var(--font-heading);
-    font-size: var(--font-size-lg);
-  }
-
-  .go-setting-button:hover {
-    background-color: var(--color-accent-700);
-  }
-
-  .header{
-    color: var(--color-accent-100);
-    font-size: var(--font-size-xl);
-  }

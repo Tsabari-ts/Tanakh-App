@@ -72,6 +72,76 @@
   margin: 0;
 }
 .dialog-body { padding: 0 var(--space-4); font-size: var(--font-size-base); }
+
+/* — dialog header banner: icon badge + kicker + title, with a soft
+   decorative corner blur — shared by every content dialog (welcome, terms,
+   accessibility statement, read-permission). */
+.dialog-head {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-accent-700);
+  color: var(--color-accent-100);
+}
+.dialog-head::before {
+  content: '';
+  position: absolute;
+  inset-inline-end: -30px;
+  top: -30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #fff 12%, transparent);
+  pointer-events: none;
+}
+.dialog-head__icon {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: color-mix(in srgb, #fff 18%, transparent);
+  display: grid;
+  place-items: center;
+}
+.dialog-head__icon svg { display: block; }
+.dialog-head__text { position: relative; flex: 1; min-width: 0; }
+.dialog-head__kicker {
+  font-size: var(--font-size-sm);
+  opacity: 0.85;
+  line-height: 1.2;
+}
+.dialog-head__title {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  line-height: 1.15;
+}
+.dialog-head .btn-icon {
+  position: relative;
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--color-accent-100);
+}
+.dialog-head .btn-icon:hover {
+  background: color-mix(in srgb, var(--color-accent-100) 20%, transparent);
+}
+
+/* pop-in entrance shared by every content dialog, replacing bespoke
+   per-component animations. */
+@keyframes dialogPop {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+.dialog-pop { animation: dialogPop 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .dialog-pop { animation: none; }
+}
+
 .dialog-actions {
   display: flex;
   /* !important: Angular Material's own [mat-dialog-actions] styles set

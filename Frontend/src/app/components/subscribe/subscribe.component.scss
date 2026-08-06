@@ -1,36 +1,3 @@
-.welcome-body {
-  background-color: var(--color-surface);
-  max-width: 420px;
-  margin: 0 auto;
-}
-
-/* Material's mat-dialog-content sets a translucent default text color that,
-   blended over --color-surface, falls below AA contrast (~3.66:1) -
-   pin it to an opaque, verified color instead. */
-.welcome-body [mat-dialog-content] {
-    color: var(--color-text);
-}
-
-.custom-dialog-title button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    color: inherit;
-    min-inline-size: var(--tap-target-min);
-    min-block-size: var(--tap-target-min);
-}
-
-.custom-dialog-title button:hover {
-    background-color: color-mix(in srgb, var(--color-accent-100) 15%, transparent);
-    border-radius: 50%;
-}
-
-.header {
-  color: inherit;
-  font-size: inherit;
-  margin: 0;
-}
-
 form {
   display: flex;
   flex-direction: column;
@@ -38,7 +5,6 @@ form {
   margin-top: var(--space-3);
 }
 
-.go-setting-button,
 .btn-block {
   margin-top: var(--space-2);
 }

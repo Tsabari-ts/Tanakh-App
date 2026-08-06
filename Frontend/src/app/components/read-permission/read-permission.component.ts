@@ -1,6 +1,5 @@
 import { Component, Inject, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { ReadingHistoryService } from '../../services/reading-history.service';
 
@@ -9,7 +8,7 @@ import { ReadingHistoryService } from '../../services/reading-history.service';
     templateUrl: './read-permission.component.html',
     styleUrl: './read-permission.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatDialogActions]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions]
 })
 
 export class ReadPermissionComponent implements OnInit{

@@ -1,31 +1,27 @@
-import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy, DestroyRef, computed, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy, computed } from '@angular/core';
 import { PwaInstallService } from '../../services/pwa-install.service';
-import { DialogService } from '../../services/dialog.service';
 import { AppComponent } from '../../app.component';
 import { NgClass } from '@angular/common';
 import { WHATSAPP_CONTACT_URL, CONTACT_EMAIL } from '../../shared/contact-links';
 import { ThemeService } from '../../services/theme.service';
 import { ReaderPrefsService, ReaderFont } from '../../services/reader-prefs.service';
-import { hasStoredManageToken } from '../../shared/reminder-subscription';
+import { SubscribeComponent } from '../subscribe/subscribe.component';
 
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass]
+    imports: [NgClass, SubscribeComponent]
 })
 
 export class SettingsComponent implements OnInit {
   constructor(private renderer: Renderer2,
               private el: ElementRef,
               readonly pwaInstall: PwaInstallService,
-              private dialogService: DialogService,
               private appComponent: AppComponent,
               readonly theme: ThemeService,
-              readonly prefs: ReaderPrefsService,
-              private destroyRef: DestroyRef) {
+              readonly prefs: ReaderPrefsService) {
                 this.appComponent.showButton.set(true);
                 this.appComponent.backTarget.set(['/home']);
                }
@@ -37,10 +33,6 @@ export class SettingsComponent implements OnInit {
   ];
 
   emailAddress = CONTACT_EMAIL;
-  userHasSubscribed = hasStoredManageToken();
-
-  readonly subscribeButton = signal(this.userHasSubscribed ? $localize`:@@subscribe.subscribedButton:נרשמת לתזכורת` : $localize`:@@settings.subscribeButton:הירשם לתזכורת יומית`);
-  subscribeIcon:string = 'calendar-icon';
   emailUsButton: string = $localize`:@@settings.emailUs:אימייל`;
   emailUsIcon:string = 'email-icon';
   whatsappUsButton: string = $localize`:@@settings.whatsappUs:וואטסאפ`;
@@ -53,19 +45,6 @@ export class SettingsComponent implements OnInit {
   downloadAppIcon:string = 'download-icon';
 
   ngOnInit(): void {  }
-
-  openSubscribe(){
-  const dialogRef = this.dialogService.openSubscribeDialog();
-
-  dialogRef.componentInstance.subscriptionStatusChange
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe(
-    (changes:
-       { newButtonName: string }
-       ) => {
-    this.subscribeButton.set(changes.newButtonName);
-  });
-  }
 
   emailUs(){
     const mailtoLink = this.renderer.createElement('a');

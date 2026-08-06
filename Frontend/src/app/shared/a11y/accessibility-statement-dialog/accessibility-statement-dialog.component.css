@@ -10,29 +10,6 @@
   font-family: var(--font-body);
 }
 
-.stmt__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.stmt__head h2 {
-  margin: 0;
-  font-family: var(--font-heading);
-}
-
-/* .btn sets color: var(--color-text) (near-black) which fails contrast on
-   the --color-accent-700 header background - the title text gets its light
-   color from .dialog-title, but the button's own color rule overrides that
-   inheritance, so it needs the same light color set explicitly. */
-.stmt__head .btn-icon {
-  color: var(--color-accent-100);
-}
-.stmt__head .btn-icon:hover {
-  background: color-mix(in srgb, var(--color-accent-100) 20%, transparent);
-}
-
 .stmt__body {
   overflow-y: auto;
   line-height: var(--line-height-body);

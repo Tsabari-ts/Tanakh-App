@@ -1,26 +1,25 @@
-import { Component, EventEmitter, Inject, Output, ChangeDetectionStrategy, DestroyRef, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiCallService } from '../../services/api-call.service';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
-import { MatIcon } from '@angular/material/icon';
-import { CdkScrollable } from '@angular/cdk/scrolling';
 import { FormsModule } from '@angular/forms';
 import { TermsService } from '../../shared/legal/terms-dialog/terms.service';
 import { getStoredUsername } from '../../shared/user-prefs';
 import { validateIsraeliMobilePhone, PhoneValidationResult } from '../../shared/israeli-mobile-phone-validator';
 import { getStoredManageToken, setStoredManageToken, clearStoredManageToken } from '../../shared/reminder-subscription';
 
+/**
+ * Embedded directly on the settings page (not a MatDialog) - the reminder
+ * signup/manage panel is always visible there rather than behind a popup.
+ */
 @Component({
     selector: 'app-subscribe',
     templateUrl: './subscribe.component.html',
     styleUrl: './subscribe.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule]
+    imports: [FormsModule]
 })
 
 export class SubscribeComponent implements OnInit {
-  @Output() subscriptionStatusChange: EventEmitter<{
-     newButtonName: string }> = new EventEmitter();
   private readonly terms = inject(TermsService);
   readonly serverResponse = signal('');
   subscribeSuccessful = false;
@@ -55,9 +54,7 @@ export class SubscribeComponent implements OnInit {
   managePreferredTime: string = '';
   managePausedUntil: string | null = null;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any,
-    public dialogRef: MatDialogRef<SubscribeComponent>,
-    private apiService: ApiCallService,
+  constructor(private apiService: ApiCallService,
     private destroyRef: DestroyRef) {
     }
 
@@ -73,10 +70,6 @@ export class SubscribeComponent implements OnInit {
       options.push(`${hour}:00`);
     }
     return options;
-  }
-
-  closeDialog() {
-    this.dialogRef.close();
   }
 
   openTerms(): void {
@@ -135,17 +128,21 @@ export class SubscribeComponent implements OnInit {
     setTimeout(() => {
       if (this.subscribeSuccessful) {
         this.serverResponse.set($localize`:@@subscribe.confirmationSent:נרשמת בהצלחה! תקבל/י תזכורת ב-SMS בשעה שבחרת.`);
-        this.subscriptionStatusChange.emit({
-          newButtonName: $localize`:@@subscribe.subscribedButton:נרשמת לתזכורת` });
       } else {
         this.serverResponse.set($localize`:@@subscribe.failed:הרישום נכשל, אנא נסה שוב מאוחר יותר`);
       }
       this.isRequestInProgress.set(false);
       this.isRequestSuccessful.set(true);
 
-      setTimeout(() => {
-        this.dialogRef.close();
-      }, 3000);
+      if (this.subscribeSuccessful) {
+        // Swap from the signup form to the manage-subscription panel once
+        // the success message has had a moment to be read - mirrors the
+        // 3s delay this used to wait before auto-closing as a dialog.
+        setTimeout(() => {
+          this.userHasSubscribed.set(true);
+          this.loadPreferences();
+        }, 3000);
+      }
     }, 3000);
   }
 
@@ -257,9 +254,6 @@ export class SubscribeComponent implements OnInit {
         next: () => {
           clearStoredManageToken();
           this.userHasSubscribed.set(false);
-          this.subscriptionStatusChange.emit({
-            newButtonName: $localize`:@@settings.subscribeButton:הירשם לתזכורת יומית` });
-          this.dialogRef.close();
         },
         error: () => {
           this.manageBusy.set(false);

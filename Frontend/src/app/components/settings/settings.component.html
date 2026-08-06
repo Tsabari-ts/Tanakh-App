@@ -61,10 +61,7 @@
   <div class="settings-group">
     <div class="settings-group__title" i18n="@@settings.reminderGroup">תזכורת יומית</div>
     <div class="card settings-card">
-      <button class="svg-button" type="button" (click)="openSubscribe()">
-        <div class="icon" [ngClass]="subscribeIcon" aria-hidden="true"></div>
-        {{ subscribeButton() }}
-      </button>
+      <app-subscribe></app-subscribe>
     </div>
   </div>
 
