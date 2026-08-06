@@ -108,6 +108,7 @@
         </div>
         <button class="btn btn-primary btn-block tk-hit" type="submit" [disabled]="isButtonDisabled() || otpVerifying()" i18n="@@subscribe.otp.verify">אמת והירשם</button>
         <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="otpSending() || otpVerifying()" (click)="resendOtp()" i18n="@@subscribe.otp.resend">שלח קוד שוב</button>
+        <button class="btn btn-ghost btn-block tk-hit" type="button" [disabled]="otpVerifying()" (click)="editDetails()" i18n="@@subscribe.otp.editDetails">טעיתי בפרטים, חזרה לעריכה</button>
       </form>
       @if (isRequestInProgress()) {
         <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100"

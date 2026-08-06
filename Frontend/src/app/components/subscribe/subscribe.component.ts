@@ -121,6 +121,10 @@ export class SubscribeComponent implements OnInit {
       this.showCancelConfirm.set(true);
     } else {
       this.formExpanded.set(false);
+      // Otherwise a code requested for a wrong/mistyped number would stay
+      // pending, and reopening the switch dropped straight back into the
+      // (now-stale) OTP step instead of the editable form.
+      this.resetOtpFlow();
     }
   }
 
@@ -179,6 +183,13 @@ export class SubscribeComponent implements OnInit {
     if (this.pendingPhoneE164) {
       this.requestOtp(this.pendingPhoneE164);
     }
+  }
+
+  // Lets the user back out of the OTP step to fix a mistyped phone number
+  // (or any other field) without losing what they already typed - only the
+  // OTP-flow state resets, not name/phone/time/consent.
+  editDetails(): void {
+    this.resetOtpFlow();
   }
 
   verifyOtpAndSubscribe(): void {
@@ -412,12 +423,7 @@ export class SubscribeComponent implements OnInit {
     this.timeValue = '';
     this.consentGiven = false;
 
-    this.otpStep.set(false);
-    this.otpSending.set(false);
-    this.otpVerifying.set(false);
-    this.otpError.set('');
-    this.otpValue = '';
-    this.pendingPhoneE164 = '';
+    this.resetOtpFlow();
 
     this.isButtonDisabled.set(false);
     this.isRequestInProgress.set(false);
@@ -430,5 +436,14 @@ export class SubscribeComponent implements OnInit {
     this.manageStatusMessage.set('');
     this.managePreferredTime = '';
     this.managePausedUntil = null;
+  }
+
+  private resetOtpFlow(): void {
+    this.otpStep.set(false);
+    this.otpSending.set(false);
+    this.otpVerifying.set(false);
+    this.otpError.set('');
+    this.otpValue = '';
+    this.pendingPhoneE164 = '';
   }
 }
