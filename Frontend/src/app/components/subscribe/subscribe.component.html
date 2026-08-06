@@ -79,10 +79,12 @@
             <input type="checkbox" id="consentInput" [(ngModel)]="consentGiven" name="consentInput" required
               [attr.aria-invalid]="myForm.submitted && !consentGiven ? 'true' : null"
               [attr.aria-describedby]="myForm.submitted && !consentGiven ? 'consentInput-error' : null">
-            <span i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת ב-SMS ומאשר/ת שקראתי את</span>
-            <button type="button" class="terms-link" (click)="openTerms()" i18n="@@subscribe.termsLink">תנאי השימוש</button>
-            <span i18n="@@subscribe.consentAnd"> ואת </span>
-            <button type="button" class="terms-link" (click)="openPrivacy()" i18n="@@subscribe.privacyLink">מדיניות הפרטיות</button>
+            <span class="consent-text">
+              <span i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת ב-SMS ומאשר/ת שקראתי את</span>
+              <button type="button" class="terms-link" (click)="openTerms()" i18n="@@subscribe.termsLink">תנאי השימוש</button>
+              <span i18n="@@subscribe.consentAnd"> ואת </span>
+              <button type="button" class="terms-link" (click)="openPrivacy()" i18n="@@subscribe.privacyLink">מדיניות הפרטיות</button>
+            </span>
           </label>
           @if (myForm.submitted && !consentGiven) {
             <div id="consentInput-error" class="error-message" role="alert" i18n="@@subscribe.consentRequired">יש לאשר קבלת הודעות כדי להירשם.</div>

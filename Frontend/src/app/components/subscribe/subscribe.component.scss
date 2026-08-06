@@ -84,25 +84,48 @@ form {
 
 .consent-label {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
+  // flex-start, not center: with the checkbox and the whole text+links
+  // paragraph as just two items now, "center" was vertically centering the
+  // checkbox against the *entire wrapped block's* height once the text
+  // wrapped to 2+ lines, instead of lining it up with the first line.
+  align-items: flex-start;
+  gap: 8px;
   font-size: var(--font-size-sm);
   cursor: pointer;
 }
 
 .consent-label input[type="checkbox"] {
+  flex: none;
   width: 1.25rem;
   height: 1.25rem;
   min-block-size: 1.25rem;
+  // Nudges the checkbox down to the text baseline - without this it sits
+  // glued to the top of the line since align-items is now flex-start.
+  margin-top: 2px;
   accent-color: var(--color-accent);
+}
+
+// One flex item holding the whole sentence (plain text + inline link
+// buttons) so it wraps as an ordinary paragraph. Previously each span/
+// button was its own flex item under flex-wrap: wrap, so lines broke
+// between *items* instead of at natural word boundaries - "מדיניות
+// הפרטיות" (or any trailing item) could end up alone on its own line
+// with a large, uneven gap above it.
+.consent-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.5;
 }
 
 .terms-link {
   background: transparent;
   border: none;
   padding: 0;
-  min-block-size: var(--tap-target-min);
+  // No min-block-size here: that 44px tap-target height made sense for the
+  // footer's standalone link buttons, but forced on a link sitting inline
+  // inside a paragraph it inflated the line height and produced the
+  // "strange gap" - WCAG 2.5.8 has an explicit inline-text exception for
+  // exactly this case.
   color: var(--color-link);
   text-decoration: underline;
   cursor: pointer;
