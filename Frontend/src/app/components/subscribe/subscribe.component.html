@@ -48,7 +48,7 @@
             [attr.aria-invalid]="phoneTouched && phoneValidation() !== 'valid' ? 'true' : null"
             [attr.aria-describedby]="phoneTouched && phoneValidation() !== 'valid' ? 'phoneInput-error' : 'phoneInput-help'"
             #phoneInput="ngModel">
-          <div id="phoneInput-help" class="text-muted" i18n="@@subscribe.phoneHelp">המספר משמש רק לשליחת התזכורת היומית, לא לפרסום. ניתן להפסיק בכל עת מההגדרות. לדוגמה: 050-1234567</div>
+          <div id="phoneInput-help" class="text-muted" i18n="@@subscribe.phoneHelp">המספר משמש רק לשליחת התזכורת היומית, לא לפרסום. ניתן להפסיק בכל עת מההגדרות.</div>
           @if (phoneTouched && phoneValidation() === 'empty') {
             <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneRequired">יש להזין מספר טלפון נייד לקבלת התזכורות.</div>
           }
@@ -56,7 +56,7 @@
             <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneLandline">לא ניתן לשלוח הודעות SMS למספר קווי. יש להזין מספר נייד.</div>
           }
           @if (phoneTouched && phoneValidation() === 'invalid') {
-            <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneInvalid">מספר הטלפון אינו תקין. יש להזין מספר נייד ישראלי, לדוגמה: 050-1234567.</div>
+            <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneInvalid">מספר הטלפון אינו תקין. יש להזין מספר נייד ישראלי.</div>
           }
         </div>
 
