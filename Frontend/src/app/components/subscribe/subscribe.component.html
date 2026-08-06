@@ -28,6 +28,7 @@
         <br>
         <b i18n="@@subscribe.intro3">ניתן לבטל את התזכורות בכל עת דרך ההגדרות באתר.</b>
       </p>
+      @if (!otpStep()) {
       <form #myForm="ngForm" (ngSubmit)="submitForm(myForm)" novalidate>
         <div class="field">
           <label for="displayNameInput" i18n="@@subscribe.nameLabel">שם</label>
@@ -80,13 +81,33 @@
               [attr.aria-describedby]="myForm.submitted && !consentGiven ? 'consentInput-error' : null">
             <span i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת ב-SMS ומאשר/ת שקראתי את</span>
             <button type="button" class="terms-link" (click)="openTerms()" i18n="@@subscribe.termsLink">תנאי השימוש</button>
+            <span i18n="@@subscribe.consentAnd"> ואת </span>
+            <button type="button" class="terms-link" (click)="openPrivacy()" i18n="@@subscribe.privacyLink">מדיניות הפרטיות</button>
           </label>
           @if (myForm.submitted && !consentGiven) {
             <div id="consentInput-error" class="error-message" role="alert" i18n="@@subscribe.consentRequired">יש לאשר קבלת הודעות כדי להירשם.</div>
           }
         </div>
 
-        <button class="btn btn-primary btn-block tk-hit" type="submit" [disabled]="isButtonDisabled()" i18n="@@subscribe.submit">הירשם</button>
+        <button class="btn btn-primary btn-block tk-hit" type="submit" [disabled]="otpSending()" i18n="@@subscribe.submit">הירשם</button>
+        @if (otpError()) {
+          <div class="error-message" role="alert">{{ otpError() }}</div>
+        }
+      </form>
+      } @else {
+      <form #otpForm="ngForm" (ngSubmit)="verifyOtpAndSubscribe()" novalidate>
+        <div class="field">
+          <label for="otpInput" i18n="@@subscribe.otp.label">קוד אימות</label>
+          <input class="input input--ltr" type="tel" inputmode="numeric" id="otpInput" [(ngModel)]="otpValue" name="otpInput" required autocomplete="one-time-code"
+            [attr.aria-invalid]="otpError() ? 'true' : null"
+            [attr.aria-describedby]="otpError() ? 'otpInput-error' : 'otpInput-help'">
+          <div id="otpInput-help" class="text-muted" i18n="@@subscribe.otp.help">שלחנו קוד אימות בן 6 ספרות ב-SMS למספר שהזנת. הזינו אותו כאן כדי להשלים את ההרשמה.</div>
+          @if (otpError()) {
+            <div id="otpInput-error" class="error-message" role="alert">{{ otpError() }}</div>
+          }
+        </div>
+        <button class="btn btn-primary btn-block tk-hit" type="submit" [disabled]="isButtonDisabled() || otpVerifying()" i18n="@@subscribe.otp.verify">אמת והירשם</button>
+        <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="otpSending() || otpVerifying()" (click)="resendOtp()" i18n="@@subscribe.otp.resend">שלח קוד שוב</button>
       </form>
       @if (isRequestInProgress()) {
         <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100"
@@ -99,6 +120,7 @@
         <div role="status">
           <span class="serverResponse">{{serverResponse()}}</span>
         </div>
+      }
       }
     } @else {
       @if (managePreferencesLoaded()) {

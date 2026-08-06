@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, inject, signal, viewChild, ElementR
 import { A11yModule } from '@angular/cdk/a11y';
 import { A11yService } from '../../../core/a11y/a11y.service';
 import { FontScale, ContrastMode } from '../../../core/a11y/a11y.model';
-import { AccessibilityStatementService } from '../accessibility-statement-dialog/accessibility-statement.service';
+import { LegalDialogService } from '../../legal/legal-dialog.service';
 
 interface ScaleOption {
   value: FontScale;
@@ -19,7 +19,7 @@ interface ScaleOption {
 })
 export class AccessibilityWidgetComponent {
   private a11y = inject(A11yService);
-  private statement = inject(AccessibilityStatementService);
+  private legal = inject(LegalDialogService);
 
   readonly s = this.a11y.settings;
   readonly open = signal(false);
@@ -61,7 +61,7 @@ export class AccessibilityWidgetComponent {
 
   openStatement(): void {
     this.close(false);
-    this.statement.open();
+    this.legal.open('accessibility');
   }
 
   onRadioKeydown(e: KeyboardEvent, list: HTMLElement): void {

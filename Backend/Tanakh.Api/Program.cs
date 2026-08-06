@@ -126,6 +126,32 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(15),
                 QueueLimit = 0
             }));
+
+    // 5 OTP requests / 15 minutes per IP - on top of the per-phone cap in
+    // SubscriptionService.RequestOtpAsync, so one IP can't OTP-bomb many
+    // different numbers even though each individual number is under its
+    // own limit.
+    options.AddPolicy(RateLimiterPolicyNames.SubscriptionOtpRequest, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(15),
+                QueueLimit = 0
+            }));
+
+    // 5 signups / hour per IP - the public subscribe endpoint had no rate
+    // limit at all before this.
+    options.AddPolicy(RateLimiterPolicyNames.SubscriptionCreate, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromHours(1),
+                QueueLimit = 0
+            }));
 });
 builder.Services.AddHostedService<RetentionHostedService>();
 builder.Services.AddHostedService<ReminderPlannerService>();

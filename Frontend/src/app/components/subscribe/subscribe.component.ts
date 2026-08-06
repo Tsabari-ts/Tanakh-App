@@ -1,8 +1,10 @@
 import { Component, ChangeDetectionStrategy, DestroyRef, computed, inject, signal, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiCallService } from '../../services/api-call.service';
 import { FormsModule, NgForm } from '@angular/forms';
-import { TermsService } from '../../shared/legal/terms-dialog/terms.service';
+import { LegalDialogService } from '../../shared/legal/legal-dialog.service';
+import { LEGAL_DOCS_META } from '../../shared/legal/legal-content';
 import { getStoredUsername } from '../../shared/user-prefs';
 import { validateIsraeliMobilePhone, PhoneValidationResult } from '../../shared/israeli-mobile-phone-validator';
 import { getStoredManageToken, setStoredManageToken, clearStoredManageToken } from '../../shared/reminder-subscription';
@@ -20,7 +22,7 @@ import { getStoredManageToken, setStoredManageToken, clearStoredManageToken } fr
 })
 
 export class SubscribeComponent implements OnInit {
-  private readonly terms = inject(TermsService);
+  private readonly legal = inject(LegalDialogService);
   readonly serverResponse = signal('');
   subscribeSuccessful = false;
   // A signal (not a plain property) because it changes after the initial
@@ -51,6 +53,22 @@ export class SubscribeComponent implements OnInit {
   private readonly skipShabbatHolidays: boolean = true;
   consentGiven: boolean = false;
   timeOptions: string[] = this.generateTimeOptions();
+
+  // Exact wording shown next to the consent checkbox - sent verbatim as
+  // ConsentText so ConsentRecord captures precisely what the subscriber
+  // agreed to (see subscribe.component.html consent-field block).
+  private readonly consentText =
+    'אני מסכים/ה לקבל הודעות תזכורת ב-SMS ומאשר/ת שקראתי את תנאי השימוש ואת מדיניות הפרטיות.';
+
+  // OTP step - shown after the form's own client-side validation passes,
+  // in place of subscribing immediately, so a phone can't be registered
+  // without its owner receiving and entering the code.
+  readonly otpStep = signal(false);
+  readonly otpSending = signal(false);
+  readonly otpVerifying = signal(false);
+  readonly otpError = signal('');
+  otpValue: string = '';
+  private pendingPhoneE164: string = '';
 
   // Manage-subscription panel - shown instead of the signup form once a
   // manage token is stored locally, i.e. this browser has already subscribed.
@@ -83,7 +101,11 @@ export class SubscribeComponent implements OnInit {
   }
 
   openTerms(): void {
-    this.terms.open();
+    this.legal.open('terms');
+  }
+
+  openPrivacy(): void {
+    this.legal.open('privacy');
   }
 
   // The switch's "on" state is fully derived (detailsVisible), not a native
@@ -130,11 +152,45 @@ export class SubscribeComponent implements OnInit {
     // version and was never needed for the inline `myForm.submitted && ...`
     // error messages to appear.
     if (form.valid && this.consentGiven && phoneCheck.result === 'valid') {
-      this.closeAndSubscribe(phoneCheck.e164);
+      this.requestOtp(phoneCheck.e164);
     }
   }
 
-  closeAndSubscribe(phoneE164: string) {
+  requestOtp(phoneE164: string): void {
+    this.otpError.set('');
+    this.otpSending.set(true);
+    this.pendingPhoneE164 = phoneE164;
+
+    this.apiService.requestOtp(phoneE164)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.otpSending.set(false);
+          this.otpStep.set(true);
+        },
+        error: () => {
+          this.otpSending.set(false);
+          this.otpError.set($localize`:@@subscribe.otp.sendFailed:שליחת קוד האימות נכשלה, נסו שוב.`);
+        },
+      });
+  }
+
+  resendOtp(): void {
+    if (this.pendingPhoneE164) {
+      this.requestOtp(this.pendingPhoneE164);
+    }
+  }
+
+  verifyOtpAndSubscribe(): void {
+    if (!this.otpValue) {
+      this.otpError.set($localize`:@@subscribe.otp.required:יש להזין את קוד האימות שנשלח אליך.`);
+      return;
+    }
+    this.closeAndSubscribe(this.pendingPhoneE164, this.otpValue);
+  }
+
+  closeAndSubscribe(phoneE164: string, otpCode: string) {
+    this.otpVerifying.set(true);
     this.isButtonDisabled.set(true);
     this.isRequestInProgress.set(true);
     this.startLoading();
@@ -144,7 +200,11 @@ export class SubscribeComponent implements OnInit {
       displayName: this.displayNameValue || null,
       preferredTime: this.timeValue,
       skipShabbatHolidays: this.skipShabbatHolidays,
-      consent: this.consentGiven
+      consent: this.consentGiven,
+      otpCode,
+      termsVersion: LEGAL_DOCS_META.terms.lastUpdated,
+      privacyVersion: LEGAL_DOCS_META.privacy.lastUpdated,
+      consentText: this.consentText,
     };
 
     this.apiService.subscribe(subscriptionRequest)
@@ -160,11 +220,29 @@ export class SubscribeComponent implements OnInit {
         // `error`. That left isRequestInProgress stuck true forever with
         // no inline feedback at all, so the only thing the user ever saw
         // was the generic global error toast (error.interceptor.ts).
-        error: () => {
+        error: (err: HttpErrorResponse) => {
+          this.otpVerifying.set(false);
+          const title = err.error?.title;
+          if (title === 'otp_invalid' || title === 'otp_locked') {
+            // Wrong/expired code - let the user retry entering it instead
+            // of dropping back through the generic "signup failed" flow,
+            // which would otherwise discard the otp step and force
+            // restarting from the phone/time/consent form.
+            this.isButtonDisabled.set(false);
+            this.isRequestInProgress.set(false);
+            this.stopLoading();
+            this.otpError.set(title === 'otp_locked'
+              ? $localize`:@@subscribe.otp.locked:יותר מדי ניסיונות שגויים. יש לבקש קוד חדש.`
+              : $localize`:@@subscribe.otp.invalid:קוד האימות שגוי. נסו שוב.`);
+            return;
+          }
           this.subscribeSuccessful = false;
           this.finishSubscribeAttempt();
         },
-        complete: () => this.finishSubscribeAttempt(),
+        complete: () => {
+          this.otpVerifying.set(false);
+          this.finishSubscribeAttempt();
+        },
       });
   }
 
@@ -333,6 +411,13 @@ export class SubscribeComponent implements OnInit {
     this.phoneValidation.set('empty');
     this.timeValue = '';
     this.consentGiven = false;
+
+    this.otpStep.set(false);
+    this.otpSending.set(false);
+    this.otpVerifying.set(false);
+    this.otpError.set('');
+    this.otpValue = '';
+    this.pendingPhoneE164 = '';
 
     this.isButtonDisabled.set(false);
     this.isRequestInProgress.set(false);

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Domain;
@@ -12,19 +14,95 @@ namespace Tanakh.Infrastructure.Services
     public class SubscriptionService : ISubscriptionService
     {
         private const string ConsentPolicyVersion = "2026-07-30";
+        private const int OtpValidityMinutes = 10;
+        private const int MaxOtpAttempts = 3;
+        private const int MaxOtpRequestsPerPhonePerHour = 5;
 
         private readonly AppDbContext dbContext;
         private readonly IHashingService hashingService;
         private readonly IUnsubscribeTokenService unsubscribeTokenService;
+        private readonly ISmsSender smsSender;
 
         public SubscriptionService(
             AppDbContext dbContext,
             IHashingService hashingService,
-            IUnsubscribeTokenService unsubscribeTokenService)
+            IUnsubscribeTokenService unsubscribeTokenService,
+            ISmsSender smsSender)
         {
             this.dbContext = dbContext;
             this.hashingService = hashingService;
             this.unsubscribeTokenService = unsubscribeTokenService;
+            this.smsSender = smsSender;
+        }
+
+        public async Task RequestOtpAsync(string phoneNumberE164, CancellationToken cancellationToken = default)
+        {
+            int recentCount = await dbContext.SubscriberOtpCodes
+                .Where(o => o.PhoneNumber == phoneNumberE164 && o.CreatedAt > DateTimeOffset.UtcNow.AddHours(-1))
+                .CountAsync(cancellationToken);
+
+            if (recentCount >= MaxOtpRequestsPerPhonePerHour)
+            {
+                return;
+            }
+
+            // Invalidate any prior unused code for this phone - only one can
+            // be live at a time, mirrors AdminAuthController's admin OTP.
+            await dbContext.SubscriberOtpCodes
+                .Where(o => o.PhoneNumber == phoneNumberE164 && !o.Used)
+                .ExecuteUpdateAsync(s => s.SetProperty(o => o.Used, true), cancellationToken);
+
+            string code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+
+            await dbContext.SubscriberOtpCodes.AddAsync(new SubscriberOtpCode
+            {
+                Id = Guid.CreateVersion7(),
+                PhoneNumber = phoneNumberE164,
+                CodeHash = hashingService.Hash(code),
+                ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(OtpValidityMinutes),
+                Attempts = 0,
+                Used = false,
+            }, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            await smsSender.SendAsync(
+                phoneNumberE164,
+                $"קוד האימות שלך: {code} (בתוקף ל-{OtpValidityMinutes} דקות)",
+                SmsMessageType.Otp,
+                cancellationToken);
+        }
+
+        public async Task<OtpVerificationResult> VerifyOtpAsync(string phoneNumberE164, string code, CancellationToken cancellationToken = default)
+        {
+            SubscriberOtpCode? otp = await dbContext.SubscriberOtpCodes
+                .Where(o => o.PhoneNumber == phoneNumberE164 && !o.Used && o.ExpiresAt > DateTimeOffset.UtcNow)
+                .OrderByDescending(o => o.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (otp is null)
+            {
+                return OtpVerificationResult.Invalid;
+            }
+
+            string suppliedHash = hashingService.Hash(code);
+            bool match = CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(suppliedHash), Encoding.UTF8.GetBytes(otp.CodeHash));
+
+            if (!match)
+            {
+                otp.Attempts++;
+                bool locked = otp.Attempts >= MaxOtpAttempts;
+                if (locked)
+                {
+                    otp.Used = true;
+                }
+                await dbContext.SaveChangesAsync(cancellationToken);
+                return locked ? OtpVerificationResult.Locked : OtpVerificationResult.Invalid;
+            }
+
+            otp.Used = true;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return OtpVerificationResult.Valid;
         }
 
         public async Task<string> SubscribeAsync(
@@ -33,6 +111,9 @@ namespace Tanakh.Infrastructure.Services
             TimeOnly preferredTime,
             string timezone,
             bool skipShabbatHolidays,
+            string termsVersion,
+            string privacyVersion,
+            string consentText,
             string? ipAddress,
             string? userAgent,
             CancellationToken cancellationToken = default)
@@ -70,7 +151,7 @@ namespace Tanakh.Infrastructure.Services
             subscriber.Timezone = timezone;
             subscriber.SkipShabbatHolidays = skipShabbatHolidays;
 
-            await RecordConsentAsync(subscriber.Id, ipAddress, userAgent, cancellationToken);
+            await RecordConsentAsync(subscriber.Id, termsVersion, privacyVersion, consentText, ipAddress, userAgent, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
 
             return unsubscribeTokenService.Issue(subscriber.Id);
@@ -204,7 +285,9 @@ namespace Tanakh.Infrastructure.Services
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        private async Task RecordConsentAsync(Guid subscriberId, string? ipAddress, string? userAgent, CancellationToken cancellationToken)
+        private async Task RecordConsentAsync(
+            Guid subscriberId, string termsVersion, string privacyVersion, string consentText,
+            string? ipAddress, string? userAgent, CancellationToken cancellationToken)
         {
             await dbContext.ConsentRecords.AddAsync(new ConsentRecord
             {
@@ -215,7 +298,10 @@ namespace Tanakh.Infrastructure.Services
                 GrantedAt = DateTimeOffset.UtcNow,
                 IpHash = hashingService.Hash(ipAddress ?? "unknown"),
                 UserAgent = userAgent ?? "unknown",
-                PolicyVersion = ConsentPolicyVersion
+                PolicyVersion = ConsentPolicyVersion,
+                TermsVersion = termsVersion,
+                PrivacyVersion = privacyVersion,
+                ConsentText = consentText
             }, cancellationToken);
         }
     }

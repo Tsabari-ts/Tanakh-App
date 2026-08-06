@@ -33,8 +33,9 @@
     <footer class="main-footer" role="contentinfo">
       <h4 i18n="@@app.footer">בשם ה' נעשה ונצליח</h4>
       <div class="footer-links">
-        <button type="button" class="accessibility-statement-link" (click)="openStatement()" i18n="@@a11yStatement.footerLink">הצהרת נגישות</button>
-        <button type="button" class="accessibility-statement-link" (click)="openTerms()" i18n="@@terms.footerLink">תנאי שימוש</button>
+        <button type="button" class="accessibility-statement-link" (click)="openLegal('accessibility')" i18n="@@a11yStatement.footerLink">הצהרת נגישות</button>
+        <button type="button" class="accessibility-statement-link" (click)="openLegal('terms')" i18n="@@terms.footerLink">תנאי שימוש</button>
+        <button type="button" class="accessibility-statement-link" (click)="openLegal('privacy')" i18n="@@privacy.footerLink">מדיניות פרטיות</button>
       </div>
       <hr class="hr-footer">
       <a class="footer-credit" [href]="whatsappContactUrl" target="_blank" rel="noopener" i18n="@@app.footerCredit">נבנה ועוצב על ידי Tomer - By Your Site</a>

@@ -27,6 +27,10 @@ export class ApiCallService {
     return this.http.get<any>(`${this.baseUrl}/Tanakh/books/main/${book}`);
   }
 
+  requestOtp(phoneNumber: string) {
+    return this.http.post(`${this.baseUrl}/api/v1/subscriptions/otp/request`, { phoneNumber });
+  }
+
   subscribe(subscriptionRequest: any) {
     return this.http.post<{ manageToken: string }>(`${this.baseUrl}/api/v1/subscriptions`, subscriptionRequest);
   }

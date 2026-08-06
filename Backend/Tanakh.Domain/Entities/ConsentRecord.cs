@@ -26,6 +26,17 @@ namespace Tanakh.Domain.Entities
 
         public required string PolicyVersion { get; set; }
 
+        // Which version of each legal document (LEGAL_DOCS lastUpdated on
+        // the frontend) and the exact consent sentence shown at signup -
+        // required by Amendment 13 alongside PolicyVersion so a dispute can
+        // be resolved against the precise wording the subscriber saw, not
+        // just a single generic policy version.
+        public required string TermsVersion { get; set; }
+
+        public required string PrivacyVersion { get; set; }
+
+        public required string ConsentText { get; set; }
+
         public DateTimeOffset CreatedAt { get; set; }
     }
 }

@@ -17,5 +17,19 @@ namespace Tanakh.Api.Model
         public bool SkipShabbatHolidays { get; set; } = true;
 
         public bool Consent { get; set; }
+
+        // Checked via ISubscriptionService.VerifyOtpAsync before any
+        // subscriber/consent work - see SubscriptionsController.
+        public required string OtpCode { get; set; }
+
+        // lastUpdated of LEGAL_DOCS['terms']/['privacy'] on the frontend at
+        // the moment consent was shown, plus the exact consent sentence
+        // rendered - persisted verbatim to ConsentRecord for Amendment 13
+        // proof-of-consent purposes.
+        public required string TermsVersion { get; set; }
+
+        public required string PrivacyVersion { get; set; }
+
+        public required string ConsentText { get; set; }
     }
 }

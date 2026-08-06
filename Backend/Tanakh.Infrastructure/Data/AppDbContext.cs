@@ -29,6 +29,8 @@ namespace Tanakh.Infrastructure.Data
 
         public DbSet<OtpCode> OtpCodes => Set<OtpCode>();
 
+        public DbSet<SubscriberOtpCode> SubscriberOtpCodes => Set<SubscriberOtpCode>();
+
         public DbSet<SmsLog> SmsLogs => Set<SmsLog>();
 
         public DbSet<ErrorLog> ErrorLogs => Set<ErrorLog>();

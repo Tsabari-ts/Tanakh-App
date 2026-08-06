@@ -12,8 +12,8 @@ import { AppUpdateService } from './core/app-update.service';
 import { SkipLinkComponent } from './shared/a11y/skip-link/skip-link.component';
 import { RouteFocusService } from './core/a11y/route-focus.service';
 import { AccessibilityWidgetComponent } from './shared/a11y/accessibility-widget/accessibility-widget.component';
-import { AccessibilityStatementService } from './shared/a11y/accessibility-statement-dialog/accessibility-statement.service';
-import { TermsService } from './shared/legal/terms-dialog/terms.service';
+import { LegalDialogService } from './shared/legal/legal-dialog.service';
+import { LegalDocId } from './shared/legal/legal-content';
 import { CookieBannerComponent } from './shared/cookie-banner/cookie-banner.component';
 import { MaintenanceScreenComponent } from './shared/maintenance-screen/maintenance-screen.component';
 import { AnnouncementBannerComponent } from './shared/announcement-banner/announcement-banner.component';
@@ -49,23 +49,23 @@ export class AppComponent {
   readonly errorState = inject(ErrorStateService);
   readonly appUpdate = inject(AppUpdateService);
   readonly maintenance = inject(MaintenanceService);
-  private readonly statement = inject(AccessibilityStatementService);
-  private readonly terms = inject(TermsService);
+  private readonly legal = inject(LegalDialogService);
 
   constructor(private location: Location, private router: Router, routeFocus: RouteFocusService) {
     routeFocus.init();
 
-    // Lets the accessibility statement / terms of use be linked to directly
-    // (e.g. for a reviewer or authority) even though they only open as a
-    // dialog and have no dedicated route - see ADR discussion in the a11y
-    // implementation doc.
+    // Lets the accessibility statement / terms of use / privacy policy be
+    // linked to directly (e.g. for a reviewer or authority) even though
+    // they only open as a dialog and have no dedicated route - see ADR
+    // discussion in the a11y implementation doc.
     afterNextRender(() => {
       const params = new URLSearchParams(window.location.search);
       if (params.get('a11y') === 'statement') {
-        this.statement.open();
+        this.legal.open('accessibility');
       }
-      if (params.get('legal') === 'terms') {
-        this.terms.open();
+      const legalDoc = params.get('legal');
+      if (legalDoc === 'terms' || legalDoc === 'privacy') {
+        this.legal.open(legalDoc);
       }
     });
   }
@@ -83,11 +83,7 @@ export class AppComponent {
     this.router.navigate(['/settings']);
   }
 
-  openStatement(): void {
-    this.statement.open();
-  }
-
-  openTerms(): void {
-    this.terms.open();
+  openLegal(id: LegalDocId): void {
+    this.legal.open(id);
   }
 }

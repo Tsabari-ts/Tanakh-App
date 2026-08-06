@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tanakh.Infrastructure.Data;
@@ -11,9 +12,11 @@ using Tanakh.Infrastructure.Data;
 namespace Tanakh.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806185247_AddSubscriberOtpCodes")]
+    partial class AddSubscriberOtpCodes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,11 +104,6 @@ namespace Tanakh.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<string>("ConsentText")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("consent_text");
-
                     b.Property<string>("ConsentType")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -136,19 +134,9 @@ namespace Tanakh.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("policy_version");
 
-                    b.Property<string>("PrivacyVersion")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("privacy_version");
-
                     b.Property<Guid>("SubscriberId")
                         .HasColumnType("uuid")
                         .HasColumnName("subscriber_id");
-
-                    b.Property<string>("TermsVersion")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("terms_version");
 
                     b.Property<string>("UserAgent")
                         .IsRequired()

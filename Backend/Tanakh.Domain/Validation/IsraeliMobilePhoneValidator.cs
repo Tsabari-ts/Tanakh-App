@@ -5,8 +5,9 @@ namespace Tanakh.Domain.Validation
 {
     // The single source of truth for "is this an Israeli mobile number" -
     // the Angular client mirrors this exact rule (same regex, same
-    // normalization steps) so the two never drift. No OTP/verification is
-    // required (see spec decision log); this is format validation only.
+    // normalization steps) so the two never drift. This is format
+    // validation only - actual ownership of the number is verified
+    // separately via SubscriptionService.RequestOtpAsync/VerifyOtpAsync.
     public static class IsraeliMobilePhoneValidator
     {
         // Local format (after normalization): 05X followed by 7 digits - 10

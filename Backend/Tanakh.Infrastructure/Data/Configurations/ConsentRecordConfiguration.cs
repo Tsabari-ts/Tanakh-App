@@ -35,6 +35,15 @@ namespace Tanakh.Infrastructure.Data.Configurations
             builder.Property(c => c.PolicyVersion)
                 .IsRequired();
 
+            builder.Property(c => c.TermsVersion)
+                .IsRequired();
+
+            builder.Property(c => c.PrivacyVersion)
+                .IsRequired();
+
+            builder.Property(c => c.ConsentText)
+                .IsRequired();
+
             builder.Property(c => c.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .IsRequired();
