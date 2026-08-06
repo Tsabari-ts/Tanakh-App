@@ -1,113 +1,141 @@
 <div>
-  @if (!userHasSubscribed()) {
-    <p>
-      <b i18n="@@subscribe.intro1">לקבלת תזכורת יומית ב-SMS נא למלא את השדות.</b>
-      <br>
-      <b i18n="@@subscribe.intro2">התזכורת תתחיל להישלח מיד לאחר ההרשמה, בשעה שתבחרו.</b>
-      <br>
-      <b i18n="@@subscribe.intro3">ניתן לבטל את התזכורות בכל עת דרך ההגדרות באתר.</b>
-    </p>
-    <form #myForm="ngForm" (ngSubmit)="submitForm(myForm)" novalidate>
-      <div class="field">
-        <label for="displayNameInput" i18n="@@subscribe.nameLabel">שם</label>
-        <input class="input" type="text" id="displayNameInput" [(ngModel)]="displayNameValue" name="displayNameInput" maxlength="50" autocomplete="name">
-      </div>
+  <div class="reminder-row">
+    <div class="reminder-row__text">
+      <div class="reminder-row__label" i18n="@@subscribe.toggleLabel">הזכר לי לקרוא</div>
+      <div class="text-muted reminder-row__sub" i18n="@@subscribe.toggleSubLabel">קבלת תזכורת יומית ב-SMS</div>
+    </div>
+    <button type="button" class="switch" [class.switch--on]="detailsVisible()" role="switch" [attr.aria-checked]="detailsVisible()" (click)="onToggleClick()" i18n-aria-label="@@subscribe.toggleLabel" aria-label="הזכר לי לקרוא">
+      <span class="switch__knob"></span>
+    </button>
+  </div>
 
-      <div class="field">
-        <label for="phoneInput" i18n="@@subscribe.phoneLabel">טלפון נייד</label>
-        <input class="input input--ltr" type="tel" inputmode="numeric" id="phoneInput" [(ngModel)]="phoneValue" name="phoneInput" required
-          autocomplete="tel" (input)="onPhoneInput()"
-          [attr.aria-invalid]="phoneTouched && phoneValidation() !== 'valid' ? 'true' : null"
-          [attr.aria-describedby]="phoneTouched && phoneValidation() !== 'valid' ? 'phoneInput-error' : 'phoneInput-help'"
-          #phoneInput="ngModel">
-        <div id="phoneInput-help" class="text-muted" i18n="@@subscribe.phoneHelp">המספר משמש רק לשליחת התזכורת היומית, לא לפרסום. ניתן להפסיק בכל עת מההגדרות. לדוגמה: 050-1234567</div>
-        @if (phoneTouched && phoneValidation() === 'empty') {
-          <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneRequired">יש להזין מספר טלפון נייד לקבלת התזכורות.</div>
-        }
-        @if (phoneTouched && phoneValidation() === 'landline') {
-          <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneLandline">לא ניתן לשלוח הודעות SMS למספר קווי. יש להזין מספר נייד.</div>
-        }
-        @if (phoneTouched && phoneValidation() === 'invalid') {
-          <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneInvalid">מספר הטלפון אינו תקין. יש להזין מספר נייד ישראלי, לדוגמה: 050-1234567.</div>
-        }
+  @if (showCancelConfirm()) {
+    <div class="confirm-cancel">
+      <p i18n="@@subscribe.cancelConfirmPrompt">ביטול הסימון יבטל את הרשמתך לתזכורת היומית. להמשיך בביטול?</p>
+      <div class="confirm-cancel__actions">
+        <button type="button" class="btn btn-secondary tk-hit" (click)="keepSubscription()" i18n="@@subscribe.cancelConfirmNo">לא, השאר אותי רשום</button>
+        <button type="button" class="btn btn-primary tk-hit" (click)="confirmCancel()" i18n="@@subscribe.cancelConfirmYes">כן, בטל את ההרשמה</button>
       </div>
+    </div>
+  }
 
-      <div class="field">
-        <label for="timeInput" i18n="@@subscribe.timeLabel">בחירת שעה</label>
-        <select class="input" id="timeInput" [(ngModel)]="timeValue" name="timeInput" required #timeInput="ngModel"
-          [attr.aria-invalid]="myForm.submitted && !timeInput.valid ? 'true' : null"
-          [attr.aria-describedby]="myForm.submitted && !timeInput.valid ? 'timeInput-error' : null">
-          @for (time of timeOptions; track time) {
-            <option [value]="time">{{ time }}</option>
-          }
-        </select>
-        @if (myForm.submitted && !timeInput.valid) {
-          <div id="timeInput-error" class="error-message" role="alert" i18n="@@subscribe.timeRequired">חייב לבחור שעה.</div>
-        }
-      </div>
-
-      <div class="field consent-field">
-        <label class="consent-label">
-          <input type="checkbox" id="consentInput" [(ngModel)]="consentGiven" name="consentInput" required
-            [attr.aria-invalid]="myForm.submitted && !consentGiven ? 'true' : null"
-            [attr.aria-describedby]="myForm.submitted && !consentGiven ? 'consentInput-error' : null">
-          <span i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת ב-SMS ומאשר/ת שקראתי את</span>
-          <button type="button" class="terms-link" (click)="openTerms()" i18n="@@subscribe.termsLink">תנאי השימוש</button>
-        </label>
-        @if (myForm.submitted && !consentGiven) {
-          <div id="consentInput-error" class="error-message" role="alert" i18n="@@subscribe.consentRequired">יש לאשר קבלת הודעות כדי להירשם.</div>
-        }
-      </div>
-
-      <button class="btn btn-primary btn-block tk-hit" type="submit" [disabled]="isButtonDisabled()" i18n="@@subscribe.submit">הירשם</button>
-    </form>
-    @if (isRequestInProgress()) {
-      <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100"
-           [attr.aria-valuenow]="progressValue() > 100 ? 100 : progressValue()"
-           i18n-aria-label="@@subscribe.submitting" aria-label="שולח את ההרשמה">
-        <div class="progress-bar" [style.width.%]="progressValue()"></div>
-      </div>
-    }
-    @if (isRequestSuccessful()) {
-      <div role="status">
-        <span class="serverResponse">{{serverResponse()}}</span>
-      </div>
-    }
-  } @else {
-    @if (managePreferencesLoaded()) {
+  @if (detailsVisible() && !showCancelConfirm()) {
+    @if (!userHasSubscribed()) {
       <p>
-        <b i18n="@@subscribe.manage.intro">את/ה רשום/ה לתזכורת יומית ב-SMS.</b>
+        <b i18n="@@subscribe.intro1">לקבלת תזכורת יומית ב-SMS נא למלא את השדות.</b>
+        <br>
+        <b i18n="@@subscribe.intro2">התזכורת תתחיל להישלח מיד לאחר ההרשמה, בשעה שתבחרו.</b>
+        <br>
+        <b i18n="@@subscribe.intro3">ניתן לבטל את התזכורות בכל עת דרך ההגדרות באתר.</b>
       </p>
-
-      <div class="field">
-        <label for="manageTimeInput" i18n="@@subscribe.timeLabel">בחירת שעה</label>
-        <select class="input" id="manageTimeInput" [(ngModel)]="managePreferredTime" name="manageTimeInput" [disabled]="manageBusy()">
-          @for (time of timeOptions; track time) {
-            <option [value]="time">{{ time }}</option>
+      <form #myForm="ngForm" (ngSubmit)="submitForm(myForm)" novalidate>
+        <div class="field">
+          <label for="displayNameInput" i18n="@@subscribe.nameLabel">שם</label>
+          <input class="input" type="text" id="displayNameInput" [(ngModel)]="displayNameValue" name="displayNameInput" maxlength="50" autocomplete="name" required
+            [attr.aria-invalid]="myForm.submitted && !displayNameInput.valid ? 'true' : null"
+            [attr.aria-describedby]="myForm.submitted && !displayNameInput.valid ? 'displayNameInput-error' : null"
+            #displayNameInput="ngModel">
+          @if (myForm.submitted && !displayNameInput.valid) {
+            <div id="displayNameInput-error" class="error-message" role="alert" i18n="@@subscribe.nameRequired">יש להזין שם.</div>
           }
-        </select>
-      </div>
+        </div>
 
-      <button class="btn btn-primary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="saveManagePreferences()" i18n="@@subscribe.manage.save">שמירה</button>
+        <div class="field">
+          <label for="phoneInput" i18n="@@subscribe.phoneLabel">טלפון נייד</label>
+          <input class="input input--ltr" type="tel" inputmode="numeric" id="phoneInput" [(ngModel)]="phoneValue" name="phoneInput" required
+            autocomplete="tel" (input)="onPhoneInput()"
+            [attr.aria-invalid]="phoneTouched && phoneValidation() !== 'valid' ? 'true' : null"
+            [attr.aria-describedby]="phoneTouched && phoneValidation() !== 'valid' ? 'phoneInput-error' : 'phoneInput-help'"
+            #phoneInput="ngModel">
+          <div id="phoneInput-help" class="text-muted" i18n="@@subscribe.phoneHelp">המספר משמש רק לשליחת התזכורת היומית, לא לפרסום. ניתן להפסיק בכל עת מההגדרות. לדוגמה: 050-1234567</div>
+          @if (phoneTouched && phoneValidation() === 'empty') {
+            <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneRequired">יש להזין מספר טלפון נייד לקבלת התזכורות.</div>
+          }
+          @if (phoneTouched && phoneValidation() === 'landline') {
+            <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneLandline">לא ניתן לשלוח הודעות SMS למספר קווי. יש להזין מספר נייד.</div>
+          }
+          @if (phoneTouched && phoneValidation() === 'invalid') {
+            <div id="phoneInput-error" class="error-message" role="alert" i18n="@@subscribe.phoneInvalid">מספר הטלפון אינו תקין. יש להזין מספר נייד ישראלי, לדוגמה: 050-1234567.</div>
+          }
+        </div>
 
-      @if (isPaused()) {
-        <p class="text-muted" i18n="@@subscribe.manage.pausedNotice">התזכורות מושהות כרגע.</p>
-        <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="togglePause()" i18n="@@subscribe.manage.resume">חדש תזכורות עכשיו</button>
-      } @else {
-        <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="togglePause()" i18n="@@subscribe.manage.pause">השהה לחודש</button>
-      }
+        <div class="field">
+          <label for="timeInput" i18n="@@subscribe.timeLabel">בחירת שעה</label>
+          <select class="input" id="timeInput" [(ngModel)]="timeValue" name="timeInput" required #timeInput="ngModel"
+            [attr.aria-invalid]="myForm.submitted && !timeInput.valid ? 'true' : null"
+            [attr.aria-describedby]="myForm.submitted && !timeInput.valid ? 'timeInput-error' : null">
+            @for (time of timeOptions; track time) {
+              <option [value]="time">{{ time }}</option>
+            }
+          </select>
+          @if (myForm.submitted && !timeInput.valid) {
+            <div id="timeInput-error" class="error-message" role="alert" i18n="@@subscribe.timeRequired">חייב לבחור שעה.</div>
+          }
+        </div>
 
-      <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="cancelSubscription()" i18n="@@subscribe.manage.cancel">בטל את ההרשמה</button>
+        <div class="field consent-field">
+          <label class="consent-label">
+            <input type="checkbox" id="consentInput" [(ngModel)]="consentGiven" name="consentInput" required
+              [attr.aria-invalid]="myForm.submitted && !consentGiven ? 'true' : null"
+              [attr.aria-describedby]="myForm.submitted && !consentGiven ? 'consentInput-error' : null">
+            <span i18n="@@subscribe.consent">אני מסכים/ה לקבל הודעות תזכורת ב-SMS ומאשר/ת שקראתי את</span>
+            <button type="button" class="terms-link" (click)="openTerms()" i18n="@@subscribe.termsLink">תנאי השימוש</button>
+          </label>
+          @if (myForm.submitted && !consentGiven) {
+            <div id="consentInput-error" class="error-message" role="alert" i18n="@@subscribe.consentRequired">יש לאשר קבלת הודעות כדי להירשם.</div>
+          }
+        </div>
 
-      @if (manageStatusMessage()) {
-        <div role="status">
-          <span class="serverResponse">{{ manageStatusMessage() }}</span>
+        <button class="btn btn-primary btn-block tk-hit" type="submit" [disabled]="isButtonDisabled()" i18n="@@subscribe.submit">הירשם</button>
+      </form>
+      @if (isRequestInProgress()) {
+        <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+             [attr.aria-valuenow]="progressValue() > 100 ? 100 : progressValue()"
+             i18n-aria-label="@@subscribe.submitting" aria-label="שולח את ההרשמה">
+          <div class="progress-bar" [style.width.%]="progressValue()"></div>
         </div>
       }
-    } @else if (manageLoadFailed()) {
-      <b i18n="@@subscribe.manage.loadFailed">לא ניתן לטעון את פרטי ההרשמה כרגע. נסו שוב מאוחר יותר.</b>
+      @if (isRequestSuccessful()) {
+        <div role="status">
+          <span class="serverResponse">{{serverResponse()}}</span>
+        </div>
+      }
     } @else {
-      <div role="status" i18n="@@subscribe.manage.loading">טוען...</div>
+      @if (managePreferencesLoaded()) {
+        <p>
+          <b i18n="@@subscribe.manage.intro">את/ה רשום/ה לתזכורת יומית ב-SMS.</b>
+        </p>
+
+        <div class="field">
+          <label for="manageTimeInput" i18n="@@subscribe.timeLabel">בחירת שעה</label>
+          <select class="input" id="manageTimeInput" [(ngModel)]="managePreferredTime" name="manageTimeInput" [disabled]="manageBusy()">
+            @for (time of timeOptions; track time) {
+              <option [value]="time">{{ time }}</option>
+            }
+          </select>
+        </div>
+
+        <button class="btn btn-primary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="saveManagePreferences()" i18n="@@subscribe.manage.save">שמירה</button>
+
+        @if (isPaused()) {
+          <p class="text-muted" i18n="@@subscribe.manage.pausedNotice">התזכורות מושהות כרגע.</p>
+          <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="togglePause()" i18n="@@subscribe.manage.resume">חדש תזכורות עכשיו</button>
+        } @else {
+          <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="togglePause()" i18n="@@subscribe.manage.pause">השהה לחודש</button>
+        }
+
+        <button class="btn btn-secondary btn-block tk-hit" type="button" [disabled]="manageBusy()" (click)="requestCancel()" i18n="@@subscribe.manage.cancel">בטל את ההרשמה</button>
+
+        @if (manageStatusMessage()) {
+          <div role="status">
+            <span class="serverResponse">{{ manageStatusMessage() }}</span>
+          </div>
+        }
+      } @else if (manageLoadFailed()) {
+        <b i18n="@@subscribe.manage.loadFailed">לא ניתן לטעון את פרטי ההרשמה כרגע. נסו שוב מאוחר יותר.</b>
+      } @else {
+        <div role="status" i18n="@@subscribe.manage.loading">טוען...</div>
+      }
     }
   }
 </div>

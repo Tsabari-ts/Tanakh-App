@@ -56,8 +56,13 @@ namespace Tanakh.Infrastructure.Services
                 // already active) reactivates and applies whatever
                 // preferences were just submitted - no confirmation step to
                 // restart, since there's no email/OTP verification here.
+                // Clearing PausedUntil too: a stale pause from a previous
+                // subscription cycle must never silently carry over - the
+                // user just explicitly opted back in, so reminders should
+                // resume immediately, not stay quietly paused.
                 subscriber.Status = SubscriberStatus.Active;
                 subscriber.UnsubscribedAt = null;
+                subscriber.PausedUntil = null;
             }
 
             subscriber.DisplayName = displayName;
@@ -85,6 +90,7 @@ namespace Tanakh.Infrastructure.Services
             {
                 subscriber.Status = SubscriberStatus.Unsubscribed;
                 subscriber.UnsubscribedAt = DateTimeOffset.UtcNow;
+                subscriber.PausedUntil = null;
             }
 
             await dbContext.ReminderDeliveries

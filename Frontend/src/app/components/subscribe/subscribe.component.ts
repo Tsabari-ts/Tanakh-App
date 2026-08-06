@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, computed, inject, signal, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiCallService } from '../../services/api-call.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { TermsService } from '../../shared/legal/terms-dialog/terms.service';
 import { getStoredUsername } from '../../shared/user-prefs';
 import { validateIsraeliMobilePhone, PhoneValidationResult } from '../../shared/israeli-mobile-phone-validator';
@@ -28,6 +28,13 @@ export class SubscribeComponent implements OnInit {
   // uses OnPush - a plain property mutation from inside an async callback
   // would not otherwise trigger a re-render.
   readonly userHasSubscribed = signal(getStoredManageToken() !== null);
+  // Drives the "הזכר לי לקרוא" switch above the form/manage panel - turning
+  // it on (while not yet subscribed) reveals the signup form; turning it
+  // off while already subscribed goes through showCancelConfirm instead of
+  // cancelling immediately, since that's a destructive action.
+  readonly formExpanded = signal(false);
+  readonly detailsVisible = computed(() => this.userHasSubscribed() || this.formExpanded());
+  readonly showCancelConfirm = signal(false);
   readonly isButtonDisabled = signal(false);
   readonly isRequestInProgress = signal(false);
   readonly isRequestSuccessful = signal(false);
@@ -64,10 +71,13 @@ export class SubscribeComponent implements OnInit {
     }
   }
 
+  // Zero-padded ("08:00", not "8:00") to match the backend's TimeOnly
+  // serialization exactly - loadPreferences() compares managePreferredTime
+  // against these values verbatim, and "8:00" never matched "08:00:00".
   generateTimeOptions(): string[] {
     const options: string[] = [];
     for (let hour = 8; hour <= 20; hour++) {
-      options.push(`${hour}:00`);
+      options.push(`${hour.toString().padStart(2, '0')}:00`);
     }
     return options;
   }
@@ -76,19 +86,51 @@ export class SubscribeComponent implements OnInit {
     this.terms.open();
   }
 
+  // The switch's "on" state is fully derived (detailsVisible), not a native
+  // form control, so turning it off while subscribed can just leave it be
+  // and show the confirm prompt instead - no value to revert.
+  onToggleClick(): void {
+    if (!this.detailsVisible()) {
+      this.formExpanded.set(true);
+      return;
+    }
+
+    if (this.userHasSubscribed()) {
+      this.showCancelConfirm.set(true);
+    } else {
+      this.formExpanded.set(false);
+    }
+  }
+
+  requestCancel(): void {
+    this.showCancelConfirm.set(true);
+  }
+
+  keepSubscription(): void {
+    this.showCancelConfirm.set(false);
+  }
+
+  confirmCancel(): void {
+    this.showCancelConfirm.set(false);
+    this.cancelSubscription();
+  }
+
   onPhoneInput(): void {
     this.phoneValidation.set(validateIsraeliMobilePhone(this.phoneValue).result);
   }
 
-  submitForm(form: any) {
+  submitForm(form: NgForm) {
     this.phoneTouched = true;
     const phoneCheck = validateIsraeliMobilePhone(this.phoneValue);
     this.phoneValidation.set(phoneCheck.result);
 
+    // form.submitted is a read-only getter (already true here, since this
+    // method only runs as the form's own (ngSubmit) handler) - assigning to
+    // it used to be a harmless no-op on older Angular, but throws on this
+    // version and was never needed for the inline `myForm.submitted && ...`
+    // error messages to appear.
     if (form.valid && this.consentGiven && phoneCheck.result === 'valid') {
       this.closeAndSubscribe(phoneCheck.e164);
-    } else {
-      form.submitted = true;
     }
   }
 
@@ -112,16 +154,25 @@ export class SubscribeComponent implements OnInit {
           this.subscribeSuccessful = true;
           setStoredManageToken(response.manageToken);
         },
+        // error and complete are mutually exclusive in RxJS - a failed
+        // request used to only set this flag and stop there, since the
+        // finishing steps were in `complete`, which never runs after
+        // `error`. That left isRequestInProgress stuck true forever with
+        // no inline feedback at all, so the only thing the user ever saw
+        // was the generic global error toast (error.interceptor.ts).
         error: () => {
           this.subscribeSuccessful = false;
+          this.finishSubscribeAttempt();
         },
-        complete: () => {
-          setTimeout(() => {
-            this.stopLoading();
-            this.setSubscribeServerResponse();
-          }, 3000);
-        }
+        complete: () => this.finishSubscribeAttempt(),
       });
+  }
+
+  private finishSubscribeAttempt(): void {
+    setTimeout(() => {
+      this.stopLoading();
+      this.setSubscribeServerResponse();
+    }, 3000);
   }
 
   setSubscribeServerResponse() {
@@ -254,11 +305,45 @@ export class SubscribeComponent implements OnInit {
         next: () => {
           clearStoredManageToken();
           this.userHasSubscribed.set(false);
+          this.resetToFreshState();
         },
         error: () => {
           this.manageBusy.set(false);
           this.manageStatusMessage.set($localize`:@@subscribe.manage.saveFailed:העדכון נכשל, נסו שוב.`);
         }
       });
+  }
+
+  // Cancelling used to leave every leftover signal/field from the previous
+  // signup in place: formExpanded stayed true (set when the switch was
+  // first turned on, never touched again), so the form reappeared instead
+  // of collapsing back to the switch-off state; the stale name/phone/time/
+  // consent values were still filled in; and the old "נרשמת בהצלחה" success
+  // banner was still showing since isRequestSuccessful/serverResponse are
+  // never cleared - together making it look like the cancellation hadn't
+  // actually happened. Puts everything back to how it looked before the
+  // user ever touched the switch.
+  private resetToFreshState(): void {
+    this.formExpanded.set(false);
+    this.manageBusy.set(false);
+
+    this.displayNameValue = getStoredUsername();
+    this.phoneValue = '';
+    this.phoneTouched = false;
+    this.phoneValidation.set('empty');
+    this.timeValue = '';
+    this.consentGiven = false;
+
+    this.isButtonDisabled.set(false);
+    this.isRequestInProgress.set(false);
+    this.isRequestSuccessful.set(false);
+    this.serverResponse.set('');
+    this.subscribeSuccessful = false;
+
+    this.managePreferencesLoaded.set(false);
+    this.manageLoadFailed.set(false);
+    this.manageStatusMessage.set('');
+    this.managePreferredTime = '';
+    this.managePausedUntil = null;
   }
 }

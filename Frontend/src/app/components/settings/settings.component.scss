@@ -114,7 +114,6 @@
 .svg-button {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     padding: 12px 28px;
     background-color: var(--color-surface);
     color: var(--color-text);
@@ -133,54 +132,23 @@
 }
 
     .svg-button svg {
-        margin-inline-start: 8px;
+        margin-inline-end: 12px;
         color: inherit;
     }
 
-.svg-button img {
-    margin-inline-start: 8px;
-    color: inherit;
-}
-
-.svg-button div.icon {
-  width: 23px;
-  height: 20px;
-  background-size: cover;
-  margin-inline-start: 5px;
-  margin-inline-end: 20px;
-}
-
-.svg-button .icon-svg {
-  margin-inline-end: 12px;
-}
-
 @include bp.from-xl {
-  .centered-container {
-    margin-top: 300px;
-  }
-
   .svg-button {
     font-size: var(--font-size-xl);
     width: 500px;
     height: auto;
   }
 
-  .svg-button div.icon {
-    width: 40px;
-    height: 40px;
-    margin-inline-start: 20px;
-    margin-inline-end: 50px;
+  .svg-button svg {
+    width: 32px;
+    height: 32px;
+    margin-inline-end: 20px;
   }
 }
-
-
-.email-icon {
-    background-image: url('/assets/email.png');
-  }
-
-  .download-icon {
-    background-image: url('/assets/download.png');
-  }
 
   .svg-button:hover:not(:disabled) {
     background-color: var(--color-accent-100);

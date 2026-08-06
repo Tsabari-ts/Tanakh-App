@@ -1,7 +1,6 @@
 import { Component, OnInit, ElementRef, Renderer2, ChangeDetectionStrategy, computed } from '@angular/core';
 import { PwaInstallService } from '../../services/pwa-install.service';
 import { AppComponent } from '../../app.component';
-import { NgClass } from '@angular/common';
 import { WHATSAPP_CONTACT_URL, CONTACT_EMAIL } from '../../shared/contact-links';
 import { ThemeService } from '../../services/theme.service';
 import { ReaderPrefsService, ReaderFont } from '../../services/reader-prefs.service';
@@ -12,7 +11,7 @@ import { SubscribeComponent } from '../subscribe/subscribe.component';
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, SubscribeComponent]
+    imports: [SubscribeComponent]
 })
 
 export class SettingsComponent implements OnInit {
@@ -33,16 +32,14 @@ export class SettingsComponent implements OnInit {
   ];
 
   emailAddress = CONTACT_EMAIL;
-  emailUsButton: string = $localize`:@@settings.emailUs:אימייל`;
-  emailUsIcon:string = 'email-icon';
-  whatsappUsButton: string = $localize`:@@settings.whatsappUs:וואטסאפ`;
+  emailUsButton: string = $localize`:@@settings.emailUs:שלחו אימייל`;
+  whatsappUsButton: string = $localize`:@@settings.whatsappUs:שלחו וואטסאפ`;
 
   readonly downloadAppButton = computed(() => {
     if (this.pwaInstall.isStandalone()) return $localize`:@@settings.appInstalled:האפליקציה מותקנת`;
     if (this.pwaInstall.isIos()) return $localize`:@@settings.addToHomeScreen:הוספה למסך הבית`;
     return $localize`:@@settings.downloadApp:הורדת אפליקציה`;
   });
-  downloadAppIcon:string = 'download-icon';
 
   ngOnInit(): void {  }
 
