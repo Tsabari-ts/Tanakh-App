@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy, DestroyRef, inject, computed, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, map, Observable, of } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiCallService } from '../../services/api-call.service';
 import { AppComponent } from '../../app.component';
@@ -146,9 +147,6 @@ export class ChapterComponent implements OnInit, OnDestroy {
   }
 
   private saveProgress(): void {
-    localStorage.setItem('HasStorage', 'true');
-    localStorage.setItem('SectionRef', `${this.section} ${this.book} ${this.chapterNumber}`);
-
     const subscriberToken = localStorage.getItem('subscriberToken');
     if (subscriberToken) {
       this.apiService.updateReadingProgress({
@@ -157,6 +155,47 @@ export class ChapterComponent implements OnInit, OnDestroy {
         chapter: this.chapterNumber,
       }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
+
+    // "Continue from where you stopped" (home.component.ts) must point at
+    // the chapter *after* the one just marked read, not the one itself -
+    // storing this.chapterNumber here used to send it right back to the
+    // chapter it had just finished.
+    if (!this.nextChapterRaw) {
+      // Finished the entire Tanakh - mirrors the backend
+      // NextChapterResolver's own behavior (restart the cycle) rather than
+      // leaving "continue" pointing at a chapter that's already read.
+      localStorage.removeItem('HasStorage');
+      localStorage.removeItem('SectionRef');
+      return;
+    }
+
+    const { book: nextBook, chapter: nextChapterStr } = this.parseNextChapter(this.nextChapterRaw);
+    const nextChapterNum = parseInt(nextChapterStr, 10);
+
+    this.resolveSection(nextBook)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(section => {
+        localStorage.setItem('HasStorage', 'true');
+        localStorage.setItem('SectionRef', `${section} ${nextBook} ${nextChapterNum}`);
+      });
+  }
+
+  // Same book -> definitely the same section, no lookup needed. A new book
+  // can also mean a new *section* (e.g. Deuteronomy -> Joshua is
+  // Torah -> Prophets), so ask the structure API for that book's actual
+  // section rather than assuming this.section still applies.
+  private resolveSection(book: string): Observable<string> {
+    if (book === this.book) {
+      return of(this.section);
+    }
+
+    return this.apiService.getBookByTitle(book).pipe(
+      map((data: any) => {
+        const bookData = Array.isArray(data) ? data[0] : data;
+        return (bookData?.section ?? this.section).toLowerCase();
+      }),
+      catchError(() => of(this.section)),
+    );
   }
 
   hasPrevChapter(): boolean {
@@ -175,7 +214,9 @@ export class ChapterComponent implements OnInit, OnDestroy {
   nextChapter(): void {
     if (!this.nextChapterRaw) return;
     const { book, chapter } = this.parseNextChapter(this.nextChapterRaw);
-    this.router.navigate([`/books/${this.section}/${book}/${chapter}/false`]);
+    this.resolveSection(book)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(section => this.router.navigate([`/books/${section}/${book}/${chapter}/false`]));
   }
 
   private parseNextChapter(nextChapter: string): { book: string; chapter: string } {
