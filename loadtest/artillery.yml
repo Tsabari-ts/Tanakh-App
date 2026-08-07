@@ -1,0 +1,144 @@
+# loadtest/artillery.yml
+#
+# חלופה ל-loadtest/load.js עבור מי שלא יכול/רוצה להתקין k6 - אותו תרחיש
+# בערך (ramp-up ל-300 "משתמשים", החזקה של 5 דקות), על אותן נקודות קצה
+# אמיתיות, עם אותה מדיניות של ברירת מחדל בטוחה ל-BASE_URL.
+#
+# הבדל מהותי חשוב מול k6: Artillery מגדיר עומס לפי arrivalRate (משתמשים
+# *חדשים* בשנייה שנכנסים לתרחיש), לא לפי VUs מקבילים קבועים כמו k6.
+# arrivalRate=300 לא שווה בהכרח ל"300 משתמשים בו-זמנית" - זה תלוי כמה זמן
+# כל תרחיש (scenario) לוקח לרוץ (כולל ה-think-time). עם ה-pause שהוגדר כאן
+# (כ-1.5 שניות בממוצע בין הבקשות) והתרחישים הקצרים (בקשה אחת), arrivalRate
+# גבוה כזה מייצר עומס בו-זמני בסדר גודל דומה ל-300, אבל אם תרצו למדוד
+# concurrency מדויק - k6 (loadtest/load.js) הוא הכלי המדויק יותר; Artillery
+# כאן הוא "כלי גיבוי" לאותה כוונה, לא שכפול מתמטי מדויק.
+#
+# התקנה: npm install -g artillery   (או: npx artillery run ...)
+# הרצה:  BASE_URL=http://localhost:5000 artillery run loadtest/artillery.yml
+#        (ב-PowerShell: $env:BASE_URL="http://localhost:5000"; artillery run loadtest/artillery.yml)
+#
+# כל הנתיבים כאן זהים לאלה שאומתו ומתועדים ב-loadtest/config.js וב-README.md
+# (הפניות קובץ:שורה מלאות שם). אין כאן אף נתיב שכותב ל-DB, מטעמי בטיחות -
+# ראו את loadtest/load.js/README.md אם רוצים לכלול גם כתיבה (opt-in בלבד).
+
+config:
+  # ברירת מחדל בטוחה ל-localhost בלבד - אף פעם לא production אמיתי.
+  # אם משתני הסביבה של Artillery לא נתמכים בגרסה שהתקנתם, הגדירו ידנית:
+  # export BASE_URL=http://localhost:5000 (bash) / $env:BASE_URL="..." (PowerShell)
+  target: "{{ $processEnvironment.BASE_URL || 'http://localhost:5000' }}"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 300
+      name: "ramp-up ל-300 משתמשים חדשים/שנייה"
+    - duration: 300
+      arrivalRate: 300
+      name: "החזקה בעומס מלא למשך 5 דקות"
+    - duration: 30
+      arrivalRate: 300
+      rampTo: 5
+      name: "ramp-down מסודר"
+  # ספי הצלחה גסים (Artillery תומך רק בבדיקת ensure בסיסית, לא thresholds
+  # עשירים כמו k6). p95/error-rate המדויקים והמנומקים נמצאים ב-loadtest/load.js.
+  ensure:
+    p95: 500
+    maxErrorRate: 1 # אחוזים
+
+scenarios:
+  # --- קריאת פרק (60%) - הפעולה המרכזית באתר ---
+  # GET /Tanakh/books/{book}/{chapter} - Backend/Tanakh.Api/Controllers/TanakhController.cs:45-56
+  - name: "קריאת פרק - בראשית א"
+    weight: 10
+    flow:
+      - get:
+          url: "/Tanakh/books/Genesis/1"
+      - think: 1.5
+  - name: "קריאת פרק - בראשית כה"
+    weight: 10
+    flow:
+      - get:
+          url: "/Tanakh/books/Genesis/25"
+      - think: 1.5
+  - name: "קריאת פרק - שמות א"
+    weight: 10
+    flow:
+      - get:
+          url: "/Tanakh/books/Exodus/1"
+      - think: 1.5
+  - name: "קריאת פרק - שמות כ"
+    weight: 10
+    flow:
+      - get:
+          url: "/Tanakh/books/Exodus/20"
+      - think: 1.5
+  - name: "קריאת פרק - תהילים כג"
+    weight: 10
+    flow:
+      - get:
+          url: "/Tanakh/books/Psalms/23"
+      - think: 1.5
+  - name: "קריאת פרק - תהילים קיט"
+    weight: 10
+    flow:
+      - get:
+          url: "/Tanakh/books/Psalms/119"
+      - think: 1.5
+
+  # --- רשימת ספרים בחטיבה (15%) ---
+  # GET /Tanakh/books/{section} - Backend/Tanakh.Api/Controllers/TanakhController.cs:26-30
+  - name: "רשימת ספרים - תורה"
+    weight: 5
+    flow:
+      - get:
+          url: "/Tanakh/books/torah"
+      - think: 1.5
+  - name: "רשימת ספרים - נביאים"
+    weight: 5
+    flow:
+      - get:
+          url: "/Tanakh/books/prophets"
+      - think: 1.5
+  - name: "רשימת ספרים - כתובים"
+    weight: 5
+    flow:
+      - get:
+          url: "/Tanakh/books/writings"
+      - think: 1.5
+
+  # --- מטא-דאטה של ספר בודד (10%) ---
+  # GET /Tanakh/books/main/{book} - Backend/Tanakh.Api/Controllers/TanakhController.cs:35-39
+  - name: "מבנה ספר - בראשית"
+    weight: 5
+    flow:
+      - get:
+          url: "/Tanakh/books/main/Genesis"
+      - think: 1.5
+  - name: "מבנה ספר - תהילים"
+    weight: 5
+    flow:
+      - get:
+          url: "/Tanakh/books/main/Psalms"
+      - think: 1.5
+
+  # --- מצב מערכת ציבורי (10%) - נבדק בכל טעינת אפליקציה בצד הלקוח ---
+  - name: "מצב תחזוקה"
+    # GET /api/v1/system/maintenance - Backend/Tanakh.Api/Controllers/SystemController.cs:28-33
+    weight: 4
+    flow:
+      - get:
+          url: "/api/v1/system/maintenance"
+      - think: 1.5
+  - name: "באנר הודעה"
+    # GET /api/v1/system/banner - Backend/Tanakh.Api/Controllers/SystemController.cs:35-50
+    weight: 3
+    flow:
+      - get:
+          url: "/api/v1/system/banner"
+      - think: 1.5
+  - name: "דגלי פיצ'ר"
+    # GET /api/v1/system/flags - Backend/Tanakh.Api/Controllers/SystemController.cs:52-58
+    weight: 3
+    flow:
+      - get:
+          url: "/api/v1/system/flags"
+      - think: 1.5
