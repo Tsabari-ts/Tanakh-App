@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -10,7 +11,23 @@ namespace Tanakh.Infrastructure.Services
 {
     public class JewishCalendarService : IJewishCalendarService
     {
+        // The hebcal.com response for a given (Gregorian) year doesn't
+        // change once fetched - cached for a day at a time (not
+        // indefinitely, to still pick up rare upstream corrections) instead
+        // of hitting hebcal.com on every call, which used to happen on
+        // every visitor's first page load plus every reminder-dispatch
+        // cycle with no cache at all.
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(24);
         private static readonly TimeZoneInfo Jerusalem = TimeZoneInfo.FindSystemTimeZoneById("Asia/Jerusalem");
+
+        private readonly HttpClient httpClient;
+        private readonly IMemoryCache cache;
+
+        public JewishCalendarService(HttpClient httpClient, IMemoryCache cache)
+        {
+            this.httpClient = httpClient;
+            this.cache = cache;
+        }
 
         public Task<bool> IsBetweenCandleLightingAndHavdalahAsync(CancellationToken cancellationToken) =>
             IsBlockedAsync(DateTimeOffset.Now, cancellationToken);
@@ -50,9 +67,15 @@ namespace Tanakh.Infrastructure.Services
             return false;
         }
 
-        private static async Task<JewishCalendarContainer> FillJewishCalendarAsync(int year, CancellationToken cancellationToken)
+        private async Task<JewishCalendarContainer> FillJewishCalendarAsync(int year, CancellationToken cancellationToken)
         {
-            HttpClient httpClient = new HttpClient();
+            string cacheKey = $"jewish-calendar-{year}";
+
+            if (cache.TryGetValue(cacheKey, out JewishCalendarContainer? cached) && cached is not null)
+            {
+                return cached;
+            }
+
             HttpResponseMessage jsonResult = await httpClient.GetAsync(
                 $"https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&geo=geoname&geonameid=293397&M=on&s=on&year={year}",
                 cancellationToken);
@@ -64,6 +87,14 @@ namespace Tanakh.Infrastructure.Services
                 throw new InvalidOperationException(
                     "Failed to parse hebcal.com calendar response: missing or empty 'items'.");
             }
+
+            // Sized entry - the shared IMemoryCache has a SizeLimit
+            // configured (see Program.cs), same reasoning as SmsBalanceService.
+            cache.Set(cacheKey, calendarContainer, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = CacheDuration,
+                Size = 1
+            });
 
             return calendarContainer;
         }

@@ -40,5 +40,5 @@ export const routes: Routes = [
     loadComponent: () => import('./components/chapter/chapter.component').then(m => m.ChapterComponent),
     title: $localize`:@@route.chapter.title:תנ"ך`
   },
-  { path: "*", redirectTo: "home" }
+  { path: "**", redirectTo: "home" }
 ];

@@ -96,6 +96,7 @@ namespace Tanakh.Api.Controllers
         }
 
         [HttpPost("verify-otp")]
+        [EnableRateLimiting(RateLimiterPolicyNames.AdminVerifyOtp)]
         public async Task<IActionResult> VerifyOtpAsync([FromBody] AdminVerifyOtpRequest request, CancellationToken cancellationToken)
         {
             OtpCode? otp = await dbContext.OtpCodes

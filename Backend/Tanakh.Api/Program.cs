@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -54,11 +55,16 @@ builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 100;
 });
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
 builder.Services.AddSingleton<ITanakhCache, MemoryTanakhCache>();
 builder.Services.AddScoped<CacheProvider>();
 builder.Services.AddScoped<ITanakhStructureService, TanakhStructureService>();
 builder.Services.AddScoped<ITanakhTextService, TanakhTextService>();
-builder.Services.AddScoped<IJewishCalendarService, JewishCalendarService>();
 builder.Services.AddScoped<IReadingProgressService, ReadingProgressService>();
 builder.Services.AddSingleton<IHashingService, HashingService>();
 builder.Services.AddSingleton<IAdminPasswordHasher, AdminPasswordHasher>();
@@ -127,6 +133,21 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0
             }));
 
+    // 10 verify attempts / 15 minutes per IP - separate from the 3-attempt
+    // per-OTP lockout in AdminAuthController.VerifyOtpAsync, which anyone
+    // anonymous could otherwise trigger repeatedly to lock the real admin
+    // out of their own in-flight login (no credential required to hit this
+    // endpoint at all).
+    options.AddPolicy(RateLimiterPolicyNames.AdminVerifyOtp, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(15),
+                QueueLimit = 0
+            }));
+
     // 5 OTP requests / 15 minutes per IP - on top of the per-phone cap in
     // SubscriptionService.RequestOtpAsync, so one IP can't OTP-bomb many
     // different numbers even though each individual number is under its
@@ -164,8 +185,11 @@ builder.Services.AddHttpClient<ISmsSender, Sms4FreeSmsSender>()
     });
 builder.Services.AddHttpClient<ISmsBalanceService, SmsBalanceService>()
     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
+builder.Services.AddHttpClient<IJewishCalendarService, JewishCalendarService>()
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(10));
 builder.Services.AddHealthChecks()
-    .AddCheck<TanakhDataHealthCheck>("tanakh-data", tags: new[] { "ready" });
+    .AddCheck<TanakhDataHealthCheck>("tanakh-data", tags: new[] { "ready" })
+    .AddDbContextCheck<AppDbContext>(tags: new[] { "ready" });
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails(options =>
@@ -233,6 +257,8 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.UseResponseCompression();
 
 app.UseRouting();
 

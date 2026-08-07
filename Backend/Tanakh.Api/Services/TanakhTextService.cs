@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Tanakh.Api.Model;
+using Tanakh.Domain.Caching;
 using Tanakh.Infrastructure;
 using Tanakh.Infrastructure.Model;
 using Tanakh.Infrastructure.Services;
@@ -12,13 +13,21 @@ namespace Tanakh.Api.Services
 {
     public class TanakhTextService : ITanakhTextService
     {
+        // Same key used regardless of book/chapter - the built dictionary
+        // covers the whole Tanakh, so it's cached once and reused for every
+        // request instead of being rebuilt (929 chapters, ~23k verses,
+        // including a Regex.Replace pass over every verse) on each call.
+        private const string ChapterDictionaryCacheKey = "chapterDictionary";
+
         private readonly CacheProvider cacheProvider;
         private readonly ITanakhStructureService structureService;
+        private readonly ITanakhCache cache;
 
-        public TanakhTextService(CacheProvider cacheProvider, ITanakhStructureService structureService)
+        public TanakhTextService(CacheProvider cacheProvider, ITanakhStructureService structureService, ITanakhCache cache)
         {
             this.cacheProvider = cacheProvider;
             this.structureService = structureService;
+            this.cache = cache;
         }
 
         public async Task<TanakhContext?> GetChapterAsync(string book, string chapter, CancellationToken cancellationToken)
@@ -40,6 +49,11 @@ namespace Tanakh.Api.Services
 
         private async Task<Dictionary<string, Book>> BuildChapterDictionaryAsync(CancellationToken cancellationToken)
         {
+            if (cache.TryGet(ChapterDictionaryCacheKey, out Dictionary<string, Book>? cached))
+            {
+                return cached;
+            }
+
             string cacheKey = "fullTanakh";
             TanakhContainer tanakhContainer = await cacheProvider.GetFullTanakhFromCacheAsync(cacheKey, cancellationToken);
             Dictionary<string, Book> dataDictionary = new Dictionary<string, Book>();
@@ -83,6 +97,8 @@ namespace Tanakh.Api.Services
 
                 dataDictionary.Add(chosenSection, bookEntry);
             }
+
+            cache.Set(ChapterDictionaryCacheKey, dataDictionary);
 
             return dataDictionary;
         }
